@@ -1,0 +1,79 @@
+[
+{
+  "name": "IF",
+  "elementType": "starter",
+  "value": "if"
+},
+{
+  "name": "Channel Type",
+  "elementType": "field",
+  "value": "channelType",
+  "type": "options"
+},
+{
+  "name": "is",
+  "elementType": "operator",
+  "value": "is"
+},
+{
+  "name": "Channel",
+  "elementType": "value",
+  "value": "C"
+},
+{
+  "name": "and",
+  "elementType": "logicalOperator",
+  "value": "&&"
+},
+{
+  "name": "Mortgage Type",
+  "elementType": "field",
+  "value": "mortgageType",
+  "type": "options"
+},
+{
+  "name": "is not",
+  "elementType": "operator",
+  "value": "isNot"
+},
+{
+  "name": "Conventional",
+  "elementType": "value",
+  "value": "C"
+},
+{
+  "name": "and",
+  "elementType": "logicalOperator",
+  "value": "&&"
+},
+{
+  "name": "Loan Product Type",
+  "elementType": "field",
+  "value": "loanProductType",
+  "type": "string"
+},
+{
+  "name": "contains",
+  "elementType": "operator",
+  "value": "contains"
+},
+{
+  "name": "Enter a string",
+  "elementType": "value",
+  "value": "Test Content"
+},
+{
+  "name": "then",
+  "elementType": "logicalOperator",
+  "value": "then"
+},
+{
+  "name": "Add Loan Exception",
+  "elementType": "result",
+  "value": "addLoanException"
+},
+{
+  "name": "Enter String",
+  "elementType": "value",
+  "value": "Test Done"
+}]
