@@ -1,79 +1,113 @@
 [
-{
-  "name": "IF",
-  "elementType": "starter",
-  "value": "if"
-},
-{
-  "name": "Channel Type",
-  "elementType": "field",
-  "value": "channelType",
-  "type": "options"
-},
-{
-  "name": "is",
-  "elementType": "operator",
-  "value": "is"
-},
-{
-  "name": "Channel",
-  "elementType": "value",
-  "value": "C"
-},
-{
-  "name": "and",
-  "elementType": "logicalOperator",
-  "value": "&&"
-},
-{
-  "name": "Mortgage Type",
-  "elementType": "field",
-  "value": "mortgageType",
-  "type": "options"
-},
-{
-  "name": "is not",
-  "elementType": "operator",
-  "value": "isNot"
-},
-{
-  "name": "Conventional",
-  "elementType": "value",
-  "value": "C"
-},
-{
-  "name": "and",
-  "elementType": "logicalOperator",
-  "value": "&&"
-},
-{
-  "name": "Loan Product Type",
-  "elementType": "field",
-  "value": "loanProductType",
-  "type": "string"
-},
-{
-  "name": "contains",
-  "elementType": "operator",
-  "value": "contains"
-},
-{
-  "name": "Enter a string",
-  "elementType": "value",
-  "value": "Test Content"
-},
-{
-  "name": "then",
-  "elementType": "logicalOperator",
-  "value": "then"
-},
-{
-  "name": "Add Loan Exception",
-  "elementType": "result",
-  "value": "addLoanException"
-},
-{
-  "name": "Enter String",
-  "elementType": "value",
-  "value": "Test Done"
-}]
+    {
+      "name": "IF",
+      "elementType": "starter",
+      "value": "if"
+    },
+    {
+      "name": "Occupancy Type",
+      "elementType": "field",
+      "value": "occupancyType",
+      "type": "options"
+    },
+    {
+      "name": "is",
+      "elementType": "operator",
+      "value": "is"
+    },
+    {
+      "name": "Purchase",
+      "elementType": "value",
+      "value": "p"
+    },
+    {
+      "name": "and",
+      "elementType": "logicalOperator",
+      "value": "&&"
+    },
+    {
+      "name": "Number Of Units",
+      "elementType": "field",
+      "value": "numberOfUnits",
+      "type": "number"
+    },
+    {
+      "name": "is equal to",
+      "elementType": "operator",
+      "value": "="
+    },
+    {
+      "name": "Enter a number",
+      "elementType": "value",
+      "value": "1"
+    },
+    {
+      "name": "and",
+      "elementType": "logicalOperator",
+      "value": "&&"
+    },
+    {
+      "name": "Loan To Value Ratio",
+      "elementType": "field",
+      "value": "loanToValueRatio",
+      "type": "number"
+    },
+    {
+      "name": "is greater than",
+      "elementType": "operator",
+      "value": ">"
+    },
+    {
+      "name": "Enter a number",
+      "elementType": "value",
+      "value": "150"
+    },
+    {
+      "name": "then",
+      "elementType": "logicalOperator",
+      "value": "then"
+    },
+    {
+      "name": "Add Loan Exception",
+      "elementType": "result",
+      "value": "addLoanException"
+    },
+    {
+      "name": "Enter a number",
+      "elementType": "value",
+      "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency"
+    },
+    {
+      "name": "Add Rule Input Parameter",
+      "elementType": "result",
+      "value": "addRuleInputParameter"
+    },
+    {
+      "name": "Occupancy Type",
+      "elementType": "field",
+      "value": "occupancyType",
+      "type": "options"
+    },
+    {
+      "name": "Add Rule Input Parameter",
+      "elementType": "result",
+      "value": "addRuleInputParameter"
+    },
+    {
+      "name": "Number Of Units",
+      "elementType": "field",
+      "value": "numberOfUnits",
+      "type": "number"
+    },
+    {
+      "name": "Add Rule Input Parameter",
+      "elementType": "result",
+      "value": "addRuleInputParameter"
+    },
+    {
+      "name": "Loan To Value Ratio",
+      "elementType": "field",
+      "value": "loanToValueRatio",
+      "type": "number"
+    }
+  ]
