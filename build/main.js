@@ -2716,13 +2716,13 @@ var EditorComponent = (function () {
     EditorComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.fieldsService.field.subscribe(function (res) {
-            _this.fields = res.slice();
+            _this.fields = res; //.slice();
         });
         this.logicalOperatorsService.logicalOperator.subscribe(function (res) {
-            _this.logicalOperators = res.slice();
+            _this.logicalOperators = res; //.slice();
         });
         this.operatorsService.operator.subscribe(function (res) {
-            _this.operators = res.slice();
+            _this.operators = res; //.slice();
         });
         this.resultsService.result.subscribe(function (res) {
             _this.results = res.slice();
