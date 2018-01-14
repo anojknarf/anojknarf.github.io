@@ -1,6 +1,6 @@
 webpackJsonp([1],{
 
-/***/ 120:
+/***/ 119:
 /***/ (function(module, exports) {
 
 function webpackEmptyAsyncContext(req) {
@@ -13,23 +13,23 @@ function webpackEmptyAsyncContext(req) {
 webpackEmptyAsyncContext.keys = function() { return []; };
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 120;
+webpackEmptyAsyncContext.id = 119;
 
 /***/ }),
 
-/***/ 161:
+/***/ 160:
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
 	"../pages/form/form.component.module": [
-		162
+		161
 	],
 	"../pages/home/home.component.module": [
-		292,
+		290,
 		0
 	],
 	"../pages/rule-list/rule-list.component.module": [
-		170
+		169
 	]
 };
 function webpackAsyncContext(req) {
@@ -43,12 +43,12 @@ function webpackAsyncContext(req) {
 webpackAsyncContext.keys = function webpackAsyncContextKeys() {
 	return Object.keys(map);
 };
-webpackAsyncContext.id = 161;
+webpackAsyncContext.id = 160;
 module.exports = webpackAsyncContext;
 
 /***/ }),
 
-/***/ 162:
+/***/ 161:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -57,18 +57,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__form_component__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__ = __webpack_require__(261);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__ = __webpack_require__(163);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__components_notification_notification_component__ = __webpack_require__(262);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_ng2_datepicker__ = __webpack_require__(168);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_ng2_datepicker__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__ = __webpack_require__(260);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__ = __webpack_require__(162);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__ = __webpack_require__(167);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-
 
 
 
@@ -83,12 +81,11 @@ var FormComponentModule = (function () {
             declarations: [
                 __WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */],
                 __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__["a" /* EditorComponent */],
-                __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__["a" /* ElementComponent */],
-                __WEBPACK_IMPORTED_MODULE_5__components_notification_notification_component__["a" /* NotificationComponent */]
+                __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__["a" /* ElementComponent */]
             ],
             imports: [
-                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["d" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */]),
-                __WEBPACK_IMPORTED_MODULE_6_ng2_datepicker__["NgDatepickerModule"],
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */]),
+                __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__["NgDatepickerModule"],
             ],
             providers: [
                 __WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */],
@@ -102,7 +99,7 @@ var FormComponentModule = (function () {
 
 /***/ }),
 
-/***/ 163:
+/***/ 162:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -162,7 +159,7 @@ var ElementComponent = (function () {
 
 /***/ }),
 
-/***/ 164:
+/***/ 163:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1985,7 +1982,7 @@ var FieldsService = (function () {
 
 /***/ }),
 
-/***/ 165:
+/***/ 164:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2036,7 +2033,7 @@ var LogicalOperatorsService = (function () {
 
 /***/ }),
 
-/***/ 166:
+/***/ 165:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2145,7 +2142,7 @@ var OperatorsService = (function () {
 
 /***/ }),
 
-/***/ 167:
+/***/ 166:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2194,7 +2191,7 @@ var ResultsService = (function () {
 
 /***/ }),
 
-/***/ 170:
+/***/ 169:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2202,8 +2199,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RuleListComponentModule", function() { return RuleListComponentModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rule_list_component__ = __webpack_require__(84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__ = __webpack_require__(168);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rule_list_component__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__ = __webpack_require__(167);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -2224,7 +2221,7 @@ var RuleListComponentModule = (function () {
                 __WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */],
             ],
             imports: [
-                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["d" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */]),
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */]),
                 __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__["NgDatepickerModule"],
             ],
             providers: [
@@ -2239,13 +2236,13 @@ var RuleListComponentModule = (function () {
 
 /***/ }),
 
-/***/ 214:
+/***/ 213:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(215);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(235);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(214);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(234);
 
 
 Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_1__app_module__["a" /* AppModule */]);
@@ -2253,7 +2250,7 @@ Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* pl
 
 /***/ }),
 
-/***/ 235:
+/***/ 234:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2261,28 +2258,26 @@ Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* pl
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(210);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(213);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_component__ = __webpack_require__(291);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(209);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(212);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_component__ = __webpack_require__(289);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pages_home_home_component__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_rule_list_rule_list_component__ = __webpack_require__(84);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_rule_list_rule_list_component__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_form_form_component__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component_module__ = __webpack_require__(170);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component_module__ = __webpack_require__(162);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__providers_fields_service__ = __webpack_require__(164);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__providers_operators_service__ = __webpack_require__(166);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__providers_logical_service__ = __webpack_require__(165);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__providers_rules_service__ = __webpack_require__(82);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__providers_result_service__ = __webpack_require__(167);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__providers_notification_service__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__providers_ruleList_service__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component_module__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component_module__ = __webpack_require__(161);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__providers_fields_service__ = __webpack_require__(163);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__providers_operators_service__ = __webpack_require__(165);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__providers_logical_service__ = __webpack_require__(164);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__providers_rules_service__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__providers_result_service__ = __webpack_require__(166);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__providers_ruleList_service__ = __webpack_require__(82);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-
 
 
 
@@ -2313,7 +2308,7 @@ var AppModule = (function () {
                 __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
                 __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component_module__["RuleListComponentModule"],
                 __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component_module__["FormComponentModule"],
-                __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["c" /* IonicModule */].forRoot(__WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* MyApp */], {}, {
+                __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["d" /* IonicModule */].forRoot(__WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* MyApp */], {}, {
                     links: [
                         { loadChildren: '../pages/form/form.component.module#FormComponentModule', name: 'form', segment: 'form/:rule-name', priority: 'low', defaultHistory: [] },
                         { loadChildren: '../pages/home/home.component.module#HomeComponentModule', name: 'home', segment: 'home', priority: 'low', defaultHistory: [] },
@@ -2321,7 +2316,7 @@ var AppModule = (function () {
                     ]
                 })
             ],
-            bootstrap: [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["a" /* IonicApp */]],
+            bootstrap: [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["b" /* IonicApp */]],
             entryComponents: [
                 __WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* MyApp */],
                 __WEBPACK_IMPORTED_MODULE_6__pages_home_home_component__["a" /* HomeComponent */],
@@ -2331,14 +2326,13 @@ var AppModule = (function () {
             providers: [
                 __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__["a" /* StatusBar */],
                 __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */],
-                { provide: __WEBPACK_IMPORTED_MODULE_1__angular_core__["ErrorHandler"], useClass: __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["b" /* IonicErrorHandler */] },
+                { provide: __WEBPACK_IMPORTED_MODULE_1__angular_core__["ErrorHandler"], useClass: __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["c" /* IonicErrorHandler */] },
                 __WEBPACK_IMPORTED_MODULE_11__providers_fields_service__["a" /* FieldsService */],
                 __WEBPACK_IMPORTED_MODULE_12__providers_operators_service__["a" /* OperatorsService */],
                 __WEBPACK_IMPORTED_MODULE_13__providers_logical_service__["a" /* LogicalOperatorsService */],
                 __WEBPACK_IMPORTED_MODULE_14__providers_rules_service__["a" /* RulesService */],
                 __WEBPACK_IMPORTED_MODULE_15__providers_result_service__["a" /* ResultsService */],
-                __WEBPACK_IMPORTED_MODULE_16__providers_notification_service__["a" /* NotificationService */],
-                __WEBPACK_IMPORTED_MODULE_17__providers_ruleList_service__["a" /* RuleListService */],
+                __WEBPACK_IMPORTED_MODULE_16__providers_ruleList_service__["a" /* RuleListService */],
             ]
         })
     ], AppModule);
@@ -2349,7 +2343,7 @@ var AppModule = (function () {
 
 /***/ }),
 
-/***/ 260:
+/***/ 259:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2620,17 +2614,17 @@ var data = [
 
 /***/ }),
 
-/***/ 261:
+/***/ 260:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return EditorComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_fields_service__ = __webpack_require__(164);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__ = __webpack_require__(165);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__ = __webpack_require__(166);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_result_service__ = __webpack_require__(167);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_rules_service__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_fields_service__ = __webpack_require__(163);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__ = __webpack_require__(164);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__ = __webpack_require__(165);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_result_service__ = __webpack_require__(166);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_rules_service__ = __webpack_require__(81);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3331,58 +3325,15 @@ var EditorComponent = (function () {
 
 /***/ }),
 
-/***/ 262:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NotificationComponent; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_notification_service__ = __webpack_require__(81);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-var NotificationComponent = (function () {
-    function NotificationComponent(notificationService) {
-        this.notificationService = notificationService;
-    }
-    NotificationComponent.prototype.ngOnInit = function () {
-        // console.log('hello `Notification` component');
-    };
-    NotificationComponent.prototype.clickedOutside = function () {
-        if (this.notificationService.showNotification) {
-            this.notificationService.toggleShow();
-        }
-    };
-    NotificationComponent = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'notification',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/notification/notification.component.html"*/'<div *ngIf="notificationService.showNotification" class="overlay" (click)="clickedOutside()"></div>\n<div *ngIf="notificationService.showNotification" class="alert">\n	<div class="alert-head">{{notificationService.title}}</div>\n	<div class="message" [innerHTML]="notificationService.message"></div>\n	<div class="ok button" (click)="notificationService.toggleShow()">OK</div>\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/components/notification/notification.component.html"*/
-        }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__providers_notification_service__["a" /* NotificationService */]])
-    ], NotificationComponent);
-    return NotificationComponent;
-}());
-
-//# sourceMappingURL=notification.component.js.map
-
-/***/ }),
-
-/***/ 291:
+/***/ 289:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyApp; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(213);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(210);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(212);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(209);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_home_home_component__ = __webpack_require__(51);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3411,7 +3362,7 @@ var MyApp = (function () {
     MyApp = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({template:/*ion-inline-start:"/Office/Rule-Editor/src/app/app.html"*/'<ion-nav [root]="rootPage"></ion-nav>\n'/*ion-inline-end:"/Office/Rule-Editor/src/app/app.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* Platform */], __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */], __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["h" /* Platform */], __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */], __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */]])
     ], MyApp);
     return MyApp;
 }());
@@ -3525,7 +3476,7 @@ var HomeComponent = (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'home',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/home/home.component.html"*/'<div class="header">\n  <div class="title">\n    Blue Sage <strong> Rules Editor</strong>\n  </div>\n  <div class="user-info">\n    <div class="user-name">\n      Steve Octaviano\n    </div>\n    <div class="mug-shot mugshot-circle"></div>\n  </div>\n</div>\n<div class="header-2">\n  <div class="header-content">\n    <div class="title-2">\n      Rules Project\n    </div>\n    <div class="button-create" (click)="toggleAddNewProject()" >\n        <span class="plus"> + </span>\n        <span class="create-rules-project"> Create Rules Project </span>\n    </div>\n  </div>\n</div>\n<div class="body">\n  <div class="table">\n\n    <div class="table-header">\n      <div class="col-1">\n        Project Name\n      </div>\n      <div class="col-2">\n        Last Modified\n      </div>\n      <div class="col-3">\n        Last Published\n      </div>\n      <div class="col-4">\n        Last Modifier\n      </div>\n      <div class="col-5">\n      </div>\n    </div>\n\n\n    <div class="table-row" *ngFor="let project of localProjectList">\n      <div class="col-1" (click)="openProject(project)">\n        {{project.name}}\n      </div>\n      <div class="col-2" (click)="openProject(project)">\n        {{formatDate(project.last_modified)}}\n      </div>\n      <div class="col-3" (click)="openProject(project)">\n        {{formatDate(project.last_published)}}\n      </div>\n      <div class="col-4" (click)="openProject(project)">\n        {{project.project_author}}\n      </div>\n      <div class="col-5">\n        <span class="edit-button" (click)="editProj(project)"></span>\n        <span class="delete-button" (click)="deleteRow(project.id)">\n        </span>\n      </div>\n    </div>\n\n\n  </div>\n</div>\n<div class="add-project" [ngClass]="{\'show\' : addNew }">\n  <div class="row-line">\n    <div class="label">Project Name</div>\n    <input type="text" #projName value="" name="projectName">\n  </div>\n  <div class="row-line">\n    <div class="label">Project Description</div>\n    <input type="text" #projDesc value="" name="projectDesc">\n  </div>\n  <div class="last-row">\n    <div class="button cancel" (click)="toggleAddNewProject()">Cancel</div>\n    <div class="button save" (click)="saveNewProject()">Save</div>\n  </div>\n</div>\n<div class="overlay" [ngClass]="{\'show\' : addNew }"></div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/home/home.component.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* NavController */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* NavController */]])
     ], HomeComponent);
     return HomeComponent;
 }());
@@ -3541,11 +3492,10 @@ var HomeComponent = (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FormComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_notification_service__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_element_element_component__ = __webpack_require__(163);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_rules_service__ = __webpack_require__(82);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_ruleList_service__ = __webpack_require__(83);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__rule_list_rule_list_component__ = __webpack_require__(84);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_element_element_component__ = __webpack_require__(162);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_rules_service__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__ = __webpack_require__(83);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3561,14 +3511,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var FormComponent = (function () {
-    function FormComponent(notification, rulesService, ruleListService, navCtrl, navParams) {
-        this.notification = notification;
+    function FormComponent(rulesService, ruleListService, navCtrl, navParams, alertCtrl) {
         this.rulesService = rulesService;
         this.ruleListService = ruleListService;
         this.navCtrl = navCtrl;
         this.navParams = navParams;
+        this.alertCtrl = alertCtrl;
         this.options = {
             displayFormat: 'MM/DD/YYYY',
             barTitleFormat: 'MMMM YYYY',
@@ -3604,7 +3553,7 @@ var FormComponent = (function () {
         this.ruleLogicArray = [];
         this.mode = "text";
         this.elementStack = [];
-        this.ruleListPage = __WEBPACK_IMPORTED_MODULE_6__rule_list_rule_list_component__["a" /* RuleListComponent */];
+        this.ruleListPage = __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__["a" /* RuleListComponent */];
     }
     FormComponent.prototype.ionViewWillLoad = function () {
         console.log(this.navParams.data);
@@ -3729,7 +3678,13 @@ var FormComponent = (function () {
         else {
             message = this.errorMessage;
         }
-        this.notification.toggleShow(message);
+        console.log(message);
+        var alert = this.alertCtrl.create({
+            title: 'Test Results',
+            subTitle: message,
+            buttons: ['OK']
+        });
+        alert.present();
     };
     FormComponent.prototype.getCleanRuleArray = function () {
         var localRuleArray = [];
@@ -3783,16 +3738,15 @@ var FormComponent = (function () {
         return JSON.stringify(this.getCleanRuleArray(), null, "  ");
     };
     __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"])(__WEBPACK_IMPORTED_MODULE_3__components_element_element_component__["a" /* ElementComponent */]),
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"])(__WEBPACK_IMPORTED_MODULE_2__components_element_element_component__["a" /* ElementComponent */]),
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
     ], FormComponent.prototype, "elements", void 0);
     FormComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'rule-form',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/form/form.component.html"*/'<div class="header">\n  <div class="title">\n    Blue Sage <strong> Rules Editor</strong>\n  </div>\n  <div class="user-info">\n    <div class="user-name">\n      Steve Octaviano\n    </div>\n    <div class="mug-shot mugshot-circle"></div>\n  </div>\n</div>\n<div class="page-title">\n	<div>\n		<span class="title-a" [navPush]="ruleListPage">Loan Validation</span>\n		<span>&nbsp;/&nbsp;</span>\n		<span class="title-b">{{pageTitle}}</span>\n	</div>\n</div>\n<div class="rule-form">\n	<div class="tabs">\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'rule\')}" (click)="tab=\'rule\'">Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'testRule\')}" (click)="tab=\'testRule\'">Test Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'droolsFormat\')}" (click)="tab=\'droolsFormat\'">Drools Format</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'jsonFormat\')}" (click)="tab=\'jsonFormat\'">JSON Format</div>\n	</div>\n	<div [hidden]="tab != \'rule\'" class="tab-content">\n		<div class="rule-section">\n			<div class="row">\n				<div class="short-sec">\n					<div class="rule-label">Rule Name</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleName">\n				</div>\n				<div class="middle-sec">\n					<div class="rule-label">Rule Category</div>\n					<div class="type-dropdown" (click)="showDropdown = showDropdown ? false : true">\n						{{ruleCatagory.name}}\n						<div class="element-options" [ngClass]="showDropdown ? \'show\' : \'\'">\n							<div class="element-option" *ngFor="let opt of ruleCatagories" (click)="ruleCatagory = opt">{{opt.name}}</div>\n						</div>\n					</div>\n				</div>\n				<div class="rule-start short-sec">\n					<div class="sec">\n						<div class="rule-label">Effective Date</div>\n						<ng-datepicker [(ngModel)]="effectiveDate" position="bottom-right" [options]="options"></ng-datepicker>\n					</div>\n					<div class="sec">\n						<div class="rule-label">Expiration Date</div>\n						<ng-datepicker [(ngModel)]="expiryDate" position="bottom-left" [options]="options"></ng-datepicker>\n					</div>\n				</div>\n			</div>\n			<div class="row">\n				<div class="large-sec">\n					<div class="rule-label">Description</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleDescription">\n				</div>\n			</div>\n			<div class="rule-logic-heading">\n				<span>\n					<div class="rule-label">Rule Logic</div>\n					<div class="rule-sub-label">{{helpText}}</div>\n				</span>\n				<button class="editor-type-button" (click)="changeEditorMode()">\n					{{ mode === \'text\' ? \'dropdown\' : \'text\' }} Mode\n				</button>\n			</div>\n			<rule-editor [helpText]="helpText" [mode]="mode" [ruleLogic]="ruleLogicArray" [testRule]="true"></rule-editor>\n			<div class="rule-last-row">\n				<div class="rule-button clear disabled">Validate</div>\n				<div class="rule-end">\n					<div class="rule-button delete" [ngClass]="{\'disabled\':pageTitle == \'Create New Rule\'}" (click)="deleteRule()">Delete</div>\n					<div class="rule-button save" (click)="saveRule()">Save</div>\n				</div>\n			</div>\n		</div>\n	</div>\n	<div [hidden]="tab != \'testRule\'" class="tab-content">\n		<div class="rule-creator">\n			<div class="rule-label">Rule Logic</div>\n			<rule-editor [helpText]="helpText" mode=\'text\' [ruleLogic]="ruleLogicArray" [testRule]="false"></rule-editor>\n		</div>\n		<div class="rule-test">\n			<div class="rule-label">Test Rule</div>\n			<element *ngFor="let elem of formElems" [elementObject]="elem"></element>\n			<div class="rule-button test" (click)="evaluateResults()" *ngIf="formElems.length > 0" [ngClass]="{ \'disabled\': errorMessage == \'\'}">Test</div>\n		</div>\n	</div>\n	<div [hidden]="tab != \'droolsFormat\'" class="tab-content">\n		<div class="drools-box">\n			<pre>\n1: package org.drools;\n2:\n3: rule "DU Refi Rule [EX-04001]"\n4:   when\n5:     BSLP_LoanExceptionServiceInputData(occupancyType == ""P"", numberOfUnits == 2, loanToValueRatio > 150)\n6:   then\n7:     BusinessRuleFactList facts = new BusinessRuleFactList();\n8:     facts.addFact(""Occupancy Type"", $l.getOccupancyType());\n9:     facts.addNumericFact(""Number of Units"", $l.getNumberOfUnits());\n10:    facts.addPercentageFact(""LTV Ratio"", $l.getLoanToValueRatio(), 2);\n11:    BusinessRulesList.add(""EX-04002"", false, facts.toArray());\n12: end\n			</pre>\n		</div>\n		<div [hidden]="tab != \'testRule\'" class="tab-content">\n			JSON FORMAT\n		</div>\n	</div>\n	<div [hidden]="tab != \'jsonFormat\'" class="tab-content">\n			<div class="drools-box">\n				<pre>{{getRuleJSONString()}}</pre>\n			</div>\n		</div>\n</div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/form/form.component.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_notification_service__["a" /* NotificationService */],
-            __WEBPACK_IMPORTED_MODULE_4__providers_rules_service__["a" /* RulesService */], __WEBPACK_IMPORTED_MODULE_5__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* NavController */],
-            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* NavParams */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__providers_rules_service__["a" /* RulesService */], __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* NavController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* NavParams */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */]])
     ], FormComponent);
     return FormComponent;
 }());
@@ -3802,41 +3756,6 @@ var FormComponent = (function () {
 /***/ }),
 
 /***/ 81:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NotificationService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-var NotificationService = (function () {
-    function NotificationService() {
-        this.showNotification = false;
-    }
-    NotificationService.prototype.toggleShow = function (message, title) {
-        if (message === void 0) { message = ""; }
-        if (title === void 0) { title = "Exception Message"; }
-        this.message = message;
-        this.title = title;
-        this.showNotification = this.showNotification ? false : true;
-        return this.showNotification;
-    };
-    NotificationService = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])()
-    ], NotificationService);
-    return NotificationService;
-}());
-
-//# sourceMappingURL=notification.service.js.map
-
-/***/ }),
-
-/***/ 82:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3885,13 +3804,13 @@ var RulesService = (function () {
 
 /***/ }),
 
-/***/ 83:
+/***/ 82:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__ = __webpack_require__(260);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__ = __webpack_require__(259);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3950,14 +3869,14 @@ var RuleListService = (function () {
 
 /***/ }),
 
-/***/ 84:
+/***/ 83:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__home_home_component__ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__form_form_component__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -4132,7 +4051,7 @@ var RuleListComponent = (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'rule-list',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/'<div class="header">\n  <div class="title">\n    Blue Sage <strong> Rules Editor</strong>\n  </div>\n  <div class="user-info">\n    <div class="user-name">\n      Steve Octaviano\n    </div>\n    <div class="mug-shot mugshot-circle"></div>\n  </div>\n</div>\n<div class="header-2">\n  <div class="header-content">\n    <div class="title-2">\n      <span class="title-a" [navPush]="homePage">Rules Project</span>\n      <span>&nbsp;/&nbsp;</span>\n      <span class="title-b">Loan Exception Rules</span>\n    </div>\n    <span class="buttons">\n      <div class="button-set">\n        <span (click)="cloneRules()" class="duplicate-button"> </span>\n        <span (click)="deleteRules()" class="delete-button"> </span>\n      </div>\n      <button class="edit-json-button">\n        Edit JSON\n      </button>\n      <div class="button-create">\n        <span class="plus"> + </span>\n        <span class="create-rules-project" [navPush]="formPage"> Create New Rule </span>\n      </div>\n    </span>\n  </div>\n</div>\n<div class="body">\n  <div class="table">\n    <div class="table-header-outer">\n      <span class="table-header">\n\n        <div class="col-1" >\n          <input type="checkbox" (click)="tickAll($event)">\n        </div>\n\n        <div class="col-2 sort-down" (click)="sortList(\'rule_name\', $event)">\n          Rule Name\n        </div>\n        <div class="col-3 sort-down" (click)="sortList(\'rule_category\', $event)">\n          Category\n        </div>\n        <div class="col-4 sort-down" (click)="sortList(\'rule_desc\', $event)">\n          Description\n        </div>\n        <div class="col-5 sort-down" (click)="sortList(\'last_modified\', $event)">\n          Last Modified\n        </div>\n        <div class="col-6 sort-down" (click)="sortList(\'last_published\', $event)">\n          Last Published\n        </div>\n        <div class="col-7 sort-down" (click)="sortList(\'rule_author\', $event)">\n          Last Modifier\n        </div>\n        <div class="col-8">\n          <span class="search-button" (click)="showSearch = showSearch ? false : true; localRuleList = cachedRuleList;" [ngClass]="{\'outline\' : showSearch}"></span>\n    </div>\n    </span>\n    <span *ngIf="showSearch" class="table-header">\n        <div class="col-1" >\n        </div>\n        <div class="col-2">\n          <input (keyup)="searchList(\'rule_name\',$event)" value="" type="text">\n        </div>\n        <div class="col-3">\n          <input (keyup)="searchList(\'rule_category\',$event)" value="" type="text">\n        </div>\n        <div class="col-4">\n          <input (keyup)="searchList(\'rule_desc\',$event)" value="" type="text">\n        </div>\n        <div class="col-5">\n          <ng-datepicker [(ngModel)]="searchLastModDate" (ngModelChange)="searchDate(\'last_modified\',searchLastModDate)" [options]="options" position="bottom-right"></ng-datepicker>\n        </div>\n        <div class="col-6">\n          <ng-datepicker [(ngModel)]="searchLastPubDate" [options]="options" (ngModelChange)="searchDate(\'last_published\',searchLastPubDate)" position="bottom-left"></ng-datepicker>\n        </div>\n        <div class="col-7">\n          <input (keyup)="searchList(\'rule_author\',$event)" value="" type="text">\n        </div>\n        <div class="col-8">\n        </div>\n      </span>\n  </div>\n  <div class="table-rows" #ruleListRows>\n    <div *ngFor="let rule of localRuleList" class="table-row" >\n      <div class="col-1">\n        <input type="checkbox" (change)="toggleCheckBox($event, rule)">\n      </div>\n      <div class="col-2" (click)="openRule(rule)">\n        DU Refi Rule [{{rule.rule_name}}]\n      </div>\n      <div class="col-3" (click)="openRule(rule)">\n        {{rule.rule_category.name}}\n      </div>\n      <div class="col-4" title="{{rule.rule_desc}}" (click)="openRule(rule)">\n        {{rule.rule_desc}}\n      </div>\n      <div class="col-5" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_modified)}}\n      </div>\n      <div class="col-6" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_published)}}\n      </div>\n      <div class="col-7" [navPush]="formPage" (click)="openRule(rule)">\n        {{rule.rule_author}}\n      </div>\n      <div class="col-8" [navPush]="formPage" (click)="openRule(rule)">\n      </div>\n    </div>\n  </div>\n</div>\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* NavController */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* NavController */]])
     ], RuleListComponent);
     return RuleListComponent;
 }());
@@ -4141,5 +4060,5 @@ var RuleListComponent = (function () {
 
 /***/ })
 
-},[214]);
+},[213]);
 //# sourceMappingURL=main.js.map

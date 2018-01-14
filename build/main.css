@@ -26112,65 +26112,6 @@ element .show {
   display: block;
 }
 
-notification .overlay {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  height: 100vh;
-  width: 100vw;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 888;
-}
-
-notification .alert {
-  position: fixed;
-  top: 40vh;
-  left: 40vw;
-  width: 25vw;
-  background: white;
-  border-radius: 5px;
-  z-index: 999;
-}
-
-notification .message {
-  padding: 15px;
-  padding-bottom: 50px;
-  text-align: center;
-  vertical-align: middle;
-  text-transform: uppercase;
-}
-
-notification .button {
-  height: 25px;
-  padding: 5px 10px 0px 10px;
-  border-radius: 5px;
-  vertical-align: middle;
-  border: 1px solid #c4c4c4;
-  -webkit-align-self: center;
-  -ms-flex-item-align: center;
-  align-self: center;
-  line-height: 1.5;
-  font-size: 13px;
-  cursor: pointer;
-  width: 50px;
-  text-align: center;
-  color: white;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 10px;
-}
-
-notification .ok {
-  background: #333365;
-}
-
-notification .alert-head {
-  color: white;
-  background: #333365;
-  border-radius: 5px 5px 0px 0px;
-  padding: 5px;
-}
-
 rule-form .page-title {
   color: #333365;
   font-family: 'Lato-Light';
