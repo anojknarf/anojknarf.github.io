@@ -3670,26 +3670,34 @@ var FormComponent = (function () {
                 var commandString = " #" + elem['value'];
                 var operatorElem = _this.elementStack[indx + 1];
                 var valueElem = _this.elementStack[indx + 2];
-                if (!operatorElem || !valueElem) {
+                var fieldCompareTest = _this.elementStack[indx - 2];
+                var operatorCompareTest = _this.elementStack[indx - 1];
+                if (!operatorElem || !valueElem ||
+                    (fieldCompareTest && fieldCompareTest.elementType == 'field'
+                        && operatorCompareTest && operatorCompareTest.elementType == 'operator')) {
                     return;
                 }
+                var value = "'" + valueElem['value'] + "' ";
+                if (valueElem.elementType == 'field') {
+                    value = "#" + valueElem['value'];
+                }
                 if (operatorElem['value'] && (operatorElem['value'] == "is" || operatorElem['value'] == "=")) {
-                    commandString += " == '" + valueElem['value'] + "' ";
+                    commandString += " == " + value;
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "isNot") {
-                    commandString += " != '" + valueElem['value'] + "' ";
+                    commandString += " != " + value;
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "contains") {
-                    commandString += ".indexOf('" + valueElem['value'] + "') > -1 ";
+                    commandString += ".indexOf(" + value + ") > -1 ";
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "startsWith") {
-                    commandString += ".indexOf('" + valueElem['value'] + "') == 0 ";
+                    commandString += ".indexOf(" + value + ") == 0 ";
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == ">") {
-                    commandString += " > '" + valueElem['value'] + "' ";
+                    commandString += " > " + value;
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "<") {
-                    commandString += " < '" + valueElem['value'] + "' ";
+                    commandString += " < " + value;
                 }
                 if (!_this.checkIfExists(elem, _this.formElems)) {
                     _this.formElems.push(elem);
