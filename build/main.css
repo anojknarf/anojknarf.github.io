@@ -26058,6 +26058,7 @@ element .element-label {
   font-size: 13px;
   margin: 0px 10px;
   padding-top: 10px;
+  text-align: left;
 }
 
 element .element-value {
@@ -26071,22 +26072,11 @@ element .element-value {
 }
 
 element .type-dropdown {
-  padding: 11px !important;
+  padding: 9px !important;
   cursor: pointer;
   font-size: 11px;
   margin: 0px !important;
   width: 40% !important;
-}
-
-element .type-dropdown::before {
-  content: '';
-  position: absolute;
-  display: block;
-  height: 20px;
-  width: 20px;
-  background: url("../../assets/icon/dropdown_arrow.png") no-repeat;
-  right: 0px;
-  top: 40%;
 }
 
 element .element-options {
@@ -26440,22 +26430,20 @@ rule-form .type-dropdown {
   font-size: 11px;
   border: 1px solid #c4c4c4;
   border-radius: 5px;
-  padding: 10px;
+  padding: 7.2px 15px;
   background: white;
-  width: 80%;
+  max-width: 80%;
   position: relative;
   margin: 10px 0px 10px 0px;
 }
 
-rule-form .type-dropdown::before {
-  content: '';
-  position: absolute;
-  display: block;
-  height: 20px;
-  width: 20px;
-  background: url("../../assets/icon/dropdown_arrow.png") no-repeat;
-  right: 0px;
-  top: 40%;
+rule-form .type-dropdown .select-text {
+  position: relative;
+  top: 2px;
+}
+
+rule-form .type-dropdown button:focus, rule-form .type-dropdown button:active {
+  border: 2px solid #6bb4ee;
 }
 
 rule-form .element-options {
@@ -26669,7 +26657,7 @@ home .col-5 {
 home .add-project {
   display: none;
   position: fixed;
-  top: 30vh;
+  top: 20vh;
   left: 30vw;
   height: 300px;
   width: 500px;
@@ -26689,10 +26677,18 @@ home .row-line {
   -ms-flex-flow: row;
   flex-flow: row;
   padding: 20px 5px;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+}
+
+home .first-line {
+  margin-top: 25px;
+}
+
+home .first-line input {
+  max-width: 40%;
 }
 
 home .row-line input {
@@ -26705,6 +26701,10 @@ home .row-line input {
 home .label {
   color: #666666;
   line-height: 30px;
+  width: 45%;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 }
 
 home .last-row {
@@ -26724,9 +26724,10 @@ home .last-row {
   -ms-flex-flow: row;
   flex-flow: row;
   width: 100%;
-  -webkit-justify-content: space-around;
-  -ms-flex-pack: distribute;
-  justify-content: space-around;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
 }
 
 home .button {
@@ -26764,6 +26765,16 @@ home .overlay {
 
 home .show {
   display: block !important;
+}
+
+home .new-header {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background: #333366;
+  color: white;
+  width: 100%;
+  padding: 10px;
 }
 
 rule-list .header-2 {
@@ -26812,6 +26823,7 @@ rule-list .button-set, rule-list .edit-json-button {
   display: -ms-flexbox;
   display: flex;
   color: #666666;
+  margin-right: 40px;
 }
 
 rule-list .edit-json-button {
@@ -26981,10 +26993,10 @@ rule-list .buttons {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
 }
 
 rule-list .table-row:hover {
