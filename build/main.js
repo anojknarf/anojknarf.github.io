@@ -2709,6 +2709,7 @@ var EditorComponent = (function () {
         this.inputParameters = [];
         this.openParanthesis = 0;
         this.dropDownIndex = 0;
+        this.deletedElements = [];
     }
     EditorComponent.prototype.clickedOutside = function ($event) {
         this.exitEditingMode($event);
@@ -2840,12 +2841,70 @@ var EditorComponent = (function () {
     };
     EditorComponent.prototype.backspace = function (event) {
         event.preventDefault();
-        if (this.ruleLogic[this.ruleLogic.length - 1].customMode) {
+        if (this.ruleLogic[this.ruleLogic.length - 1].customMode
+            || this.ruleLogic[this.dropDownIndex].customMode) {
             this.setCustomString(this.customString.substring(0, this.customString.length - 1));
             return;
         }
-        this.setCurrentText(this.currentText.substring(0, this.currentText.length - 1));
-        this.filterDropDown(this.currentText, true);
+        if (this.currentText.length) {
+            this.setCurrentText(this.currentText.substring(0, this.currentText.length - 1));
+            this.filterDropDown(this.currentText, true);
+            return;
+        }
+        this.deleteRuleBlock(this.ruleLogic[this.dropDownIndex], this.dropDownIndex, this.ruleLogic);
+    };
+    EditorComponent.prototype.deleteRuleBlock = function (ruleElement, index, ruleLogic) {
+        var elementType = ruleElement.elementType;
+        var deleteStartIndex = 0;
+        var deleteEndIndex = 0;
+        var noOfElementsToDelete = 0;
+        if (elementType === 'field' || elementType === 'value') {
+            elementType = (ruleLogic[index - 1].elementType === 'result')
+                ? 'result-param'
+                : elementType;
+        }
+        switch (elementType) {
+            case 'value':
+                deleteStartIndex = index - 2;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 4;
+                break;
+            case 'field':
+                deleteStartIndex = index;
+                deleteEndIndex = index + 3;
+                noOfElementsToDelete = 4;
+                break;
+            case 'operator':
+                deleteStartIndex = index - 2;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 4;
+                break;
+            case 'logicalOperator':
+                deleteStartIndex = index - 3;
+                deleteEndIndex = index;
+                noOfElementsToDelete = 4;
+                break;
+            case 'result':
+                deleteStartIndex = index;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 2;
+                break;
+            case 'result-param':
+                deleteStartIndex = index - 1;
+                deleteEndIndex = index;
+                noOfElementsToDelete = 2;
+                break;
+        }
+        var deletedElements = this.ruleLogic.splice(deleteStartIndex, noOfElementsToDelete);
+        this.deletedElements.push({ elementsDeleted: deletedElements, index: deleteStartIndex });
+        this.setDropdown({ code: '' }, true);
+    };
+    EditorComponent.prototype.undoDelete = function () {
+        if (this.deletedElements.length) {
+            var deletedElement = this.deletedElements.pop();
+            (_a = this.ruleLogic).splice.apply(_a, [deletedElement.index, 0].concat(deletedElement.elementsDeleted));
+        }
+        var _a;
     };
     EditorComponent.prototype.setDropdown = function (event, empty) {
         if (empty === void 0) { empty = false; }
@@ -3251,7 +3310,8 @@ var EditorComponent = (function () {
     };
     EditorComponent.prototype.logicClicked = function (event, logic, index) {
         this.dropDownIndex = index;
-        if (logic.value === 'then') {
+        if (logic.value === 'then' || logic.elementType === 'result') {
+            this.emptyDropDown();
             return;
         }
         this.setDropDownPosOnEdit(event.target);
@@ -3269,7 +3329,8 @@ var EditorComponent = (function () {
                 return 'col-6';
         }
     };
-    EditorComponent.prototype.getOptions = function (logic) {
+    EditorComponent.prototype.getOptions = function (logic, index) {
+        this.dropDownIndex = index;
         var options = this['get' + logic.elementType + 's']();
         return options;
     };
@@ -3309,7 +3370,7 @@ var EditorComponent = (function () {
     ], EditorComponent.prototype, "clickedOutside", null);
     EditorComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' \n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          {{ logic.customMode ? customString : logic.value }}\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select class="col-4"\n      *ngIf="logic.elementType===\'value\' && !(logic.name === \'Enter a string\' || logic.name === \'Enter String\')"\n      [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic)">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input class="col-4"\n        *ngIf="logic.elementType===\'value\' && (logic.name === \'Enter a string\' || logic.name === \'Enter String\')"\n        [value] = "logic.value">\n\n    <select class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
+            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.command)  = undoDelete()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          {{ logic.customMode ? customString : logic.value }}\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic, i)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic, i)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select class="col-4"\n      *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\')"\n      [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic, i)">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\')"\n        [value] = "logic.value">\n\n    <select class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.name">\n      <option *ngFor="let logic of getOptions(logic, i)">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\'"\n        [value] = "logic.name">\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__providers_fields_service__["a" /* FieldsService */],
             __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__["a" /* LogicalOperatorsService */],

@@ -25703,6 +25703,10 @@ ion-navbar.toolbar {
   src: url("../assets/fonts/tahoma.ttf");
 }
 
+* {
+  font-family: 'Lato';
+}
+
 ng-datepicker input {
   width: 70% !important;
   padding: 10px !important;
@@ -26018,9 +26022,14 @@ rule-editor .rules-drop-down-elements > select, rule-editor .rules-drop-down-ele
 }
 
 rule-editor .rules-drop-down-elements > input {
-  height: 23px;
+  height: 34px;
   padding: 5px 0px 5px 11px;
-  max-width: 252px;
+  max-width: 269px;
+}
+
+rule-editor input.result {
+  width: 47vw;
+  min-width: 680px;
 }
 
 element .element-container {
