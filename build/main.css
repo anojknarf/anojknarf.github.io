@@ -26143,10 +26143,19 @@ rule-form .tab-content {
   -ms-flex-flow: row;
   flex-flow: row;
   height: 565px;
-  padding: 20px;
+  padding: 0px;
   width: 1000px;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+  max-height: 0px;
+  overflow: hidden;
+  -webkit-transition: 1s all;
+  transition: 1s all;
+}
+
+rule-form .show-tab {
+  padding: 20px;
+  max-height: 100%;
 }
 
 rule-form .tabs {
@@ -26169,6 +26178,8 @@ rule-form .tab {
   font-size: 14px;
   border-top: 3px solid transparent;
   border-bottom: 3px solid transparent;
+  -webkit-transition: all 1s;
+  transition: all 1s;
 }
 
 rule-form .highlight-tab {
