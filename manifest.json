@@ -1,11 +1,11 @@
 {
-  "name": "LO-Smart",
-  "short_name": "LO-Smart",
+  "name": "Rules-Editor-Application",
+  "short_name": "Rules-Editor",
   "start_url": "index.html",
   "display": "standalone",
   "icons": [{
-    "src": "./assets/images/favicon.png",
-    "sizes": "50x50",
+    "src": "assets/imgs/logo.png",
+    "sizes": "512x512",
     "type": "image/png"
   }],
   "background_color": "#4e8ef7",

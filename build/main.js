@@ -1,24 +1,797 @@
-webpackJsonp([56],{
+webpackJsonp([0],{
 
-/***/ 138:
+/***/ 113:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FormComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_element_element_component__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_rules_service__ = __webpack_require__(114);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__ = __webpack_require__(115);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__ = __webpack_require__(116);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+
+
+var FormComponent = (function () {
+    function FormComponent(rulesService, ruleListService, navCtrl, navParams, alertCtrl) {
+        this.rulesService = rulesService;
+        this.ruleListService = ruleListService;
+        this.navCtrl = navCtrl;
+        this.navParams = navParams;
+        this.alertCtrl = alertCtrl;
+        this.options = {
+            displayFormat: 'MM/DD/YYYY',
+            barTitleFormat: 'MMMM YYYY',
+        };
+        this.tab = "rule";
+        this.showDropdown = false;
+        this.ruleCatagories = [
+            {
+                name: 'Purchase',
+                value: 'P'
+            },
+            {
+                name: 'Refinance',
+                value: 'R'
+            },
+            {
+                name: 'Others',
+                value: 'O'
+            },
+        ];
+        this.ruleCatagory = JSON.stringify({
+            name: 'Refinance',
+            value: 'R'
+        });
+        this.pageTitle = "Create New Rule";
+        this.helpText = "Click anywhere inside the rule area to modify the rule.";
+        this.effectiveDate = new Date();
+        this.expiryDate = new Date();
+        this.formElems = [];
+        this.ruleString = "";
+        this.errorMessage = "";
+        this.exceptionStack = [];
+        this.ruleLogicArray = [];
+        this.mode = "text";
+        this.elementStack = [];
+        this.ruleListPage = __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__["a" /* RuleListComponent */];
+    }
+    FormComponent.prototype.ionViewWillLoad = function () {
+        console.log(this.navParams.data);
+        if (this.navParams.get('rule-name')) {
+            this.pageTitle = "Edit Rule";
+            this.ruleName = this.navParams.get('rule-name');
+            var rule = this.ruleListService.getRule(this.ruleName);
+            this.ruleDescription = rule.rule_desc;
+            this.ruleLogic = rule.rule_logic;
+            this.effectiveDate = new Date(rule.effective_date);
+            this.expiryDate = new Date(rule.expiry_date);
+            this.ruleLogicArray = rule.rule_logic_array;
+            console.log("form component..", this.ruleLogicArray);
+        }
+    };
+    FormComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.elementStack = [];
+        this.rulesService.rule.subscribe(function (res) {
+            if (res.elementType === 'starter') {
+                _this.elementStack = [];
+            }
+            _this.elementStack.push(res);
+            _this.constructResults();
+        });
+    };
+    FormComponent.prototype.constructResults = function () {
+        var _this = this;
+        this.formElems = [];
+        this.exceptionStack = [];
+        this.ruleString = "";
+        var resultBlockFound = false;
+        this.elementStack.forEach(function (elem, indx) {
+            if (elem.elementType == 'field' && !resultBlockFound) {
+                var commandString = " #" + elem['value'];
+                var operatorElem = _this.elementStack[indx + 1];
+                var valueElem = _this.elementStack[indx + 2];
+                var fieldCompareTest = _this.elementStack[indx - 2];
+                var operatorCompareTest = _this.elementStack[indx - 1];
+                if (!operatorElem || !valueElem ||
+                    (fieldCompareTest && fieldCompareTest.elementType == 'field'
+                        && operatorCompareTest && operatorCompareTest.elementType == 'operator')) {
+                    return;
+                }
+                var value = "'" + valueElem['value'] + "' ";
+                if (valueElem.elementType == 'field') {
+                    value = "#" + valueElem['value'];
+                }
+                if (operatorElem['value'] && (operatorElem['value'] == "is" || operatorElem['value'] == "=")) {
+                    commandString += " == " + value;
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isNot") {
+                    commandString += " != " + value;
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "contains") {
+                    commandString += ".indexOf(" + value + ") > -1 ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "startsWith") {
+                    commandString += ".indexOf(" + value + ") == 0 ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == ">") {
+                    commandString += " > " + value;
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "<") {
+                    commandString += " < " + value;
+                }
+                if (!_this.checkIfExists(elem, _this.formElems)) {
+                    _this.formElems.push(elem);
+                }
+                _this.ruleString += commandString;
+            }
+            else if (elem.elementType == 'logicalOperator' && elem['value'] != "then") {
+                _this.ruleString += " " + elem['value'] + " ";
+            }
+            else if (elem.elementType == 'result' && elem.value == "addLoanException") {
+                resultBlockFound = true;
+                var exceptionMessageElem = _this.elementStack[indx + 1];
+                if (!exceptionMessageElem) {
+                    return;
+                }
+                _this.errorMessage = exceptionMessageElem['value'];
+            }
+            else if (elem.elementType == 'result' && elem.value == "addRuleInputParameter") {
+                resultBlockFound = true;
+                var exceptionElem = _this.elementStack[indx + 1];
+                if (!exceptionElem) {
+                    return;
+                }
+                _this.exceptionStack.push(exceptionElem);
+            }
+            else if (elem.elementType == 'paranthesis') {
+                _this.ruleString += " " + elem['name'] + " ";
+            }
+        });
+    };
+    FormComponent.prototype.checkIfExists = function (obj, array) {
+        var flag = false;
+        array.forEach(function (elm) {
+            if (elm.value == obj.value) {
+                flag = true;
+            }
+        });
+        return flag;
+    };
+    FormComponent.prototype.evaluateResults = function () {
+        var _this = this;
+        var message = "";
+        var localRuleString = this.ruleString;
+        this.elements.forEach(function (elementComponent) {
+            var elmValObj = elementComponent.getValueObject();
+            var replaceString = new RegExp(elmValObj.key, 'g');
+            var replaceWith = elmValObj.value;
+            localRuleString = localRuleString.replace(replaceString, replaceWith);
+        });
+        console.log("eval all elements", this.ruleString);
+        var evalResult = eval(localRuleString);
+        var exceptionListMessage = "<br><br> Attributes with exceptions are ";
+        this.exceptionStack.forEach(function (elem, indx) {
+            exceptionListMessage += "<br>" + elem.name;
+            if (indx != (_this.exceptionStack.length - 1)) {
+                exceptionListMessage += " , ";
+            }
+        });
+        if (this.exceptionStack.length > 0) {
+            this.errorMessage += exceptionListMessage;
+        }
+        if (!evalResult) {
+            message = "No exceptions found in the test data!";
+        }
+        else {
+            message = this.errorMessage;
+        }
+        console.log(message);
+        var alert = this.alertCtrl.create({
+            title: 'Test Results',
+            subTitle: message,
+            buttons: ['OK']
+        });
+        alert.present();
+    };
+    FormComponent.prototype.getCleanRuleArray = function () {
+        var localRuleArray = [];
+        this.elementStack.map(function (elem) {
+            var rule = {
+                "name": elem.name,
+                "elementType": elem.elementType,
+                "value": elem.value
+            };
+            if (elem['type']) {
+                rule['type'] = elem['type'];
+            }
+            localRuleArray.push(rule);
+        });
+        return localRuleArray;
+    };
+    FormComponent.prototype.saveRule = function () {
+        console.log("Element Stack ::", this.elementStack, "Exception Stack ::", this.exceptionStack);
+        var finalRule = {
+            'rule_name': this.ruleName ? this.ruleName : '',
+            'rule_category': this.ruleCatagory ? this.ruleCatagory : '',
+            'rule_desc': this.ruleDescription ? this.ruleDescription : '',
+            'rule_logic': this.ruleString,
+            'rule_exception': this.errorMessage ? this.errorMessage : '',
+            'effective_date': this.effectiveDate,
+            'expiry_date': this.expiryDate,
+            'last_modified': this.effectiveDate,
+            'last_published': this.effectiveDate,
+            'rule_author': 'Steve Octaviano',
+            'rule_logic_array': this.getCleanRuleArray(),
+        };
+        console.log(JSON.stringify(finalRule, null, '\t'));
+        if (this.pageTitle == "Edit Rule") {
+            this.ruleListService.updateRule(finalRule);
+        }
+        else {
+            this.ruleListService.saveRule(finalRule);
+        }
+    };
+    FormComponent.prototype.deleteRule = function () {
+        if (window.confirm("Are you sure you want to delete this rule ?")) {
+            console.log('deleting rule', this.ruleName);
+            this.ruleListService.deleteRule(this.ruleName);
+            this.navCtrl.pop();
+        }
+    };
+    FormComponent.prototype.changeEditorMode = function () {
+        this.mode = this.mode === 'text' ? 'dropdown' : 'text';
+    };
+    FormComponent.prototype.getRuleJSONString = function () {
+        return JSON.stringify(this.getCleanRuleArray(), null, "  ");
+    };
+    FormComponent.prototype.stringify = function (value) {
+        return JSON.stringify(value);
+    };
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChildren"])(__WEBPACK_IMPORTED_MODULE_2__components_element_element_component__["a" /* ElementComponent */]),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["QueryList"])
+    ], FormComponent.prototype, "elements", void 0);
+    FormComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'rule-form',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/form/form.component.html"*/'<div class="page-title">\n	<div>\n		<span class="title-a" [navPush]="ruleListPage">Loan Validation</span>\n		<span>&nbsp;/&nbsp;</span>\n		<span class="title-b">{{pageTitle}}</span>\n	</div>\n</div>\n<div class="rule-form">\n	<div class="tabs">\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'rule\')}" (click)="tab=\'rule\'">Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'testRule\')}" (click)="tab=\'testRule\'">Test Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'droolsFormat\')}" (click)="tab=\'droolsFormat\'">Drools Format</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'jsonFormat\')}" (click)="tab=\'jsonFormat\'">JSON Format</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'rule\')}" class="tab-content">\n		<div class="rule-section">\n			<div class="row">\n				<div class="short-sec">\n					<div class="rule-label">Rule Name</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleName">\n				</div>\n				<div class="middle-sec">\n					<div class="rule-label">Rule Category</div>\n				    <ion-select class="type-dropdown" [(ngModel)]="ruleCatagory">\n				      <ion-option *ngFor="let opt of ruleCatagories" [value]="stringify(opt)">{{opt.name}}</ion-option>\n				    </ion-select>\n				</div>\n				<div class="rule-start short-sec">\n					<div class="sec">\n						<div class="rule-label">Effective Date</div>\n						<ng-datepicker [(ngModel)]="effectiveDate" position="bottom-right" [options]="options"></ng-datepicker>\n					</div>\n					<div class="sec">\n						<div class="rule-label">Expiration Date</div>\n						<ng-datepicker [(ngModel)]="expiryDate" position="bottom-left" [options]="options"></ng-datepicker>\n					</div>\n				</div>\n			</div>\n			<div class="row">\n				<div class="large-sec">\n					<div class="rule-label">Description</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleDescription">\n				</div>\n			</div>\n			<div class="rule-logic-heading">\n				<span>\n					<div class="rule-label">Rule Logic</div>\n					<div class="rule-sub-label">{{helpText}}</div>\n				</span>\n				<button class="editor-type-button" (click)="changeEditorMode()">\n					{{ mode === \'text\' ? \'dropdown\' : \'text\' }} Mode\n				</button>\n			</div>\n			<rule-editor [helpText]="helpText" [mode]="mode" [ruleLogic]="ruleLogicArray" [testRule]="true"></rule-editor>\n			<div class="rule-last-row">\n				<div class="rule-button clear disabled">Validate</div>\n				<div class="rule-end">\n					<div class="rule-button delete" [ngClass]="{\'disabled\':pageTitle == \'Create New Rule\'}" (click)="deleteRule()">Delete</div>\n					<div class="rule-button save" (click)="saveRule()">Save</div>\n				</div>\n			</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'testRule\')}"  class="tab-content">\n		<div class="rule-creator">\n			<div class="rule-label">Rule Logic</div>\n			<rule-editor [helpText]="helpText" mode=\'text\' [ruleLogic]="elementStack" [testRule]="false"></rule-editor>\n		</div>\n		<div class="rule-test">\n			<div class="rule-label">Test Rule</div>\n			<element *ngFor="let elem of formElems" [elementObject]="elem"></element>\n			<div class="rule-button test" (click)="evaluateResults()" *ngIf="formElems.length > 0" [ngClass]="{ \'disabled\': errorMessage == \'\'}">Test</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'droolsFormat\')}" class="tab-content">\n		<div class="drools-box">\n			<pre>\n1: package org.drools;\n2:\n3: rule "DU Refi Rule [EX-04001]"\n4:   when\n5:     BSLP_LoanExceptionServiceInputData(occupancyType == ""P"", numberOfUnits == 2, loanToValueRatio > 150)\n6:   then\n7:     BusinessRuleFactList facts = new BusinessRuleFactList();\n8:     facts.addFact(""Occupancy Type"", $l.getOccupancyType());\n9:     facts.addNumericFact(""Number of Units"", $l.getNumberOfUnits());\n10:    facts.addPercentageFact(""LTV Ratio"", $l.getLoanToValueRatio(), 2);\n11:    BusinessRulesList.add(""EX-04002"", false, facts.toArray());\n12: end\n			</pre>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'jsonFormat\')}" class="tab-content">\n			<div class="drools-box">\n				<pre>{{getRuleJSONString()}}</pre>\n			</div>\n		</div>\n</div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/form/form.component.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__providers_rules_service__["a" /* RulesService */], __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["k" /* NavParams */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */]])
+    ], FormComponent);
+    return FormComponent;
+}());
+
+//# sourceMappingURL=form.component.js.map
+
+/***/ }),
+
+/***/ 114:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RulesService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+var RulesService = (function () {
+    function RulesService() {
+        this.rules = new __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__["BehaviorSubject"]([
+            {
+                name: 'IF',
+                elementType: 'starter',
+                newline: true,
+                dropDown: false,
+                value: 'if'
+            }
+        ]);
+        this.rule = this.rules.asObservable();
+    }
+    RulesService.prototype.changeRule = function (rule, index) {
+        this.rules.next(rule);
+    };
+    RulesService.prototype.addRule = function (rule) {
+        this.rules.next(rule);
+    };
+    RulesService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], RulesService);
+    return RulesService;
+}());
+
+//# sourceMappingURL=rules.service.js.map
+
+/***/ }),
+
+/***/ 115:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__ = __webpack_require__(392);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+var RuleListService = (function () {
+    function RuleListService() {
+        this.ruleList = [];
+        console.log(__WEBPACK_IMPORTED_MODULE_1__assets_rule_list__["a" /* default */]);
+        this.ruleList = __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__["a" /* default */];
+    }
+    RuleListService.prototype.getRule = function (name) {
+        return this.ruleList.filter(function (elem) {
+            if (elem['rule_name'] == name) {
+                return true;
+            }
+            return false;
+        })[0];
+    };
+    RuleListService.prototype.updateRule = function (rule) {
+        this.deleteRule(rule.rule_name);
+        this.saveRule(rule);
+    };
+    RuleListService.prototype.saveRule = function (rule) {
+        this.ruleList.push(rule);
+    };
+    RuleListService.prototype.deleteRule = function (name) {
+        this.ruleList = this.ruleList.filter(function (elem) {
+            if (elem['rule_name'] == name) {
+                return false;
+            }
+            return true;
+        });
+    };
+    RuleListService.prototype.cloneRule = function (rule) {
+        var newRule = JSON.parse(JSON.stringify(rule));
+        newRule.rule_name = newRule.rule_name + " - Copy";
+        newRule.last_published = "";
+        newRule.last_modified = new Date();
+        this.ruleList.push(newRule);
+    };
+    RuleListService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], RuleListService);
+    return RuleListService;
+}());
+
+//# sourceMappingURL=ruleList.service.js.map
+
+/***/ }),
+
+/***/ 116:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__ = __webpack_require__(115);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__home_home_component__ = __webpack_require__(117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__form_form_component__ = __webpack_require__(113);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+
+var RuleListComponent = (function () {
+    function RuleListComponent(ruleListService, navCtrl) {
+        this.ruleListService = ruleListService;
+        this.navCtrl = navCtrl;
+        this.options = {
+            displayFormat: 'MM/DD/YYYY',
+            barTitleFormat: 'MMMM YYYY',
+        };
+        this.localRuleList = [];
+        this.cachedRuleList = [];
+        this.showSearch = false;
+        this.selectedRules = [];
+        this.searchLastModDate = new Date();
+        this.searchLastPubDate = new Date();
+        this.homePage = __WEBPACK_IMPORTED_MODULE_3__home_home_component__["a" /* HomeComponent */];
+        this.formPage = __WEBPACK_IMPORTED_MODULE_4__form_form_component__["a" /* FormComponent */];
+    }
+    RuleListComponent.prototype.ngOnInit = function () {
+        this.localRuleList = this.cachedRuleList = this.ruleListService.ruleList;
+    };
+    RuleListComponent.prototype.formatDate = function (date) {
+        if (date) {
+            var localDate = new Date(date);
+            return (localDate.getMonth() + 1) + '/' + localDate.getDate() + '/' + localDate.getFullYear();
+        }
+        else {
+            return "-";
+        }
+    };
+    RuleListComponent.prototype.sortList = function (column, event) {
+        var target = event.target || event.srcElement || event.currentTarget;
+        var direction = target.className.split(" ")[1] == 'sort-down' ? -1 : 1;
+        target.classList.toggle("sort-down");
+        target.classList.toggle("sort-up");
+        this.localRuleList.sort(function (a, b) {
+            var compA = a[column];
+            var compB = b[column];
+            if (column == "rule_category") {
+                compA = a[column].name;
+                compB = b[column].name;
+            }
+            if (compA < compB) {
+                return -1 * direction;
+            }
+            else if (compA > compB) {
+                return 1 * direction;
+            }
+            else {
+                return 0;
+            }
+        });
+    };
+    RuleListComponent.prototype.searchList = function (column, event) {
+        var value = event.target.value;
+        this.localRuleList = this.cachedRuleList.filter(function (elem) {
+            var toCheck = elem[column];
+            if (column == "rule_category") {
+                toCheck = elem[column].name;
+            }
+            if (toCheck.toLowerCase().indexOf(value.toLowerCase()) > -1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+    };
+    RuleListComponent.prototype.toggleCheckBox = function (event, rule) {
+        var checked = event.target.checked;
+        if (checked) {
+            this.selectedRules.push(rule);
+        }
+        else {
+            this.selectedRules = this.selectedRules.filter(function (elem) {
+                if (elem.rule_name == rule.rule_name) {
+                    return false;
+                }
+                return true;
+            });
+        }
+        console.log(this.selectedRules);
+    };
+    RuleListComponent.prototype.deleteRules = function () {
+        var _this = this;
+        if (window.confirm("Are you sure you want to delete the selected rule(s) ? ")) {
+            this.selectedRules.forEach(function (rule) {
+                _this.ruleListService.deleteRule(rule.rule_name);
+                _this.selectedRules = _this.selectedRules.filter(function (elem) {
+                    if (elem.rule_name == rule.rule_name) {
+                        return false;
+                    }
+                    return true;
+                });
+            });
+            this.ngOnInit();
+        }
+    };
+    RuleListComponent.prototype.cloneRules = function () {
+        var _this = this;
+        this.selectedRules.forEach(function (rule) {
+            _this.ruleListService.cloneRule(rule);
+        });
+        this.ngOnInit();
+        this.localRuleList.sort(function (a, b) {
+            var compA = a["rule_name"];
+            var compB = b["rule_name"];
+            if (compA < compB) {
+                return -1;
+            }
+            else if (compA > compB) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        });
+        var ruleListRowElements = this.ruleListRows.nativeElement.querySelectorAll('input');
+        ruleListRowElements.forEach(function (elem) {
+            if (elem.checked) {
+                elem.click();
+            }
+        });
+    };
+    RuleListComponent.prototype.tickAll = function (event) {
+        var check = event.target.checked;
+        var ruleListRowElements = this.ruleListRows.nativeElement.querySelectorAll('input');
+        ruleListRowElements.forEach(function (elem) {
+            if (elem.checked != check) {
+                elem.click();
+            }
+        });
+    };
+    RuleListComponent.prototype.searchDate = function (column, date) {
+        console.log('cal');
+        this.localRuleList = this.cachedRuleList.filter(function (elem) {
+            var toCheckFullDate = new Date(elem[column]);
+            var toCheckDate = toCheckFullDate.getDate();
+            var toCheckMonth = toCheckFullDate.getMonth();
+            var toCheckYear = toCheckFullDate.getFullYear();
+            if (toCheckDate == date.getDate() && toCheckMonth == date.getMonth() && toCheckYear == date.getFullYear()) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+    };
+    RuleListComponent.prototype.openRule = function (rule) {
+        this.navCtrl.push("form", { 'rule-name': rule.rule_name });
+    };
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])("ruleListRows"),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], RuleListComponent.prototype, "ruleListRows", void 0);
+    RuleListComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'rule-list',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/'<div class="header-2">\n  <div class="header-content">\n    <div class="title-2">\n      <span class="title-a" [navPush]="homePage">Rules Project</span>\n      <span>&nbsp;/&nbsp;</span>\n      <span class="title-b">Loan Exception Rules</span>\n    </div>\n    <span class="buttons">\n      <div class="button-set">\n        <span (click)="cloneRules()" class="duplicate-button"> </span>\n        <span (click)="deleteRules()" class="delete-button"> </span>\n      </div>\n      <!-- <button class="edit-json-button">\n        Edit JSON\n      </button> -->\n      <div class="button-create">\n        <span class="plus"> + </span>\n        <span class="create-rules-project" [navPush]="formPage"> Create New Rule </span>\n      </div>\n    </span>\n  </div>\n</div>\n<div class="body">\n  <div class="table">\n    <div class="table-header-outer">\n      <span class="table-header">\n\n        <div class="col-1" >\n          <input type="checkbox" (click)="tickAll($event)">\n        </div>\n\n        <div class="col-2 sort-down" (click)="sortList(\'rule_name\', $event)">\n          Rule Name\n        </div>\n        <div class="col-3 sort-down" (click)="sortList(\'rule_category\', $event)">\n          Category\n        </div>\n        <div class="col-4 sort-down" (click)="sortList(\'rule_desc\', $event)">\n          Description\n        </div>\n        <div class="col-5 sort-down" (click)="sortList(\'last_modified\', $event)">\n          Last Modified\n        </div>\n        <div class="col-6 sort-down" (click)="sortList(\'last_published\', $event)">\n          Last Published\n        </div>\n        <div class="col-7 sort-down" (click)="sortList(\'rule_author\', $event)">\n          Last Modifier\n        </div>\n        <div class="col-8">\n          <span class="search-button" (click)="showSearch = showSearch ? false : true; localRuleList = cachedRuleList;" [ngClass]="{\'outline\' : showSearch}"></span>\n    </div>\n    </span>\n    <span *ngIf="showSearch" class="table-header">\n        <div class="col-1" >\n        </div>\n        <div class="col-2">\n          <input (keyup)="searchList(\'rule_name\',$event)" value="" type="text">\n        </div>\n        <div class="col-3">\n          <input (keyup)="searchList(\'rule_category\',$event)" value="" type="text">\n        </div>\n        <div class="col-4">\n          <input (keyup)="searchList(\'rule_desc\',$event)" value="" type="text">\n        </div>\n        <div class="col-5">\n          <ng-datepicker [(ngModel)]="searchLastModDate" (ngModelChange)="searchDate(\'last_modified\',searchLastModDate)" [options]="options" position="bottom-right"></ng-datepicker>\n        </div>\n        <div class="col-6">\n          <ng-datepicker [(ngModel)]="searchLastPubDate" [options]="options" (ngModelChange)="searchDate(\'last_published\',searchLastPubDate)" position="bottom-left"></ng-datepicker>\n        </div>\n        <div class="col-7">\n          <input (keyup)="searchList(\'rule_author\',$event)" value="" type="text">\n        </div>\n        <div class="col-8">\n        </div>\n      </span>\n  </div>\n  <div class="table-rows" #ruleListRows>\n    <div *ngFor="let rule of localRuleList" class="table-row" >\n      <div class="col-1">\n        <input type="checkbox" (change)="toggleCheckBox($event, rule)">\n      </div>\n      <div class="col-2" (click)="openRule(rule)">\n        DU Refi Rule [{{rule.rule_name}}]\n      </div>\n      <div class="col-3" (click)="openRule(rule)">\n        {{rule.rule_category.name}}\n      </div>\n      <div class="col-4" title="{{rule.rule_desc}}" (click)="openRule(rule)">\n        {{rule.rule_desc}}\n      </div>\n      <div class="col-5" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_modified)}}\n      </div>\n      <div class="col-6" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_published)}}\n      </div>\n      <div class="col-7" [navPush]="formPage" (click)="openRule(rule)">\n        {{rule.rule_author}}\n      </div>\n      <div class="col-8" [navPush]="formPage" (click)="openRule(rule)">\n      </div>\n    </div>\n  </div>\n</div>\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */]])
+    ], RuleListComponent);
+    return RuleListComponent;
+}());
+
+//# sourceMappingURL=rule-list.component.js.map
+
+/***/ }),
+
+/***/ 117:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HomeComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+var HomeComponent = (function () {
+    function HomeComponent(navCtrl) {
+        this.navCtrl = navCtrl;
+        this.localProjectList = [
+            {
+                "id": "1",
+                "name": "Loan Exception Rules",
+                "last_modified": "2017-11-11T17:36:43.704Z",
+                "last_published": "2017-11-05T17:36:43.704Z",
+                "project_desc": "Contains loan exception rules",
+                "project_author": "Steve Octaviano"
+            },
+            {
+                "id": "2",
+                "name": "Pricing Rules",
+                "last_modified": "2018-01-03T17:36:43.704Z",
+                "last_published": "2018-01-05T17:36:43.704Z",
+                "project_desc": "Contains pricing rules",
+                "project_author": "Supree Periasamy"
+            }
+        ];
+        this.addNew = false;
+        this.addNewTitle = "Create Rules Project";
+    }
+    HomeComponent.prototype.ngOnInit = function () {
+    };
+    HomeComponent.prototype.deleteRow = function (id) {
+        if (window.confirm("Are you sure you want to delete the selected project ? (All associated rules will also be deleted) ")) {
+            this.localProjectList = this.localProjectList.filter(function (elem) {
+                if (elem.id == id) {
+                    return false;
+                }
+                return true;
+            });
+        }
+    };
+    HomeComponent.prototype.formatDate = function (date) {
+        if (date) {
+            var localDate = new Date(date);
+            return (localDate.getMonth() + 1) + '/' + localDate.getDate() + '/' + localDate.getFullYear();
+        }
+        else {
+            return "-";
+        }
+    };
+    HomeComponent.prototype.toggleAddNewProject = function () {
+        this.projName.nativeElement.value = "";
+        this.projDesc.nativeElement.value = "";
+        this.addNewTitle = "Create Rules Project";
+        this.addNew = this.addNew ? false : true;
+    };
+    HomeComponent.prototype.saveNewProject = function () {
+        if (!this.projName.nativeElement.value || !this.projDesc.nativeElement.value) {
+            alert('Project name and/or Project Description is empty !');
+            return;
+        }
+        var project = {
+            "id": Math.ceil(Math.random() * 100),
+            "name": this.projName.nativeElement.value,
+            "project_desc": this.projDesc.nativeElement.value,
+            "last_modified": new Date(),
+            "last_published": new Date(),
+            "project_author": "Steve Octaviano"
+        };
+        this.localProjectList.push(project);
+        this.toggleAddNewProject();
+    };
+    HomeComponent.prototype.editProj = function (project) {
+        this.toggleAddNewProject();
+        this.addNewTitle = "Edit Rules Project";
+        this.projName.nativeElement.value = project.name;
+        this.projDesc.nativeElement.value = project.project_desc;
+    };
+    HomeComponent.prototype.openProject = function (project) {
+        this.navCtrl.push("rule-list", {
+            id: project.id
+        });
+    };
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])('projName'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], HomeComponent.prototype, "projName", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])('projDesc'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], HomeComponent.prototype, "projDesc", void 0);
+    HomeComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'home',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/home/home.component.html"*/'<div class="header-2">\n  <div class="header-content">\n    <div class="title-2">\n      Rules Project\n    </div>\n    <div class="button-create" (click)="toggleAddNewProject()" >\n        <span class="plus"> + </span>\n        <span class="create-rules-project"> Create Rules Project </span>\n    </div>\n  </div>\n</div>\n<div class="body">\n  <div class="table">\n\n    <div class="table-header">\n      <div class="col-1">\n        Project Name\n      </div>\n      <div class="col-2">\n        Last Modified\n      </div>\n      <div class="col-3">\n        Last Published\n      </div>\n      <div class="col-4">\n        Last Modifier\n      </div>\n      <div class="col-5">\n      </div>\n    </div>\n\n\n    <div class="table-row" *ngFor="let project of localProjectList">\n      <div class="col-1" (click)="openProject(project)">\n        {{project.name}}\n      </div>\n      <div class="col-2" (click)="openProject(project)">\n        {{formatDate(project.last_modified)}}\n      </div>\n      <div class="col-3" (click)="openProject(project)">\n        {{formatDate(project.last_published)}}\n      </div>\n      <div class="col-4" (click)="openProject(project)">\n        {{project.project_author}}\n      </div>\n      <div class="col-5">\n        <span class="edit-button" (click)="editProj(project)"></span>\n        <span class="delete-button" (click)="deleteRow(project.id)">\n        </span>\n      </div>\n    </div>\n\n\n  </div>\n</div>\n<div class="add-project" [ngClass]="{\'show\' : addNew }">\n  <div class="new-header">{{addNewTitle}}</div>\n  <div class="row-line first-line">\n    <div class="label">Project Name</div>\n    <input type="text" #projName value="" name="projectName">\n  </div>\n  <div class="row-line">\n    <div class="label">Project Description</div>\n    <input type="text" #projDesc value="" name="projectDesc">\n  </div>\n  <div class="last-row">\n    <div class="button cancel" (click)="toggleAddNewProject()">Cancel</div>\n    <div class="button save" (click)="saveNewProject()">Save</div>\n  </div>\n</div>\n<div class="overlay" [ngClass]="{\'show\' : addNew }"></div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/home/home.component.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */]])
+    ], HomeComponent);
+    return HomeComponent;
+}());
+
+//# sourceMappingURL=home.component.js.map
+
+/***/ }),
+
+/***/ 120:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoginPage; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_auth_service__ = __webpack_require__(121);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+var LoginPage = (function () {
+    function LoginPage(nav, auth, alertCtrl, platform, menuCtrl, keyboard) {
+        this.nav = nav;
+        this.auth = auth;
+        this.alertCtrl = alertCtrl;
+        this.platform = platform;
+        this.menuCtrl = menuCtrl;
+        this.keyboard = keyboard;
+        this.credentials = { username: "", password: "" };
+    }
+    LoginPage.prototype.login = function () {
+        var _this = this;
+        this.auth.login(this.credentials).subscribe(function (allowed) {
+            if (allowed) {
+                _this.nav.setRoot("home");
+            }
+        });
+    };
+    LoginPage.prototype.isLargeScreen = function () {
+        if ((this.platform.is("core") || this.platform.is("ipad") || this.platform.is("tablet"))
+            && (this.platform.isLandscape())) {
+            return true;
+        }
+        return false;
+    };
+    LoginPage.prototype.getAppVersion = function () {
+        if (BUILD_NUMBER === "<BUILD_NUMBER>") {
+            return BUILD_VERSION;
+        }
+        else {
+            return BUILD_VERSION + "-" + BUILD_NUMBER;
+        }
+    };
+    LoginPage = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: "page-login",template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/login/login.component.html"*/'<ion-scroll direction="x" scrollbar-y="true">\n  <div class="login-item">\n    <form (ngSubmit)="login()" #registerForm="ngForm">\n      <ion-card>\n        <ion-card-header>\n          <!-- <div class="logo-box">\n          </div> -->\n        </ion-card-header>\n        <ion-card-content>\n          <input required id="username" type="text" autocomplete="off" autocapitalize="off" placeholder="User ID" name="username" [(ngModel)]="credentials.username"\n            class="row" />\n          <input required id="password" type="password" placeholder="Password" name="password"\n          [(ngModel)]="credentials.password" class="row"/>\n          <button id="submit" ion-button block type="submit" [disabled]="!registerForm.form.valid" class="row space">Login</button>\n        </ion-card-content>\n      </ion-card>\n    </form>\n  </div>\n</ion-scroll>\n<ion-footer *ngIf="!keyboard.isOpen()">\n  <!-- <label class="row build-version">{{ \'Build Version : \' + getAppVersion() }}</label> -->\n</ion-footer>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/login/login.component.html"*/,
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */],
+            __WEBPACK_IMPORTED_MODULE_2__providers_auth_service__["a" /* AuthService */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* Platform */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["i" /* MenuController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* Keyboard */]])
+    ], LoginPage);
+    return LoginPage;
+}());
+
+//# sourceMappingURL=login.component.js.map
+
+/***/ }),
+
+/***/ 121:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AuthService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__ = __webpack_require__(205);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(119);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_model_session__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__providers_feedback_feedback_messages__ = __webpack_require__(139);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__angular_http__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_model_session__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__config_service_url_config__ = __webpack_require__(673);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__ = __webpack_require__(322);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__providers_feedback_feedback_messages__ = __webpack_require__(674);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -38,7 +811,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var AuthService = (function () {
     function AuthService(http, session, exception, feedback) {
         this.http = http;
@@ -48,6 +820,11 @@ var AuthService = (function () {
         this.currentUserInfo = {};
         this.loginUrl = __WEBPACK_IMPORTED_MODULE_6__config_service_url_config__["a" /* Config */].LOGIN_URL;
         this.authentication = false;
+        if (typeof (Storage) !== "undefined" && window.localStorage.getItem("currentUser")) {
+            this.authentication = true;
+            this.currentUser = JSON.parse(window.localStorage.getItem("currentUser"));
+            this.currentUserInfo = JSON.parse(window.localStorage.getItem("currentUserInfo"));
+        }
     }
     AuthService.prototype.login = function (credentials) {
         if (credentials.username === null || credentials.password === null) {
@@ -80,34 +857,25 @@ var AuthService = (function () {
     AuthService.prototype.getUserFullName = function () {
         return this.currentUserInfo.fullName;
     };
-    AuthService.prototype.destroy = function () {
+    AuthService.prototype.logout = function () {
         this.session.expire();
         this.session.set("currentUser", null);
         this.currentUser = null;
         this.authentication = false;
-    };
-    AuthService.prototype.logout = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_6__config_service_url_config__["a" /* Config */].LOGOUT_URL);
+        this.clearLocalStorage();
     };
     AuthService.prototype.process = function (credentials) {
         var _this = this;
         var loader = this.feedback.getLoader();
         loader.present();
-        var queryString = this.http.convertJsonToQueryString({
-            "userName-inputEl": credentials.username, "password-inputEl": credentials.password,
-        }).toString();
-        var headers = new __WEBPACK_IMPORTED_MODULE_10__angular_http__["Headers"]({ "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" });
-        return this.http.post(this.loginUrl, queryString, headers)
+        return this.http.post(this.loginUrl, credentials)
             .map(function (response) {
-            if (response && response.success === true) {
+            if (response) {
                 _this.session.set("currentUser", response);
                 _this.currentUser = response;
                 _this.authentication = true;
                 _this.getAuthUser();
-                // this.setLocalStorageUser();
-            }
-            else {
-                throw Error("Authentication Failed");
+                _this.setLocalStorageUser();
             }
             return _this.authentication;
         })
@@ -139,115 +907,242 @@ var AuthService = (function () {
         var _this = this;
         return this.http.get(__WEBPACK_IMPORTED_MODULE_6__config_service_url_config__["a" /* Config */].USER_URL).subscribe(function (response) {
             _this.currentUserInfo = response;
-            // this.setLocalStorageUserInfo();
+            _this.setLocalStorageUserInfo();
         });
     };
+    AuthService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__["a" /* HttpService */],
+            __WEBPACK_IMPORTED_MODULE_4__common_model_session__["a" /* Session */],
+            __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__["a" /* ExceptionService */],
+            __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__["a" /* FeedbackService */]])
+    ], AuthService);
     return AuthService;
 }());
-AuthService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__["a" /* HttpService */],
-        __WEBPACK_IMPORTED_MODULE_4__common_model_session__["a" /* Session */],
-        __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__["a" /* ExceptionService */],
-        __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__["a" /* FeedbackService */]])
-], AuthService);
 
 //# sourceMappingURL=auth.service.js.map
 
 /***/ }),
 
-/***/ 139:
+/***/ 122:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FeedbackMessage; });
-/**
- * Class to define all the feedback message
- *
- * usage: FeedbackMessage.LOGIN_ERROR type is FeedbackMessage
- */
-/**
- * Class to define all the feedback message
- *
- * usage: FeedbackMessage.LOGIN_ERROR type is FeedbackMessage
- */ var FeedbackMessage;
-(function (FeedbackMessage) {
-    FeedbackMessage[FeedbackMessage["GENERIC_ERROR_MESSAGE"] = "Error occured. Please contact the Support team."] = "GENERIC_ERROR_MESSAGE";
-    FeedbackMessage[FeedbackMessage["LOGIN_ERROR"] = "Incorrect username and/or password. Please try again."] = "LOGIN_ERROR";
-    FeedbackMessage[FeedbackMessage["INSERT_CREDENTIALS"] = "Please enter username and/or password."] = "INSERT_CREDENTIALS";
-    FeedbackMessage[FeedbackMessage["NO_CHANGES"] = "No changes are made."] = "NO_CHANGES";
-    FeedbackMessage[FeedbackMessage["TASK_UPDATE_SUCCESS"] = "Task updated successfully."] = "TASK_UPDATE_SUCCESS";
-    FeedbackMessage[FeedbackMessage["TASK_MANDATORY_CHECK"] = "Please ensure all mandatory fields are selected."] = "TASK_MANDATORY_CHECK";
-    FeedbackMessage[FeedbackMessage["TASK_ADD_SUCCESS"] = "Task added successfully."] = "TASK_ADD_SUCCESS";
-    FeedbackMessage[FeedbackMessage["QUICK_QUALIFIER_STATE_MISSING"] = "Please select state."] = "QUICK_QUALIFIER_STATE_MISSING";
-    FeedbackMessage[FeedbackMessage["QUICK_QUALIFIER_INCOME_MISSING"] = "Monthly income cannot be 0 or empty."] = "QUICK_QUALIFIER_INCOME_MISSING";
-    FeedbackMessage[FeedbackMessage["GENERIC_FAILURE"] = "Something went wrong."] = "GENERIC_FAILURE";
-    FeedbackMessage[FeedbackMessage["LOAN_UNLOCK_FAILURE"] = "Error occured while unlocking the loan. Please contact the Support team."] = "LOAN_UNLOCK_FAILURE";
-    // Schedule
-    FeedbackMessage[FeedbackMessage["SCHEDULE_MANDATORY_CHECK"] = "Please ensure all mandatory fields are entered."] = "SCHEDULE_MANDATORY_CHECK";
-    FeedbackMessage[FeedbackMessage["START_TIME_BEFORE_END_TIME_VALIDATION"] = "Start time should be before End time."] = "START_TIME_BEFORE_END_TIME_VALIDATION";
-    // Loan condition Documents
-    FeedbackMessage[FeedbackMessage["DELETE_CONDITION_DOCUMENT_SUCCESS"] = "Document successfully deleted."] = "DELETE_CONDITION_DOCUMENT_SUCCESS";
-    FeedbackMessage[FeedbackMessage["DELETE_CONDITION_DOCUMENT_FAIL"] = "Document deletion failed; please try again."] = "DELETE_CONDITION_DOCUMENT_FAIL";
-    FeedbackMessage[FeedbackMessage["DELETE_DOCUMENT_CONFIRM_DIALOG"] = "Do you want to delete the document?"] = "DELETE_DOCUMENT_CONFIRM_DIALOG";
-    FeedbackMessage[FeedbackMessage["ADD_DOCUMENT_DESCRIPTION_SAVE"] = "Add a description for the attached document."] = "ADD_DOCUMENT_DESCRIPTION_SAVE";
-    FeedbackMessage[FeedbackMessage["DOCUMENT_UPLOAD_SUCCESS"] = "Condition document uploaded."] = "DOCUMENT_UPLOAD_SUCCESS";
-    FeedbackMessage[FeedbackMessage["DOCUMENT_UPLOAD_FAILURE"] = "Upload failed; please try again."] = "DOCUMENT_UPLOAD_FAILURE";
-    // Affordability calculator
-    FeedbackMessage[FeedbackMessage["CHECK_FIELDS"] = "Please fill all the fields."] = "CHECK_FIELDS";
-    FeedbackMessage[FeedbackMessage["MONTHLY_INCOME_GREATER_THAN_ZERO"] = "Monthly Income should be greater than 0."] = "MONTHLY_INCOME_GREATER_THAN_ZERO";
-    FeedbackMessage[FeedbackMessage["RATIO_COMPARISION"] = "Back-end ratio should be greater than front-end ratio."] = "RATIO_COMPARISION";
-    FeedbackMessage[FeedbackMessage["LOAN_AMOUNT_GREATER_THAN_ZERO"] = "Loan Amount should be greater than 0."] = "LOAN_AMOUNT_GREATER_THAN_ZERO";
-    // Upcoming events
-    FeedbackMessage[FeedbackMessage["DELETE_EVENT_CONFIRM_DIALOG_CONTENT"] = "Are you sure you want to delete this event?"] = "DELETE_EVENT_CONFIRM_DIALOG_CONTENT";
-    FeedbackMessage[FeedbackMessage["DELETE_EVENT_CONFIRM_DIALOG_TITLE"] = "Confirm Delete"] = "DELETE_EVENT_CONFIRM_DIALOG_TITLE";
-    FeedbackMessage[FeedbackMessage["DELETE_EVENT_SUCCESS"] = "Successfully deleted."] = "DELETE_EVENT_SUCCESS";
-    FeedbackMessage[FeedbackMessage["EDIT_EVENT_SUCCESS"] = "Event edit successful."] = "EDIT_EVENT_SUCCESS";
-    FeedbackMessage[FeedbackMessage["PLEASE_FILL_ALL_FIELDS"] = "Please fill all fields."] = "PLEASE_FILL_ALL_FIELDS";
-    FeedbackMessage[FeedbackMessage["ADD_EVENT_SUCCESS"] = "Event added successfully."] = "ADD_EVENT_SUCCESS";
-    // My Contacts
-    FeedbackMessage[FeedbackMessage["CONTACT_CREATE_SUCCESS_MESSAGE"] = "Contact added successfully."] = "CONTACT_CREATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["CONTACT_UPDATE_SUCCESS_MESSAGE"] = "Contact updated successfully."] = "CONTACT_UPDATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["PHONE_NUMBER_VALIDATION_MESSAGE"] = "Phone Number should be 10 digits."] = "PHONE_NUMBER_VALIDATION_MESSAGE";
-    FeedbackMessage[FeedbackMessage["EMAIL_PREFERRED_MESSAGE"] = "Preferred email is set to"] = "EMAIL_PREFERRED_MESSAGE";
-    FeedbackMessage[FeedbackMessage["PHONE_NUMBER_PREFERRED_MESSAGE"] = "Preferred Phone is set to"] = "PHONE_NUMBER_PREFERRED_MESSAGE";
-    // My Referral Partners
-    FeedbackMessage[FeedbackMessage["REFERRAL_ACCOUNT_CREATE_SUCCESS_MESSAGE"] = "Referral Account added successfully."] = "REFERRAL_ACCOUNT_CREATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["REFERRAL_ACCOUNT_UPDATE_SUCCESS_MESSAGE"] = "Referral Account updated successfully."] = "REFERRAL_ACCOUNT_UPDATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["FORM_DATA_VALIDATION_MESSAGE"] = "Please complete all required fields."] = "FORM_DATA_VALIDATION_MESSAGE";
-    FeedbackMessage[FeedbackMessage["REFERRAL_PARTNER_CREATE_SUCCESS_MESSAGE"] = "Referral Partner added successfully."] = "REFERRAL_PARTNER_CREATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["REFERRAL_PARTNER_UPDATE_SUCCESS_MESSAGE"] = "Referral Partner updated successfully."] = "REFERRAL_PARTNER_UPDATE_SUCCESS_MESSAGE";
-    FeedbackMessage[FeedbackMessage["SEARCH_COMPANY_MESSAGE"] = "Search Company name..."] = "SEARCH_COMPANY_MESSAGE";
-    // My Quotes
-    FeedbackMessage[FeedbackMessage["MANDATORY_FIELDS_NOT_FILLED"] = "Please enter values for all mandatory fields to proceed."] = "MANDATORY_FIELDS_NOT_FILLED";
-    FeedbackMessage[FeedbackMessage["QUOTE_CREATED"] = "Quote has been successfully created."] = "QUOTE_CREATED";
-    FeedbackMessage[FeedbackMessage["QUOTE_UPDATED"] = "Quote has been successfully updated."] = "QUOTE_UPDATED";
-    FeedbackMessage[FeedbackMessage["QUOTE_STATUS_UPDATED"] = "Quote Status successfully updated."] = "QUOTE_STATUS_UPDATED";
-    FeedbackMessage[FeedbackMessage["QUOTE_EMAIL_SUCCESS"] = "The PDF has been generated and mailed successfully."] = "QUOTE_EMAIL_SUCCESS";
-    FeedbackMessage[FeedbackMessage["QUOTE_PDF_FAIL"] = "There was some problem in generating the PDF."] = "QUOTE_PDF_FAIL";
-    FeedbackMessage[FeedbackMessage["QUOTE_PDF_SUCCESS"] = "The PDF has been generated successfully."] = "QUOTE_PDF_SUCCESS";
-    FeedbackMessage[FeedbackMessage["QUOTE_NOT_ELIGIBLE"] = "There are no eligible products for the given inputs."] = "QUOTE_NOT_ELIGIBLE";
-    // Pricing
-    FeedbackMessage[FeedbackMessage["LOAN_PRICING_UPDATE_FAILURE"] = "Something went wrong."] = "LOAN_PRICING_UPDATE_FAILURE";
-    // Photo Editor
-    FeedbackMessage[FeedbackMessage["PHOTO_UPLOAD_FAILED"] = "Picture upload failed."] = "PHOTO_UPLOAD_FAILED";
-    FeedbackMessage[FeedbackMessage["PHOTO_UPLOAD_SUCCESS"] = "Picture uploaded successfully."] = "PHOTO_UPLOAD_SUCCESS";
-})(FeedbackMessage || (FeedbackMessage = {}));
-//# sourceMappingURL=feedback.messages.js.map
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Session; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var Session = (function () {
+    function Session() {
+        this.map = {};
+        if (typeof (Storage) !== "undefined" && window.localStorage.getItem("sessionMap")) {
+            this.map = JSON.parse(window.localStorage.getItem("sessionMap"));
+        }
+    }
+    Session.prototype.set = function (key, value) {
+        this.map[key] = value;
+        if (typeof (Storage) !== "undefined") {
+            window.localStorage.setItem("sessionMap", JSON.stringify(this.map));
+        }
+    };
+    Session.prototype.get = function (key) {
+        return this.map[key];
+    };
+    Session.prototype.expire = function () {
+        this.map = {};
+    };
+    Session = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], Session);
+    return Session;
+}());
+
+//# sourceMappingURL=session.js.map
 
 /***/ }),
 
-/***/ 140:
+/***/ 171:
+/***/ (function(module, exports) {
+
+function webpackEmptyAsyncContext(req) {
+	// Here Promise.resolve().then() is used instead of new Promise() to prevent
+	// uncatched exception popping up in devtools
+	return Promise.resolve().then(function() {
+		throw new Error("Cannot find module '" + req + "'.");
+	});
+}
+webpackEmptyAsyncContext.keys = function() { return []; };
+webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
+module.exports = webpackEmptyAsyncContext;
+webpackEmptyAsyncContext.id = 171;
+
+/***/ }),
+
+/***/ 216:
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"../pages/form/form.component.module": [
+		217
+	],
+	"../pages/home/home.component.module": [
+		226
+	],
+	"../pages/login/login.component.module": [
+		227
+	],
+	"../pages/rule-list/rule-list.component.module": [
+		323
+	]
+};
+function webpackAsyncContext(req) {
+	var ids = map[req];
+	if(!ids)
+		return Promise.reject(new Error("Cannot find module '" + req + "'."));
+	return Promise.all(ids.slice(1).map(__webpack_require__.e)).then(function() {
+		return __webpack_require__(ids[0]);
+	});
+};
+webpackAsyncContext.keys = function webpackAsyncContextKeys() {
+	return Object.keys(map);
+};
+webpackAsyncContext.id = 216;
+module.exports = webpackAsyncContext;
+
+/***/ }),
+
+/***/ 217:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TasksService; });
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FormComponentModule", function() { return FormComponentModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__form_component__ = __webpack_require__(113);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__ = __webpack_require__(393);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+
+
+
+
+
+var FormComponentModule = (function () {
+    function FormComponentModule() {
+    }
+    FormComponentModule = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            declarations: [
+                __WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */],
+                __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__["a" /* EditorComponent */],
+                __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__["a" /* ElementComponent */]
+            ],
+            imports: [
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */]),
+                __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__["NgDatepickerModule"],
+            ],
+            providers: [
+                __WEBPACK_IMPORTED_MODULE_2__form_component__["a" /* FormComponent */],
+            ],
+        })
+    ], FormComponentModule);
+    return FormComponentModule;
+}());
+
+//# sourceMappingURL=form.component.module.js.map
+
+/***/ }),
+
+/***/ 218:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ElementComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var ElementComponent = (function () {
+    function ElementComponent() {
+        this.showDropdown = false;
+        this.selectedValue = "";
+    }
+    ElementComponent.prototype.ngOnInit = function () {
+        this.selectedValue = this.elementObject.type === 'options' ? this.elementObject.options[0] : '';
+    };
+    ElementComponent.prototype.getValueObject = function () {
+        var key = "#" + this.elementObject['value'];
+        var value = this.selectedValue;
+        if (typeof (this.selectedValue) == "object") {
+            value = value['value'];
+        }
+        return { 'key': key, 'value': "'" + value + "'" };
+    };
+    ElementComponent.prototype.numberRestrict = function (evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        key = String.fromCharCode(key);
+        var regex = /[0-9]|\./;
+        if (!regex.test(key)) {
+            theEvent.returnValue = false;
+            if (theEvent.preventDefault)
+                theEvent.preventDefault();
+        }
+    };
+    ElementComponent.prototype.suppress = function () {
+        // console.trace('click element event');
+        // Dummy method to supress clicks and stop its propogation
+    };
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])(),
+        __metadata("design:type", Object)
+    ], ElementComponent.prototype, "elementObject", void 0);
+    ElementComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'element',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/element/element.component.html"*/'<div class="element-container">\n	<div class="element-label">{{elementObject.name}}</div>\n	<ion-select *ngIf="elementObject.type == \'options\'" class="element-value type-dropdown" [(ngModel)]="selectedValue">\n    	<ion-option *ngFor="let opt of elementObject.options" [value]="opt">{{opt.name}}</ion-option>\n  	</ion-select>\n	<input *ngIf="elementObject.type == \'number\'" (click)="suppress()" (keypress)=\'numberRestrict(event)\' [(ngModel)]="selectedValue" class="element-value type-number">\n	<input *ngIf="elementObject.type == \'string\'" (click)="suppress()" [(ngModel)]="selectedValue" class="element-value">\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/components/element/element.component.html"*/
+        }),
+        __metadata("design:paramtypes", [])
+    ], ElementComponent);
+    return ElementComponent;
+}());
+
+//# sourceMappingURL=element.component.js.map
+
+/***/ }),
+
+/***/ 219:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FieldsService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -259,262 +1154,1818 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
-
-
-
-var SSN_LENGTH = 9;
-var PHONE_LENGTH = 10;
-var SSN = "ssn";
-var PHONE = "phone";
-var NAME = "name";
-var TasksService = (function () {
-    function TasksService(http, filters) {
-        this.http = http;
-        this.filters = filters;
-    }
-    TasksService.prototype.getAllLoanTasks = function (params) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_LOAN_TASKS_URL, params);
-    };
-    TasksService.prototype.changeStatus = function (task, status) {
-        task.taskStatusId = status;
-        if (task.category === "CONTACT_STANDARD") {
-            return this.updateContactTask(task);
-        }
-        if (task.category === "HOMELOAN_STANDARD") {
-            return this.updateLoanTask(task);
-        }
-    };
-    TasksService.prototype.updateContactTask = function (contactTaskRequest) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_CONTACT_TASK, contactTaskRequest);
-    };
-    TasksService.prototype.updateLoanTask = function (loanTaskRequest) {
-        loanTaskRequest.noteText = loanTaskRequest.noteText ?
-            loanTaskRequest.noteText : "";
-        loanTaskRequest.taskAssignedToTeamId = loanTaskRequest.taskAssignedToTeamId ?
-            loanTaskRequest.taskAssignedToTeamId : "";
-        loanTaskRequest.taskAssignedToUserTypeId = loanTaskRequest.taskAssignedToUserTypeId ?
-            loanTaskRequest.taskAssignedToUserTypeId : "";
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_LOAN_TASK, loanTaskRequest);
-    };
-    TasksService.prototype.getContactTaskStatusHistory = function (contactTaskStatusHistoryRequest) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_CONTACT_TASK_STATUS_HISTORY, contactTaskStatusHistoryRequest);
-    };
-    TasksService.prototype.getLoanTaskStatusHistory = function (loanTaskStatusHistoryRequest) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_LOAN_TASK_STATUS_HISTORY, loanTaskStatusHistoryRequest);
-    };
-    TasksService.prototype.getTaskStatusList = function () {
-        var params = {
-            page: 1,
-            start: 0,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_TASK_STATUS, params);
-    };
-    TasksService.prototype.getUsersList = function () {
-        var params = {
-            page: 1,
-            start: 0,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_USERS, params);
-    };
-    TasksService.prototype.searchContacts = function (searchString) {
-        var searchobj = {
-            searchparams: {},
-            searchtotal: "",
-            currentpage: "",
-        };
-        var params = {
-            advSearchYn: true,
-            page: 1,
-            start: 0,
-            limit: 25,
-        };
-        if (Number(searchString)) {
-            if (searchString.length === SSN_LENGTH) {
-                params[SSN] = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].formatSSN(searchString);
+var FieldsService = (function () {
+    function FieldsService() {
+        this.fields = new __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__["BehaviorSubject"]([
+            {
+                "name": "Amortization Term Months",
+                "value": "amortizationTermMonths",
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Fixed Rate",
+                        "value": "F"
+                    },
+                    {
+                        "name": "Adjustable Rate",
+                        "value": "A"
+                    }
+                ]
+            },
+            {
+                "name": "Amortization Type",
+                "value": "amortizationType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Annual MIP Pct",
+                "value": "annualMIPPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Anticipated Settlement Date",
+                "value": "anticipatedSettlementDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Applicant Data",
+                "value": "applicantData",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Application Date",
+                "value": "applicationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Date",
+                "value": "appraisalDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Document Id",
+                "value": "appraisalDocumentId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Fieldwork Type",
+                "value": "appraisalFieldworkType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Valuation Method Type",
+                "value": "appraisalValuationMethodType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Verification Effective Date",
+                "value": "appraisalVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Appraisal Verification Expiration Date",
+                "value": "appraisalVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "ARM Lifetime Cap Pct",
+                "value": "armLifetimeCapPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "ARM Margin",
+                "value": "armMargin",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "ARM Plan Id",
+                "value": "armPlanId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Asset Verification Effective Date",
+                "value": "assetVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Asset Verification Expiration Date",
+                "value": "assetVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "AUS Case File Id",
+                "value": "ausCaseFileId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "AUS Result Code",
+                "value": "ausResultCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "AUS Type",
+                "value": "ausType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Balloon Term Months",
+                "value": "balloonTermMonths",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Bankruptcy Age In Years",
+                "value": "bankruptcyAgeInYears",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Bankruptcy Date",
+                "value": "bankruptcyDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Base Combined Loan To Value Ratio",
+                "value": "baseCombinedLoanToValueRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Base High Credit Loan To Value Ratio",
+                "value": "baseHighCreditLoanToValueRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Base Loan To Value Ratio",
+                "value": "baseLoanToValueRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Birth Date",
+                "value": "birthDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Bond Authority Type",
+                "value": "bondAuthorityType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Bond Program Type",
+                "value": "bondProgramType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Borrower Role",
+                "value": "borrowerRole",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Broker Compensation Pct",
+                "value": "brokerCompensationPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Broker Id",
+                "value": "brokerId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Broker NMLS Id",
+                "value": "brokerNmlsId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Broker Pricing Tier",
+                "value": "brokerPricingTier",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Building Status Type",
+                "value": "buildingStatusType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Building Type",
+                "value": "buildingType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Cash Out Amount",
+                "value": "cashOutAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Channel Type",
+                "value": "channelType",
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Retail",
+                        "value": "R"
+                    },
+                    {
+                        "name": "Wholesale",
+                        "value": "W"
+                    }
+                ]
+            },
+            {
+                "name": "Citizenship Type",
+                "value": "citizenshipType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Combined Loan To Value Ratio",
+                "value": "combinedLoanToValueRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Conforming Loan Limit Amount",
+                "value": "conformingLoanLimitAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Correspondent Id",
+                "value": "correspondentId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Correspondent NMLS Id",
+                "value": "correspondentNmlsId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Correspondent Pricing Tier",
+                "value": "correspondentPricingTier",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Counseling Agency Id",
+                "value": "counselingAgencyId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Counseling Agency Name",
+                "value": "counselingAgencyName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "County FIPS Code",
+                "value": "countyFIPSCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Credit Report Type",
+                "value": "creditReportType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Credit Score",
+                "value": "creditScore",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Credit Verification Effective Date",
+                "value": "creditVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Credit Verification Expiration Date",
+                "value": "creditVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Current Date",
+                "value": "currentDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Debt To Income Ratio",
+                "value": "debtToIncomeRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Deed In Lieu Age In Years",
+                "value": "deedInLieuAgeInYears",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Deed In Lieu Date",
+                "value": "deedInLieuDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Documentation Type",
+                "value": "documentationType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Downpayment Pct",
+                "value": "downpaymentPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "DU Result Code",
+                "value": "duResultCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Employer Name",
+                "value": "employerName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Employment Data",
+                "value": "employmentData",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Employment Type",
+                "value": "employmentType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Employment Verification Effective Date",
+                "value": "employmentVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Employment Verification Expiration Date",
+                "value": "employmentVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Escrow For Completion HUD Consultant Name",
+                "value": "escrowForCompletionHUDConsultantName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Estate Holding Type",
+                "value": "estateHoldingType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Ethnicity",
+                "value": "ethnicity",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Existing Subordinate Financing Amount",
+                "value": "existingSubordinateFinancingAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Existing Subordinate HELOC Amount",
+                "value": "existingSubordinateHELOCAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Existing Subordinate HELOC Max Credit Amount",
+                "value": "existingSubordinateHELOCMaxCreditAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "FHA Case Number Assignment Date",
+                "value": "fhaCaseNumberAssignmentDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "FHA Prior Loan Endorsement Date",
+                "value": "fhaPriorLoanEndorsementDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "FHA Section Of Act",
+                "value": "FHASectionOfAct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Financed Properties Count",
+                "value": "financedPropertiesCount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "First ARM Adjustment Decrease Cap Pct",
+                "value": "firstARMAdjustmentDecreaseCapPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "First ARM Adjustment Increase Cap Pct",
+                "value": "firstARMAdjustmentIncreaseCapPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "First ARM Adjustment Payment Number",
+                "value": "firstARMAdjustmentPaymentNumber",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "First Name",
+                "value": "firstName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Flood Certificate Verification Effective Date",
+                "value": "floodCertificateVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Flood Certificate Verification Expiration Date",
+                "value": "floodCertificateVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Foreclosure Age In Years",
+                "value": "foreclosureAgeInYears",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Foreclosure Date",
+                "value": "foreclosureDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Gender",
+                "value": "gender",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Guidelines Id",
+                "value": "guidelinesId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Guidelines Version",
+                "value": "guidelinesVersion",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Guidelines Version Date",
+                "value": "guidelinesVersionDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "High Credit Loan To Value Ratio",
+                "value": "highCreditLoanToValueRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Housing Expense Ratio",
+                "value": "housingExpenseRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Income",
+                "value": "income",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Income Verification Effective Date",
+                "value": "incomeVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Income Verification Expiration Date",
+                "value": "incomeVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Initial Closing Disclosure Delivery Date",
+                "value": "initialClosingDisclosureDeliveryDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Initial Closing Disclosure Receipt Date",
+                "value": "initialClosingDisclosureReceiptDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Initial Loan Estimate Delivery Date",
+                "value": "initialLoanEstimateDeliveryDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Initial Loan Estimate Receipt Date",
+                "value": "initialLoanEstimateReceiptDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Interest Only Term Months",
+                "value": "interestOnlyTermMonths",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Interest Rate",
+                "value": "interestRate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Interviewer Name",
+                "value": "interviewerName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Investor",
+                "value": "investor",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Investor Id",
+                "value": "investorId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Adverse Modification Applicable",
+                "value": "adverseModificationApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Alimony Child Support Obligated",
+                "value": "alimonyChildSupportObligated",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Asset Depletion Income Used",
+                "value": "assetDepletionIncomeUsed",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Assumable Product",
+                "value": "assumableProduct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Bankruptcy Applicable",
+                "value": "bankruptcyApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Cash Out Refinance",
+                "value": "cashOutRefinance",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Citizen",
+                "value": "citizen",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Closed End Loan",
+                "value": "closedEndLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Condominium Property",
+                "value": "condominiumProperty",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Coop Property",
+                "value": "coopProperty",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Correspondent Channel",
+                "value": "correspondentChannel",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Declining Balance Renewals",
+                "value": "decliningBalanceRenewals",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Deed In Lieu Applicable",
+                "value": "deedInLieuApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Delegated Underwriting",
+                "value": "delegatedUnderwriting",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is DU Refi Plus Loan",
+                "value": "duRefiPlusLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Escrows Waived",
+                "value": "escrowsWaived",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Fee Buy Out",
+                "value": "feeBuyOut",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is First Time Home Buyer",
+                "value": "firstTimeHomeBuyer",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Foreclosure Applicable",
+                "value": "foreclosureApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Full Eligibility",
+                "value": "fullEligibility",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Hoepa Applicable",
+                "value": "hoepaApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Home Equity Loan",
+                "value": "homeEquityLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Home Ready Loan",
+                "value": "homeReadyLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Home Style Renovation Loan",
+                "value": "homeStyleRenovationLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is In House Loan",
+                "value": "inHouseLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is In House Servicing",
+                "value": "inHouseServicing",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Initialized",
+                "value": "initialized",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Insurance Escrows Waived",
+                "value": "insuranceEscrowsWaived",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Lender Paid Mortgage Insurance",
+                "value": "lenderPaidMortgageInsurance",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Limited Cash Out Refinance",
+                "value": "limitedCashOutRefinance",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Manual Underwriting",
+                "value": "manualUnderwriting",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Manufactured Home Property",
+                "value": "manufacturedHomeProperty",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Modification Applicable",
+                "value": "modificationApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Mortgage Insurance Premium Financed",
+                "value": "mortgageInsurancePremiumFinanced",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is My Community Mortgage Loan",
+                "value": "myCommunityMortgageLoan",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is New Construction Property",
+                "value": "newConstructionProperty",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Non Occupant Borrower",
+                "value": "nonOccupantBorrower",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Non Warrantable Project",
+                "value": "nonWarrantableProject",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Partial Term Buydown",
+                "value": "partialTermBuydown",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Permanent Resident Alien",
+                "value": "permanentResidentAlien",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is PMI Attributes Initialized",
+                "value": "pmiAttributesInitialized",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Prepayment Penalty",
+                "value": "prepaymentPenalty",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Primary Borrower",
+                "value": "primaryBorrower",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Primary Employment Indicated",
+                "value": "primaryEmploymentIndicated",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Property Fully Occupied",
+                "value": "propertyFullyOccupied",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Property Inspection Waiver",
+                "value": "propertyInspectionWaiver",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is PUD",
+                "value": "pud",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Quote Service Call",
+                "value": "quoteServiceCall",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Rate Lock Expired",
+                "value": "rateLockExpired",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Rate Lock Pending",
+                "value": "rateLockPending",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Rate Locked",
+                "value": "rateLocked",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Recent Home Owner",
+                "value": "recentHomeOwner",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Refundable Premium",
+                "value": "refundablePremium",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Retail Channel",
+                "value": "retailChannel",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Self Employed",
+                "value": "selfEmployed",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Self Employed",
+                "value": "selfEmployed",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Short Sale Applicable",
+                "value": "shortSaleApplicable",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Single Premium Mortgage Insurance",
+                "value": "singlePremiumMortgageInsurance",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Streamline Refi Program",
+                "value": "streamlineRefiProgram",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Tax Escrows Waived",
+                "value": "taxEscrowsWaived",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is VA Entitlement Used",
+                "value": "vaEntitlementUsed",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is VA Funding Fee Exempt",
+                "value": "vaFundingFeeExempt",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is VA Prior Use Manufactured Home",
+                "value": "vaPriorUseManufacturedHome",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Is Wholesale Channel",
+                "value": "wholesaleChannel",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Last Name",
+                "value": "lastName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lead Campaign Type Id",
+                "value": "leadCampaignTypeId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lead Source Type Id",
+                "value": "leadSourceTypeId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lead Type Id",
+                "value": "leadTypeId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lender Id",
+                "value": "lenderId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lender NMLS Id",
+                "value": "lenderNmlsId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lien Position",
+                "value": "lienPosition",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lien Type",
+                "value": "lienType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Lien Type",
+                "value": "lienType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Amount",
+                "value": "loanAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Closed Date",
+                "value": "loanClosedDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Eligibility Date",
+                "value": "loanEligibilityDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Exception Type Id",
+                "value": "loanExceptionTypeId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Funding Date",
+                "value": "loanFundingDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Note Date",
+                "value": "loanNoteDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Number",
+                "value": "loanNumber",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Product Type",
+                "value": "loanProductType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Program Type",
+                "value": "loanProgramType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Prospector Key Identifier",
+                "value": "loanProspectorKeyIdentifier",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Purpose Type",
+                "value": "loanPurposeType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Status Level",
+                "value": "loanStatusLevel",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Status Type",
+                "value": "loanStatusType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan Submitted From Correspondent Portal Date",
+                "value": "loanSubmittedFromCorrespondentPortalDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Loan To Value Ratio",
+                "value": "loanToValueRatio",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Lot Size",
+                "value": "lotSize",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Marital Status",
+                "value": "maritalStatus",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Maximum Credit Line Amount",
+                "value": "maximumCreditLineAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Maximum Days To Complete Repairs",
+                "value": "maximumDaysToCompleteRepairs",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Maximum Loan Limit Amount",
+                "value": "maximumLoanLimitAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Maximum Months To Complete Repairs",
+                "value": "maximumMonthsToCompleteRepairs",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Military Duty Type",
+                "value": "militaryDutyType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Modification Age In Years",
+                "value": "modificationAgeInYears",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Modification Date",
+                "value": "modificationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Months Reserves",
+                "value": "monthsReserves",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Insurance Certificate Verification Effective Date",
+                "value": "mortgageInsuranceCertificateVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Insurance Certificate Verification Expiration Date",
+                "value": "mortgageInsuranceCertificateVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Insurance Financed Amount",
+                "value": "mortgageInsuranceFinancedAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 30 Past 12 Months",
+                "value": "mortgageLate30past12Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 30 Past 24 Months",
+                "value": "mortgageLate30past24Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 30 Past 36 Months",
+                "value": "mortgageLate30past36Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 60 Past 12 Months",
+                "value": "mortgageLate60past12Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 60 Past 24 Months",
+                "value": "mortgageLate60past24Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 60 Past 36 Months",
+                "value": "mortgageLate60past36Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 90 Past 12 Months",
+                "value": "mortgageLate90past12Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 90 Past 24 Months",
+                "value": "mortgageLate90past24Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Late 90 Past 36 Months",
+                "value": "mortgageLate90past36Months",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Mortgage Type",
+                "value": "mortgageType",
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Conventional",
+                        "value": "C"
+                    },
+                    {
+                        "name": "FHA",
+                        "value": "F"
+                    },
+                    {
+                        "name": "USDA/Rural Housing Service",
+                        "value": "U"
+                    },
+                    {
+                        "name": "VA",
+                        "value": "V"
+                    }
+                ]
+            },
+            {
+                "name": "Number Of Units",
+                "value": "numberOfUnits",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Occupancy Type",
+                "value": "occupancyType",
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Purchase",
+                        "value": "p"
+                    },
+                    {
+                        "name": "Refinance",
+                        "value": "R"
+                    },
+                ]
+            },
+            {
+                "name": "Originator NMLS Id",
+                "value": "originatorNmlsId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Payment Rounding Type",
+                "value": "paymentRoundingType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "PMI Coverage Percent",
+                "value": "pmiCoveragePercent",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "PMI Plan Type",
+                "value": "pmiPlanType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "PMI Type",
+                "value": "pmiType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address City",
+                "value": "presentAddressCity",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address Line One",
+                "value": "presentAddressLineOne",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address Line Two",
+                "value": "presentAddressLineTwo",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address Postal Code",
+                "value": "presentAddressPostalCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address State",
+                "value": "presentAddressState",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Present Address Status",
+                "value": "presentAddressStatus",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Price",
+                "value": "price",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Pricing Date",
+                "value": "pricingDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Pricing Tier",
+                "value": "pricingTier",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Product Pricing Template",
+                "value": "productPricingTemplate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Project Classification Type",
+                "value": "projectClassificationType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Acquisition Cost",
+                "value": "propertyAcquisitionCost",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Acquisition Date",
+                "value": "propertyAcquisitionDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property City",
+                "value": "propertyCity",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Debt To Income Ratio",
+                "value": "propertyDebtToIncomeRatio",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Ownership Age In Months",
+                "value": "propertyOwnershipAgeInMonths",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Postal Code",
+                "value": "propertyPostalCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Rehabilitation Costs",
+                "value": "propertyRehabilitationCosts",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property State",
+                "value": "propertyState",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Type",
+                "value": "propertyType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Property Value Amount",
+                "value": "propertyValueAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Purchase Price Amount",
+                "value": "purchasePriceAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Qualified Mortgage Type",
+                "value": "qualifiedMortgageType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Race",
+                "value": "race",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rate Lock Data",
+                "value": "rateLockData",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rate Lock Date",
+                "value": "rateLockDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rate Lock Days",
+                "value": "rateLockDays",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rate Lock Expiration Date",
+                "value": "rateLockExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rate Lock Option Type",
+                "value": "rateLockOptionType",
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Floating",
+                        "value": "F"
+                    },
+                    {
+                        "name": "15 Day Rate Lock",
+                        "value": "15"
+                    },
+                    {
+                        "name": "30 Day Rate Lock",
+                        "value": "30"
+                    },
+                    {
+                        "name": "45 Day Rate Lock",
+                        "value": "45"
+                    },
+                    {
+                        "name": "60 Day Rate Lock",
+                        "value": "60"
+                    },
+                    {
+                        "name": "90 Day Rate Lock",
+                        "value": "90"
+                    }
+                ]
+            },
+            {
+                "name": "Rate Lock Status",
+                "value": "rateLockStatus",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Refi Loan Data",
+                "value": "refiLoanData",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Refinance Amount",
+                "value": "refinanceAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Refinance Purpose Type",
+                "value": "refinancePurposeType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Refinance Type",
+                "value": "refinanceType",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Relock Date",
+                "value": "relockDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Required Months Reserves",
+                "value": "requiredMonthsReserves",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Revised Closing Disclosure Delivery Date",
+                "value": "revisedClosingDisclosureDeliveryDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Revised Closing Disclosure Receipt Date",
+                "value": "revisedClosingDisclosureReceiptDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Revised Loan Estimate Delivery Date",
+                "value": "revisedLoanEstimateDeliveryDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Revised Loan Estimate Receipt Date",
+                "value": "revisedLoanEstimateReceiptDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Rule Group Name",
+                "value": "ruleGroupName",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Sales Branch Id",
+                "value": "salesBranchId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Scheduled Closing Date",
+                "value": "scheduledClosingDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Second ARM Adjustment Decrease Cap Pct",
+                "value": "secondARMAdjustmentDecreaseCapPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Second ARM Adjustment Increase Cap Pct",
+                "value": "secondARMAdjustmentIncreaseCapPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Second ARM Adjustment Payment Number",
+                "value": "secondARMAdjustmentPaymentNumber",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Short Sale Age In Years",
+                "value": "shortSaleAgeInYears",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Short Sale Date",
+                "value": "shortSaleDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Special Features",
+                "value": "specialFeatures",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Square Footage",
+                "value": "squareFootage",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "State FIPS Code",
+                "value": "stateFIPSCode",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Subordinate Credit Line Amount",
+                "value": "subordinateCreditLineAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Subordinate Financing Amount",
+                "value": "subordinateFinancingAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "System Type Id",
+                "value": "systemTypeId",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Tax Id Number",
+                "value": "taxIdNumber",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Title Verification Effective Date",
+                "value": "titleVerificationEffectiveDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Title Verification Expiration Date",
+                "value": "titleVerificationExpirationDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Total Combined Loan To Value Ratio",
+                "value": "totalCombinedLoanToValueRatio",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Total Cost Of Repairs",
+                "value": "totalCostOfRepairs",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Total High Credit Loan To Value Ratio",
+                "value": "totalHighCreditLoanToValueRatio",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Total Loan To Value Ratio",
+                "value": "totalLoanToValueRatio",
+                "type": "number",
+                "elementType": "field"
+            },
+            {
+                "name": "Up Front MIP Pct",
+                "value": "upFrontMIPPct",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Usda Case Number Assignment Date",
+                "value": "usdaCaseNumberAssignmentDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "VA Case Number Assignment Date",
+                "value": "vaCaseNumberAssignmentDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "VA Guarantee Available Amount",
+                "value": "VAGuaranteeAvailableAmount",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Verification Document Date",
+                "value": "verificationDocumentDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Verification Document Exp Date",
+                "value": "verificationDocumentExpDate",
+                "type": "string",
+                "elementType": "field"
+            },
+            {
+                "name": "Year Built",
+                "value": "yearBuilt",
+                "type": "string",
+                "elementType": "field"
             }
-            if (searchString.length === PHONE_LENGTH) {
-                params[PHONE] = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].formatPhoneNumber(searchString);
-            }
-        }
-        else {
-            params[NAME] = searchString;
-        }
-        searchobj.searchparams = params;
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CONTACT_FLEX_FIND, searchobj.searchparams);
-    };
-    TasksService.prototype.searchReferrals = function (searchString) {
-        var params = {
-            searchType: "simple",
-            page: 1,
-            start: 0,
-            limit: 25,
-            flexValue: "",
-        };
-        if (Number(searchString)) {
-            if (searchString.length === PHONE_LENGTH) {
-                params.flexValue = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].formatPhoneNumber(searchString);
-            }
-        }
-        else {
-            params.flexValue = searchString;
-        }
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_REFERRAL_ACCOUNTS, params);
-    };
-    TasksService.prototype.searchLoans = function (query) {
-        var searchParam = {
-            flexValue: query,
-            advSearchYn: false,
-            page: 1,
-            start: 0,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_SEARCH_URL, searchParam);
-    };
-    TasksService.prototype.getTaskItems = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].TASK_ITEMS);
-    };
-    TasksService.prototype.getTaskCatagories = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].TASK_CATEGORIES);
-    };
-    TasksService.prototype.saveTask = function (type, params) {
-        var URL = (type === "Loan")
-            ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].ADD_TASK_LOAN
-            : (type === "Contact")
-                ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].ADD_TASK_CONTACT
-                : __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].ADD_TASK_REFERRAL;
-        return this.http.post(URL, params);
-    };
-    TasksService.prototype.getTasksList = function (url, params) {
-        return this.http.get(url, params);
-    };
-    TasksService.prototype.getAllTasks = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_ALL_TASKS_URL);
-    };
-    TasksService.prototype.getTaskDetails = function (taskId) {
-        var taskDetailsParam = {
-            id: taskId,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].TASK_DETAILS, taskDetailsParam);
-    };
-    return TasksService;
-}());
-TasksService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */], __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */]])
-], TasksService);
-
-//# sourceMappingURL=tasks.service.js.map
-
-/***/ }),
-
-/***/ 141:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ScheduleService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_moment__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_moment__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-// tslint:disable max-line-length
-
-
-
-
-
-
-var ScheduleService = (function () {
-    function ScheduleService(http) {
-        this.http = http;
+        ]);
+        this.field = this.fields.asObservable();
     }
-    ScheduleService.prototype.getAppointments = function (startDate, endDate) {
-        var params = {
-            startDate: startDate,
-            endDate: endDate,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].LIST_APPOINTMENTS_URL, params);
+    FieldsService.prototype.changeField = function (field) {
+        this.fields.next(field);
     };
-    ScheduleService.prototype.createScheduleDetails = function (schedule) {
-        if (!schedule) {
-            return {};
-        }
-        return {
-            comment: schedule.hasOwnProperty("comment") ? schedule.comment : "",
-            contacts: schedule.contacts,
-            referralPartners: schedule.referralPartners,
-            description: schedule.description,
-            reminder: schedule.hasOwnProperty("reminder") ? schedule.reminder : "",
-            startDate: schedule.hasOwnProperty("startDateTime") ? __WEBPACK_IMPORTED_MODULE_2_moment___default()(schedule.startDateTime).format("dddd Do MMMM YYYY") : "No Start DateTime",
-            startTime: schedule.hasOwnProperty("startDateTime") ? __WEBPACK_IMPORTED_MODULE_2_moment___default()(schedule.startDateTime).format("LT") : "No Start Time",
-            endTime: schedule.hasOwnProperty("endDateTime") ? __WEBPACK_IMPORTED_MODULE_2_moment___default()(schedule.endDateTime).format("LT") : "No End Time",
-        };
-    };
-    ScheduleService.prototype.deleteAppointment = function (scheduleId) {
-        var params = {
-            appointmentId: scheduleId,
-        };
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].DELETE_UPPOINTMENT_URL, params);
-    };
-    ScheduleService.prototype.addAppointment = function (appointmentRequest) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].ADD_APPOINTMENT, appointmentRequest);
-    };
-    ScheduleService.prototype.editAppointment = function (appointmentRequest) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].EDIT_APPOINTMENT, appointmentRequest);
-    };
-    ScheduleService.prototype.getUsersList = function () {
-        var params = {
-            page: 1,
-            start: 0,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].LIST_USERS, params);
-    };
-    ScheduleService.prototype.getAppointmentDetails = function (appointmentId) {
-        var params = { appointmentId: appointmentId };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].READ_APPOINTMENT_DETAILS, params);
-    };
-    ScheduleService.prototype.getMyScheduleForToday = function () {
-        var fromDate = __WEBPACK_IMPORTED_MODULE_2_moment___default.a.utc().format();
-        var toDate = __WEBPACK_IMPORTED_MODULE_2_moment___default()().format("YYYY-MM-DD") + "T23:59:59Z";
-        return this.getAppointments(fromDate, toDate).catch(function (response) { return __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__["Observable"].of({}); });
-    };
-    return ScheduleService;
+    FieldsService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], FieldsService);
+    return FieldsService;
 }());
-ScheduleService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__["a" /* HttpService */]])
-], ScheduleService);
 
-//# sourceMappingURL=schedule.service.js.map
+//# sourceMappingURL=fields.service.js.map
 
 /***/ }),
 
-/***/ 142:
+/***/ 220:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HomeService; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LogicalOperatorsService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -526,60 +2977,46 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
-
-
-/*
-  Generated class for the HomeService provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
-var HomeService = (function () {
-    function HomeService(http) {
-        this.http = http;
+var LogicalOperatorsService = (function () {
+    function LogicalOperatorsService() {
+        this.logicalOperators = new __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__["BehaviorSubject"]({
+            'AND': {
+                name: 'and',
+                value: '&&',
+            },
+            'OR': {
+                name: 'or',
+                value: '||',
+            },
+            'THEN': {
+                name: 'then',
+                value: 'then',
+            },
+        });
+        this.logicalOperator = this.logicalOperators.asObservable();
     }
-    HomeService.prototype.getDashboardCounts = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].COUNT_LIST);
+    LogicalOperatorsService.prototype.changeOperator = function (logicalOperator) {
+        this.logicalOperators.next(logicalOperator);
     };
-    HomeService.prototype.getLoanCounts = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_LIST_URL, { start: 0, limit: 1 });
-    };
-    HomeService.prototype.getPipelineCounts = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].PIPLINE_SUMMARY_URL);
-    };
-    HomeService.prototype.getReferralCounts = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_REFERRAL_ACCOUNTS);
-    };
-    HomeService.prototype.getAppointmentsCounts = function (startDate, endDate) {
-        var params = {
-            startDate: startDate,
-            endDate: endDate,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_APPOINTMENTS_URL, params);
-    };
-    return HomeService;
+    LogicalOperatorsService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], LogicalOperatorsService);
+    return LogicalOperatorsService;
 }());
-HomeService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], HomeService);
 
-//# sourceMappingURL=home.service.js.map
+//# sourceMappingURL=logical.service.js.map
 
 /***/ }),
 
-/***/ 143:
+/***/ 221:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UpcomingEventsService; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return OperatorsService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -591,70 +3028,104 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
-
-
-
-var CONTACT_DETAILS_URL = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CONTACT_DETAILS_URL, CREATE_EVENT_URL = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREATE_EVENT_URL, DELETE_EVENT_URL = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].DELETE_EVENT_URL, GET_EVENT_TYPES = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_EVENT_TYPES, LIST_EVENTS_URL = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_EVENTS_URL, UPDATE_EVENT_URL = __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_EVENT_URL;
-var UpcomingEventsService = (function () {
-    function UpcomingEventsService(http) {
-        this.http = http;
+var OperatorsService = (function () {
+    function OperatorsService() {
+        this.operators = new __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__["BehaviorSubject"]({
+            'number': [
+                {
+                    name: 'is equal to',
+                    value: '=',
+                },
+                {
+                    name: 'is equal to',
+                    value: '!=',
+                },
+                {
+                    name: 'is greater than',
+                    value: '>',
+                },
+                {
+                    name: 'is lesser than',
+                    value: '<',
+                },
+                {
+                    name: 'is greater than or equal to',
+                    value: '>=',
+                },
+                {
+                    name: 'is lesser than or equal to',
+                    value: '<=',
+                },
+            ],
+            'string': [
+                {
+                    name: 'contains',
+                    value: 'contains',
+                },
+                {
+                    name: 'does not contain',
+                    value: 'doesNotContain',
+                },
+                {
+                    name: 'starts with',
+                    value: 'startsWith',
+                },
+                {
+                    name: 'does not start with',
+                    value: 'doesNotStartWith',
+                },
+                {
+                    name: 'ends with',
+                    value: 'endsWith',
+                },
+                {
+                    name: 'does not end with',
+                    value: 'doesNotEndWith',
+                },
+                {
+                    name: 'is',
+                    value: 'is',
+                },
+                {
+                    name: 'is not',
+                    value: 'isNot',
+                },
+            ],
+            'options': [
+                {
+                    name: 'is',
+                    value: 'is',
+                },
+                {
+                    name: 'is not',
+                    value: 'isNot',
+                },
+            ],
+        });
+        this.operator = this.operators.asObservable();
     }
-    /**
-     * Returns event types
-     * @return { Observable }
-     * {
-     *  "total": 5,
-     *   "data": [
-     *      {
-     *         "id": 1,
-     *         "dateTypeId": "BIRTHDAY",
-     *         "dateTypeDesc": "Birthday"
-     *      }...
-     *  }
-     */
-    UpcomingEventsService.prototype.getUpcomingEvents = function () {
-        var params = { page: 1, start: 0, limit: 25, contactId: 3245, dueBy: "END_OF_MONTH" };
-        return this.http.get(LIST_EVENTS_URL, params);
+    OperatorsService.prototype.changeOperator = function (operator) {
+        this.operators.next(operator);
     };
-    UpcomingEventsService.prototype.getUpcomingEventsForToday = function () {
-        var params = { page: 1, start: 0, limit: 25, contactId: 3245, dueBy: "END_OF_DAY" };
-        return this.http.get(LIST_EVENTS_URL, params).catch(function (response) { return __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__["Observable"].of({}); });
-    };
-    UpcomingEventsService.prototype.getContactDetails = function (contactId) {
-        var params = { id: 3245 };
-        return this.http.get(CONTACT_DETAILS_URL, params);
-    };
-    UpcomingEventsService.prototype.addEvent = function (eventDetails) {
-        return this.http.post(CREATE_EVENT_URL, eventDetails);
-    };
-    UpcomingEventsService.prototype.updateEvent = function (eventDetails) {
-        return this.http.post(UPDATE_EVENT_URL, eventDetails);
-    };
-    UpcomingEventsService.prototype.deleteEvent = function (eventId) {
-        var accToken = this.http.getAccessToken();
-        var url = DELETE_EVENT_URL + "?access_token=" + accToken + "&id=" + eventId;
-        return fetch(url, { method: "post" })
-            .then(function (res) { return res.json(); });
-        // return this.http.post(DELETE_EVENT_URL, {id: eventId});
-    };
-    return UpcomingEventsService;
+    OperatorsService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], OperatorsService);
+    return OperatorsService;
 }());
-UpcomingEventsService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], UpcomingEventsService);
 
-//# sourceMappingURL=upcoming-events.service.js.map
+//# sourceMappingURL=operators.service.js.map
 
 /***/ }),
 
-/***/ 144:
+/***/ 222:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MenuService; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ResultsService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -666,54 +3137,132 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
-var MenuService = (function () {
-    function MenuService(platform) {
-        this.platform = platform;
-        this.menuToggle = true;
-        this.menuToggle = (this.platform.is("core") || this.platform.is("tablet")) ? true : false;
+var ResultsService = (function () {
+    function ResultsService() {
+        this.results = new __WEBPACK_IMPORTED_MODULE_1_rxjs_BehaviorSubject__["BehaviorSubject"]([
+            {
+                name: 'Add Loan Exception',
+                value: 'addLoanException',
+                elementType: 'result',
+            },
+            {
+                name: 'Add Rule Input Parameter',
+                value: 'addRuleInputParameter',
+                elementType: 'result',
+            },
+        ]);
+        this.result = this.results.asObservable();
     }
-    MenuService.prototype.shouldShow = function () {
-        return this.menuToggle;
+    ResultsService.prototype.changeResult = function (result) {
+        this.results.next(result);
     };
-    MenuService.prototype.toggleShow = function () {
-        this.menuToggle = this.menuToggle ? false : true;
-        this.shouldShow();
-    };
-    MenuService.prototype.resetToggle = function () {
-        this.menuToggle = true;
-    };
-    MenuService.prototype.showHideMenu = function (show) {
-        this.menuToggle = show;
-        this.shouldShow();
-    };
-    return MenuService;
+    ResultsService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], ResultsService);
+    return ResultsService;
 }());
-MenuService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["p" /* Platform */]])
-], MenuService);
 
-//# sourceMappingURL=menu.service.js.map
+//# sourceMappingURL=result.service.js.map
 
 /***/ }),
 
-/***/ 15:
+/***/ 226:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HomeComponentModule", function() { return HomeComponentModule; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__home_component__ = __webpack_require__(117);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+
+
+var HomeComponentModule = (function () {
+    function HomeComponentModule() {
+    }
+    HomeComponentModule = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            declarations: [
+                __WEBPACK_IMPORTED_MODULE_2__home_component__["a" /* HomeComponent */],
+            ],
+            imports: [
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__home_component__["a" /* HomeComponent */]),
+            ],
+            providers: [
+                __WEBPACK_IMPORTED_MODULE_2__home_component__["a" /* HomeComponent */],
+            ],
+        })
+    ], HomeComponentModule);
+    return HomeComponentModule;
+}());
+
+//# sourceMappingURL=home.component.module.js.map
+
+/***/ }),
+
+/***/ 227:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LoginPageModule", function() { return LoginPageModule; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__login_component__ = __webpack_require__(120);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+
+
+var LoginPageModule = (function () {
+    function LoginPageModule() {
+    }
+    LoginPageModule = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            declarations: [
+                __WEBPACK_IMPORTED_MODULE_2__login_component__["a" /* LoginPage */],
+            ],
+            imports: [
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__login_component__["a" /* LoginPage */]),
+            ],
+            exports: [
+                __WEBPACK_IMPORTED_MODULE_2__login_component__["a" /* LoginPage */],
+            ],
+        })
+    ], LoginPageModule);
+    return LoginPageModule;
+}());
+
+//# sourceMappingURL=login.component.module.js.map
+
+/***/ }),
+
+/***/ 230:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HttpService; });
 /* unused harmony export CONTENT_TYPE_FORM */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(231);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__ = __webpack_require__(206);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__ = __webpack_require__(232);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_BehaviorSubject__ = __webpack_require__(116);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_BehaviorSubject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_rxjs_BehaviorSubject__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__model_session__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__providers_feedback_feedback_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__model_session__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -723,8 +3272,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-
-
 
 
 
@@ -735,13 +3282,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
  * Wrapper for @angular/http
  */
 var HttpService = (function () {
-    function HttpService(http, session, feedbackService, exceptionService) {
+    function HttpService(http, session, feedbackService) {
         this.http = http;
         this.session = session;
         this.feedbackService = feedbackService;
-        this.exceptionService = exceptionService;
-        this.hasSessionExpired = new __WEBPACK_IMPORTED_MODULE_4_rxjs_BehaviorSubject__["BehaviorSubject"](false);
-        this.hasSessionExpiredObservable = this.hasSessionExpired.asObservable();
     }
     /**
      * Performs a request with `get` http method.
@@ -775,18 +3319,13 @@ var HttpService = (function () {
             authUrl = authUrl + queryString;
         }
         // Create a request option
-        if (!headers) {
-            headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]();
-        }
-        headers.append("Accept", "application/json");
-        headers.append("X-Requested-With", "XMLHttpRequest");
-        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({ headers: headers, withCredentials: true });
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({ headers: headers });
         return this.intercept(this.http.post(authUrl, body, options));
     };
     HttpService.prototype.postFile = function (url, body) {
         var authUrl = this.addAccesstokenToUrl(url);
-        var opts = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({
-            responseType: __WEBPACK_IMPORTED_MODULE_1__angular_http__["ResponseContentType"].ArrayBuffer,
+        var opts = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({
+            responseType: __WEBPACK_IMPORTED_MODULE_1__angular_http__["d" /* ResponseContentType */].ArrayBuffer,
         });
         return this.http.post(authUrl, body, opts);
     };
@@ -804,7 +3343,7 @@ var HttpService = (function () {
      * Converts the JSON object to query
      */
     HttpService.prototype.convertJsonToQueryString = function (params) {
-        var reqParams = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["URLSearchParams"]();
+        var reqParams = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["e" /* URLSearchParams */]();
         for (var _i = 0, _a = Object.keys(params); _i < _a.length; _i++) {
             var key = _a[_i];
             reqParams.set(key, params[key]);
@@ -812,28 +3351,19 @@ var HttpService = (function () {
         return reqParams;
     };
     HttpService.prototype.getRequestOptions = function (params, headers) {
-        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]();
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]();
         options.search = this.convertJsonToQueryString(params);
-        if (!headers) {
-            headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]();
-        }
-        headers.append("Accept", "application/json");
-        headers.append("X-Requested-With", "XMLHttpRequest");
         options.headers = headers;
-        options.withCredentials = true;
         return options;
     };
     HttpService.prototype.onCatch = function (error, caught) {
         return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error);
     };
     HttpService.prototype.onSubscribeSuccess = function (response) {
-        this.hasSessionExpired.next(false);
+        // Todo
     };
     HttpService.prototype.onSubscribeError = function (error) {
-        // tslint:disable:no-magic-numbers
-        if ((error.status === 0 && error.type === 3) || error.status === 401) {
-            this.hasSessionExpired.next(true);
-        }
+        // Todo
     };
     HttpService.prototype.onFinally = function () {
         // Todo
@@ -862,8 +3392,7 @@ var HttpService = (function () {
     };
     HttpService.prototype.intercept = function (observable) {
         var _this = this;
-        return observable
-            .map(function (response) { return response.json(); })
+        return observable.map(function (response) { return response.json(); })
             .catch(this.onCatch)
             .do(function (res) {
             _this.onSubscribeSuccess(res);
@@ -880,3266 +3409,29 @@ var HttpService = (function () {
             loader.dismiss();
         }
     };
+    HttpService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["a" /* Http */],
+            __WEBPACK_IMPORTED_MODULE_4__model_session__["a" /* Session */],
+            __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__["a" /* FeedbackService */]])
+    ], HttpService);
     return HttpService;
 }());
-HttpService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_5__model_session__["a" /* Session */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5__model_session__["a" /* Session */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_6__providers_feedback_feedback_service__["a" /* FeedbackService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_6__providers_feedback_feedback_service__["a" /* FeedbackService */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__["a" /* ExceptionService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__["a" /* ExceptionService */]) === "function" && _d || Object])
-], HttpService);
 
 var CONTENT_TYPE_FORM = "Content-Type: application/x-www-form-urlencoded";
-var _a, _b, _c, _d;
 //# sourceMappingURL=http.service.js.map
 
 /***/ }),
 
-/***/ 155:
-/***/ (function(module, exports) {
-
-function webpackEmptyAsyncContext(req) {
-	// Here Promise.resolve().then() is used instead of new Promise() to prevent
-	// uncatched exception popping up in devtools
-	return Promise.resolve().then(function() {
-		throw new Error("Cannot find module '" + req + "'.");
-	});
-}
-webpackEmptyAsyncContext.keys = function() { return []; };
-webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
-module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 155;
-
-/***/ }),
-
-/***/ 18:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Config; });
-/* tslint:disable max-line-length*/
-var Config = (function () {
-    function Config() {
-    }
-    return Config;
-}());
-
-Config.LOGIN_URL = "https://blooming-badlands-78815.herokuapp.com/login";
-Config.LOGOUT_URL = BASE_URL + "crm/login/logout";
-Config.USER_URL = BASE_URL + "crm/login/loginInfo";
-// Dashboard
-Config.COUNT_LIST = BASE_URL + "crm/dashboard/getDashboardData";
-// Contacts
-Config.RECENT_CONTACT_URL = BASE_URL + "crm/contact/recentList";
-Config.CONTACT_LIST_URL = BASE_URL + "crm/contact/myList";
-Config.CONTACT_SEARCH_URL = BASE_URL + "crm/contact/flexFind";
-Config.CONTACT_GET_COUNTS = BASE_URL + "crm/contact/myList";
-Config.CONTACT_FLEX_FIND = BASE_URL + "crm/contact/flexFind";
-Config.LOAN_LIST_URL = BASE_URL + "crm/loan/myLoans";
-Config.LOAN_RECENT_LIST = BASE_URL + "crm/loan/recentLoans";
-Config.LOAN_SEARCH_URL = BASE_URL + "crm/loan/searchLoans";
-// Loan advanced search
-Config.LOAN_PURPOSE_TYPES = BASE_URL + "crm/ref/loanPurposeTypes";
-Config.LOAN_STATUS_TYPES = BASE_URL + "crm/ref/loanStatusTypes";
-Config.LOAN_LOCK_STATUS_TYPES = BASE_URL + "crm/ref/loanLockStatusTypes";
-Config.TASKS_GET_COUNT = BASE_URL + "crm/contactTask/listMyTasks";
-Config.CONTACT_LOANCOUNTS_URL = BASE_URL + "crm/contact/listLoans";
-Config.CONTACT_DETAILS_URL = BASE_URL + "crm/contact/read";
-Config.PIPLINE_SUMMARY_URL = BASE_URL + "crm/pipeline/summaryAmounts";
-Config.UNLOCKED_LOANS_COUNT = BASE_URL + "crm/sfa/getMyUnlockedLoansCount";
-Config.UNLOCKED_LOANS_LIST = BASE_URL + "crm/sfa/listMyUnlockedLoans";
-Config.EXPIRED_LOANS_COUNT = BASE_URL + "crm/sfa/getMyLockExpiredLoansCount";
-Config.EXPIRED_LOANS_LIST = BASE_URL + "crm/sfa/listMyLockExpiredLoans";
-Config.EXPIRING_LOANS_COUNT = BASE_URL + "crm/sfa/getMyLockExpiringLoansCount";
-Config.EXPIRING_LOANS_LIST = BASE_URL + "crm/sfa/listMyLockExpiringLoans";
-// Loan Summary
-Config.LOAN_SUMMARY_AGGREGATOR_API = BASE_URL + "crm/sfa/loanSummary";
-Config.LOAN_READ_SUMMARY_URL = BASE_URL + "crm/loan/readSummary";
-Config.OPEN_LOAN_URL = BASE_URL + "crm/loan/openLoan";
-Config.BORROWER_DETAILS_BY_LOAN_URL = BASE_URL + "crm/loan/getBorrowerDetailsByLoan";
-Config.READ_SUBJECT_PROPERTY_URL = BASE_URL + "crm/loanAppPropertyExpense/readSubjectProperty";
-Config.READ_EXISTING_LOAN_APP_URL = BASE_URL + "crm/loanAppBorrower/readExistingLoanApp";
-// Loan Lock status check
-Config.GET_LOAN_LOCKED_STATUS = BASE_URL + "crm/loan/isLoanLocked";
-Config.UNLOCK_LOCKED_LOANS = BASE_URL + "crm/loan/unlockMyLoans";
-// Loan Conditions list
-Config.LOAN_CONDITIONS_LIST = BASE_URL + "crm/conditions/list";
-// Loan Condition api to list attached files
-Config.LOAN_CONDITION_LIST_FILES = BASE_URL + "crm/conditions/listFilesByCondition";
-// Download Loan condition
-Config.LOAN_CONDITION_FILE_DOWNLOAD = BASE_URL + "crm/conditions/downloadFile";
-// Delete condition document
-Config.LOAN_CONDITION_FILE_DELETE = BASE_URL + "crm/conditions/deleteCondDocumentRecord";
-// file upload
-Config.LOAN_CONDITION_FILE_UPLOAD = BASE_URL + "crm/conditionImageUpload/addImages";
-// Add and Edit Contact
-Config.SALUTATION_URL = BASE_URL + "crm/ref/salutations";
-Config.TELEPHONETYPES_URL = BASE_URL + "crm/ref/telephoneTypes";
-Config.CONTACTTYPES_URL = BASE_URL + "crm/ref/contactTypes";
-Config.CITYSTATELOOKUP_URL = BASE_URL + "crm/zip/cityStateLookup";
-Config.STATELOOKUP_URL = BASE_URL + "crm/ref/states";
-Config.CREATECONTACT_URL = BASE_URL + "crm/contact/createContact";
-Config.UPDATECONTACT_URL = BASE_URL + "crm/contact/update";
-// Notes
-Config.NOTES_LIST_URL = BASE_URL + "crm/contact/listNotes";
-Config.NOTES_SAVE_URL = BASE_URL + "crm/contact/saveNote";
-Config.NOTES_COND_LIST_URL = BASE_URL + "crm/conditions/listNotes";
-Config.NOTES_COND_SAVE_URL = BASE_URL + "crm/conditions/saveNote";
-Config.NOTES_LOAN_TASK_LIST_URL = BASE_URL + "crm/loanTask/listTaskNotes";
-Config.NOTES_LOAN_TASK_SAVE_URL = BASE_URL + "crm/loanTask/saveTaskNote";
-Config.NOTES_CONTACT_TASK_LIST_URL = BASE_URL + "crm/contactTask/listTaskNotes";
-Config.NOTES_CONTACT_TASK_SAVE_URL = BASE_URL + "crm/contactTask/saveTaskNote";
-// Communication and Contact activites
-Config.COMMUNICATION_ACTIVITIES_URL = BASE_URL + "crm/contact/listCommunicationActivities";
-Config.CONTACT_ACTIVITIES_URL = BASE_URL + "crm/contact/listActivities";
-Config.ADD_CONTACT_ACTIVITY_URL = BASE_URL + "crm/activity/addContactActivity";
-Config.UPDATE_RECENT_CONTACT_URL = BASE_URL + "crm/contact/updateRecentList";
-// Tools
-Config.QUICK_QUALIFIER_URL = BASE_URL + "crm/quote/quickQualifierEstimates";
-// Refinance Calculator
-Config.REFINANCE_CALCULATOR = BASE_URL + "lendingservices/calcs/principalAndInterest";
-Config.LOAN_TYPE = BASE_URL + "crm/calculators/app/data/LoanType.json";
-Config.LENDING_SERVICES_CALCULATOR = BASE_URL + "lendingservices/calcs/";
-Config.AFFORDABILITY_CALCULATOR = Config.LENDING_SERVICES_CALCULATOR + "affordability";
-Config.REQUIRED_INCOME_CALCULATOR = Config.LENDING_SERVICES_CALCULATOR + "requiredIncome";
-Config.MAX_LOAN_AMOUNT_CALCULATOR = Config.LENDING_SERVICES_CALCULATOR + "maxLoanAmount";
-Config.ADDITIONAL_PAYMENT_CALCULATOR = Config.LENDING_SERVICES_CALCULATOR + "AmortizationSchedule";
-// Schedule
-Config.ADD_APPOINTMENT = BASE_URL + "crm/appointments/createSysUserAppointment";
-Config.EDIT_APPOINTMENT = BASE_URL + "crm/appointments/updateSysUserAppointment";
-Config.DELETE_UPPOINTMENT_URL = BASE_URL + "crm/appointments/deleteSysUserAppointment";
-Config.LIST_APPOINTMENTS_URL = BASE_URL + "crm/appointments/listSysUserAppointments";
-Config.READ_APPOINTMENT_DETAILS = BASE_URL + "crm/appointments/readAppointment";
-// TASKS
-Config.LIST_CONTACT_TASK_STATUS_HISTORY = BASE_URL + "crm/contactTask/listTaskStatusHistory";
-Config.LIST_LOAN_TASK_STATUS_HISTORY = BASE_URL + "crm/loanTask/listTaskStatusHistory";
-Config.LIST_TASK_STATUS = BASE_URL + "crm/ref/taskStatuses";
-Config.LIST_USER_TEAMS = BASE_URL + "crm/ref/userTeams";
-Config.LIST_USERS = BASE_URL + "crm/ref/userList";
-Config.UPDATE_CONTACT_TASK = BASE_URL + "crm/contactTask/updateTask";
-Config.UPDATE_LOAN_TASK = BASE_URL + "crm/loanTask/updateTask";
-Config.LIST_ALL_TASKS_URL = BASE_URL + "crm/sfa/listMyTasks";
-Config.LIST_DUE_TASKS_URL = BASE_URL + "crm/sfa/listMyDueTasks";
-Config.LIST_CONTACT_TASKS_URL = BASE_URL + "crm/contactTask/listMyTasks";
-Config.LIST_LOAN_TASKS_URL = BASE_URL + "crm/loanTask/listMyTasks";
-Config.TASK_ITEMS = BASE_URL + "crm/ref/taskItems";
-Config.TASK_CATEGORIES = BASE_URL + "crm/ref/taskCategoryTypes";
-Config.ADD_TASK_LOAN = BASE_URL + "crm/loanTask/createTask";
-Config.ADD_TASK_CONTACT = BASE_URL + "crm/contactTask/createTask";
-Config.ADD_TASK_REFERRAL = BASE_URL + "crm/referralContactTask/createTask";
-Config.TASK_DETAILS = BASE_URL + "crm/readTaskInfo";
-// Filestack
-Config.GET_FILE_STACK_PROPERTIES_URL = BASE_URL + "crm/fileStack/getFileStackProperties";
-Config.ADD_LOAN_CONDITION_DOCUMENT = BASE_URL + "crm/fileStack/addLoanConditionDocument";
-// Upcoming Events
-Config.GET_EVENT_TYPES = BASE_URL + "crm/ref/dateTypes";
-Config.DELETE_EVENT_URL = BASE_URL + "crm/contact/deleteContactDate";
-Config.CREATE_EVENT_URL = BASE_URL + "crm/contact/createContactDate";
-Config.UPDATE_EVENT_URL = BASE_URL + "crm/contact/updateContactDate";
-Config.LIST_EVENTS_URL = BASE_URL + "crm/sfa/listMyDueContactEvents";
-// public static LIST_EVENTS_URL = BASE_URL + "crm/contact/listContactDates";
-Config.INTEGRATION_OUTLOOK_APPOINMENT = "https://btech-dev2.bluesageusa.com:8081/outlook/appoinment";
-Config.LIST_REFERRAL_ACCOUNTS = BASE_URL + "crm/referralContact/listReferralPartners";
-Config.LIST_REFERRAL_CONTACTS = BASE_URL + "crm/referralContact/listReferralPartnerAssociates";
-Config.LIST_REFERRAL_ACCOUNT_CONTACTS = BASE_URL + "crm/referralContact/listAssociateNamesByPartner";
-// Referral Partners
-Config.REFERRAL_CONTACT_DETAILS = BASE_URL + "crm/referralContact/readPartnerAssociate";
-Config.REFERRAL_ACCOUNT_DETAILS = BASE_URL + "crm/referralContact/readPartner";
-Config.CREATE_REFERRAL_ACCOUNT = BASE_URL + "crm/referralContact/createPartner";
-Config.UPDATE_REFERRAL_ACCOUNT = BASE_URL + "crm/referralContact/updatePartner";
-Config.CREATE_REFERRAL_PARTNER = BASE_URL + "crm/referralContact/createPartnerAssociate";
-Config.UPDATE_REFERRAL_PARTNER = BASE_URL + "crm/referralContact/updatePartnerAssociate";
-Config.SEARCH_COMPANY_NAMES = BASE_URL + "crm/referralContact/getCompanyNames";
-Config.SEARCH_COMPANY_ASSOCIATE = BASE_URL + "crm/referralContact/searchCompanyAssociate";
-// Quotes
-Config.RECENT_QUOTES = BASE_URL + "crm/quote/recentQuotes";
-Config.QUOTES = BASE_URL + "crm/quote/myQuotes";
-Config.SEARCH_QUOTES = BASE_URL + "crm/quote/searchQuotes";
-Config.UPDATE_QUOTES_STATUS = BASE_URL + "crm/quote/updateQuoteStatus";
-// Quotes static lookups
-Config.LEAD_TYPES = BASE_URL + "crm/ref/leadTypes";
-Config.LEAD_SOURCES = BASE_URL + "crm/ref/leadSources";
-Config.QUOTE_STATUS = BASE_URL + "crm/ref/quoteStatusTypes";
-Config.BUILDING_TYPES = BASE_URL + "crm/ref/buildingTypes";
-Config.PROJ_CLASS_TYPES = BASE_URL + "crm/ref/projClassTypes";
-Config.REFI_PURPOSE_TYPES = BASE_URL + "crm/ref/refiPurposeTypes";
-Config.PMI_PLAN_TYPES = BASE_URL + "crm/ref/pmiPlanTypes";
-Config.CREDIT_RATINGS = BASE_URL + "crm/ref/creditRatings";
-Config.RATE_LOCK_TYPE = BASE_URL + "crm/ref/rateLockTypes";
-Config.PRODUCT_PRICING_TEMPLATES = BASE_URL + "ref/productPricingTemplates";
-Config.COUNTIES = BASE_URL + "crm/ref/countiesLookup";
-Config.TAX_RATE = BASE_URL + "crm/quote/getTaxAndInsRates";
-Config.AVAILABLE_QUOTE_STATUSES = BASE_URL + "crm/quote/getAvailableQuoteStatuses";
-Config.MORTGAGE_TYPES = BASE_URL + "crm/ref/mortgageTypes";
-Config.LIABILITY_STATUS_TYPES = BASE_URL + "crm/ref/liabilityStatusTypes";
-Config.QUOTES_STATS = BASE_URL + "crm/sfa/getMyQuotesStatusTotals";
-// Quotes weather info
-Config.WEATHER_INFO = BASE_URL + "crm/quote/getWeatherInfo";
-// Quotes core operations
-Config.OPEN_QUOTE = BASE_URL + "crm/quote/openQuote";
-Config.READ_QUOTE = BASE_URL + "crm/quote/readQuote";
-Config.RATE_EXISTS = BASE_URL + "crm/quote/ratesExist";
-Config.CALC_LTV_RATIO = BASE_URL + "crm/quote/calcLTVRatios";
-Config.CREATE_QUOTE = BASE_URL + "crm/quote/createQuote";
-Config.QUOTES_UPDATE_PURPOSE_PROPERTY = BASE_URL + "crm/quote/updateQuotePurposeAndProperty";
-Config.UPDATE_QUOTE_PURCHASE_LOAN_SCENARIO = BASE_URL + "crm/quote/updatePurchaseLoanScenario";
-Config.UPDATE_QUOTE_REFINANCE_LOAN_SCENARIO = BASE_URL + "crm/quote/updateRefinanceLoanScenario";
-Config.UPDATE_QUOTE_EQUITY_LOAN_SCENARIO = BASE_URL + "crm/quote/updateEquityLoanScenario";
-Config.GET_QUOTE_RESULTS = BASE_URL + "crm/quote/price";
-Config.UPDATE_QUOTE_DESIRED_PRODUCTS = BASE_URL + "crm/quote/updateQuoteDesiredProducts";
-Config.UPDATE_QUOTE_PRICING_GOALS = BASE_URL + "crm/quote/updateQuotePricingGoals";
-Config.READ_QUOTE_STATUS = BASE_URL + "crm/quote/readQuoteStatus";
-Config.UPDATE_EXISTING_LIENS = BASE_URL + "crm/quote/updateQuoteExistingLiens";
-Config.DOWNLOAD_PDF = BASE_URL + "crm/quote/printProductCompareDocument";
-Config.EMAIL_PDF = BASE_URL + "crm/quote/emailProductCompareDocument";
-Config.QUOTE_GET_NOTES = BASE_URL + "crm/quote/listNotes";
-Config.QUOTE_SAVE_NOTES = BASE_URL + "crm/quote/saveNote";
-Config.PAYMENT_BALANCE = BASE_URL + "crm/quote/calcPaymentAndBalance";
-Config.QUOTE_FEES = BASE_URL + "crm/quote/getFees";
-Config.QUOTE_RATES = BASE_URL + "crm/quote/getRates";
-Config.UPDATE_QUOTE_HOME = BASE_URL + "crm/quote/updateQuoteHome";
-// Pricing section
-Config.GET_SUBJECT_PROPERTY_TYPES = BASE_URL + "crm/ref/buildingTypes";
-Config.GET_PROJECT_TYPES = BASE_URL + "crm/ref/projClassTypes";
-Config.GET_PROPERTY_TYPES = BASE_URL + "crm/ref/propertyTypes";
-Config.UPDATE_PROPERTY_INFO = BASE_URL + "crm/property/updateProperty";
-Config.GET_LOAN_HEADER_INFO = BASE_URL + "crm/loan/getLoanHeaderInfo";
-Config.GET_LOAN_PURPOSES = BASE_URL + "crm/ref/loanPurposeTypes";
-Config.GET_REFINANCE_PURPOSES = BASE_URL + "crm/ref/refiPurposeTypes";
-Config.GET_DOCUMENTATION_TYPES = BASE_URL + "crm/ref/documentationTypes";
-Config.GET_OCCUPANCY_TYPES = BASE_URL + "crm/ref/occupancyTypes";
-Config.SAVE_ALL_LOAN_TERMS = BASE_URL + "crm/retailLoanTerms/saveAllLoanTerms";
-Config.GET_LOCK_PERIODS = BASE_URL + "crm/ref/rateLockTypes";
-Config.GET_PRICING_RATELOCK_INFO = BASE_URL + "crm/retailPricing/getPricingAndRateLockInfo";
-Config.GET_HOME_LOAN_MAPPING_DATA = BASE_URL + "crm/loan/homeLoanMappingData";
-Config.GET_RETAIL_LOAN_TERMS = BASE_URL + "crm/retailLoanTerms/read";
-Config.GET_PRICING_HISTORY = BASE_URL + "crm/retailPricing/listPriceHistory";
-Config.GET_RATES = BASE_URL + "crm/retailPricing/getPricingTotals";
-Config.GET_PRICING_ADJUSTMENTS = BASE_URL + "crm/retailPricing/getPricingAdjustments";
-Config.UPDATE_PRICING = BASE_URL + "crm/retailPricing/updatePricing";
-Config.GET_CORE_CHANGE_REASONS = BASE_URL + "crm/ref/changeReasonTypes";
-Config.GET_EXCEPTION_TYPES = BASE_URL + "crm/ref/pricingExceptionTypes";
-Config.GET_LOAN_TYPES = BASE_URL + "crm/ref/listLoanTypes";
-Config.GET_LIEN_TYPES = BASE_URL + "crm/ref/lienTypes";
-Config.GET_PRICING_TIERS = BASE_URL + "crm/ref/pricingTiers";
-Config.GET_AMORTIZATION_TYPES = BASE_URL + "crm/ref/amortizationTypes";
-Config.GET_PRODUCT_TYPES = BASE_URL + "crm/ref/productPricingTemplates";
-Config.GET_INVESTOR_INFO = BASE_URL + "crm/ref/investorInfos";
-Config.READ_LOAN_TERMS = BASE_URL + "crm/loanAppLoanTerms/readTerms";
-Config.GET_LENDER_INFOS = BASE_URL + "crm/ref/lenderInfos";
-Config.GET_FULFILLMENT_CENTERS = BASE_URL + "crm/ref/fulfillmentCenters";
-Config.GET_SALES_REGIONS = BASE_URL + "crm/ref/salesRegions";
-Config.GET_SALES_BRANCHES = BASE_URL + "crm/ref/salesBranches";
-Config.GET_MARKET_TYPES = BASE_URL + "crm/ref/marketTypes";
-Config.GET_LEAD_TYPES = BASE_URL + "crm/ref/leadTypes";
-Config.GET_LEAD_SOURCES = BASE_URL + "crm/ref/leadSources";
-Config.GET_USERTEAMS = BASE_URL + "crm/ref/userTeams";
-Config.GET_BROKERINFOS = BASE_URL + "crm/ref/brokerInfos";
-Config.GET_SUB_CHANNELS = BASE_URL + "crm/ref/subChannels";
-Config.GET_SALESSUBREGIONS = BASE_URL + "crm/ref/salesSubRegions";
-Config.GET_PRODUCT_PRICING_MAPPINGS = BASE_URL + "crm/ref/productPricingMappings";
-Config.GET_BROKER_TYPES = BASE_URL + "crm/ref/listRefBrokerTypes";
-Config.GET_CHANNELS = BASE_URL + "crm/ref/channels";
-Config.GET_PROMOTIONS = BASE_URL + "crm/loanAppLoanSource/listPromotions";
-Config.GET_ASSIGNED_TEAMS = BASE_URL + "crm/loanAppAssignment/getAssignedTeams";
-Config.GET_ASSIGNED_USERS = BASE_URL + "crm/loanAppAssignment/getAssignedUsers";
-Config.GET_LOAN_MAPPING_DATA = BASE_URL + "crm/loan/homeLoanMappingData";
-Config.GET_LOAN_SOURCE_DETAILS = BASE_URL + "crm/loanAppLoanSource/read";
-// Stats section
-Config.GET_COMPARE_QUOTES_CONVERSION = BASE_URL + "crm/sfa/compareQuotesConversion";
-Config.GET_AVERAGE_QUOTES_CONVERSION = BASE_URL + "crm/sfa/getAverageConvertedQuotesTotals";
-Config.GET_MY_QUOTES_CONVERSION = BASE_URL + "crm/sfa/getMyConvertedQuotesTotals";
-Config.GET_MY_CLOSED_LOANS_FUNDED = BASE_URL + "crm/sfa/getMyClosedLoansMonthlyTotals";
-Config.GET_AVG_CLOSED_LOANS_FUNDED = BASE_URL + "crm/sfa/getAllClosedLoansMonthlyTotals";
-Config.GET_MY_CLOSED_LOANS_ADVERSED = BASE_URL + "crm/sfa/getMyAdverseActionedLoansMonthlyTotals";
-Config.GET_AVG_CLOSED_LOANS_ADVERSED = BASE_URL + "crm/sfa/getAllAdverseActionedLoansMonthlyTotals";
-Config.GET_MY_CLOSED_LOANS_ORIGIN = BASE_URL + "crm/sfa/getMyOriginatedLoansMonthlyTotals";
-Config.GET_AVG_CLOSED_LOANS_ORIGIN = BASE_URL + "crm/sfa/getAllOriginatedLoansMonthlyTotals";
-//# sourceMappingURL=service-url.config.js.map
-
-/***/ }),
-
-/***/ 204:
-/***/ (function(module, exports, __webpack_require__) {
-
-var map = {
-	"../pages/mobile/dashboard/dashboard.module": [
-		726,
-		0
-	],
-	"../pages/mobile/dashboard/edit-dashboard/edit-dashboard.module": [
-		727,
-		55
-	],
-	"../pages/mobile/home/home.module": [
-		725,
-		54
-	],
-	"../pages/mobile/loans/advanced-search/advanced-search.module": [
-		729,
-		34
-	],
-	"../pages/mobile/loans/condition-summary/condition-summary.module": [
-		730,
-		4
-	],
-	"../pages/mobile/loans/conditions/conditions.module": [
-		723,
-		13
-	],
-	"../pages/mobile/loans/documents/documents.module": [
-		721,
-		20
-	],
-	"../pages/mobile/loans/loan-summary/loan-summary.module": [
-		731,
-		10
-	],
-	"../pages/mobile/loans/loans.module": [
-		728,
-		2
-	],
-	"../pages/mobile/loans/pricing-history/pricing-history.module": [
-		733,
-		53
-	],
-	"../pages/mobile/loans/pricing/pricing.module": [
-		732,
-		9
-	],
-	"../pages/mobile/loans/select-rate/select-rate.module": [
-		734,
-		52
-	],
-	"../pages/mobile/login/login.module": [
-		735,
-		51
-	],
-	"../pages/mobile/my-contacts/add-edit-contact/add-edit-contact.module": [
-		737,
-		26
-	],
-	"../pages/mobile/my-contacts/communication-log/communication-log.module": [
-		738,
-		31
-	],
-	"../pages/mobile/my-contacts/contact-details/contact-details.module": [
-		739,
-		14
-	],
-	"../pages/mobile/my-contacts/my-contacts.module": [
-		736,
-		16
-	],
-	"../pages/mobile/my-quotes/advanced-search/advanced-search.module": [
-		741,
-		35
-	],
-	"../pages/mobile/my-quotes/eligible-products/eligible-products.module": [
-		742,
-		50
-	],
-	"../pages/mobile/my-quotes/loan-calculator/loan-calculator.module": [
-		743,
-		49
-	],
-	"../pages/mobile/my-quotes/my-quotes.module": [
-		740,
-		8
-	],
-	"../pages/mobile/my-quotes/new-quote/new-quote.module": [
-		744,
-		12
-	],
-	"../pages/mobile/my-quotes/quotes-calculator/quotes-calculator.module": [
-		745,
-		48
-	],
-	"../pages/mobile/my-quotes/quotes-comparison/quotes-comparison.module": [
-		746,
-		47
-	],
-	"../pages/mobile/my-quotes/quotes-product/quotes-product.module": [
-		747,
-		46
-	],
-	"../pages/mobile/my-quotes/quotes-rates/quotes-rates.module": [
-		748,
-		45
-	],
-	"../pages/mobile/my-referral-partners/add-edit-referral-account/add-edit-referral-account.module": [
-		750,
-		44
-	],
-	"../pages/mobile/my-referral-partners/add-edit-referral-partner/add-edit-referral-partner.module": [
-		751,
-		25
-	],
-	"../pages/mobile/my-referral-partners/my-referral-partners.module": [
-		749,
-		15
-	],
-	"../pages/mobile/my-referral-partners/referral-account-contacts/referral-account-contacts.module": [
-		752,
-		33
-	],
-	"../pages/mobile/my-referral-partners/referral-account-details/referral-account-details.module": [
-		753,
-		18
-	],
-	"../pages/mobile/my-referral-partners/referral-partner-details/referral-partner-details.module": [
-		754,
-		17
-	],
-	"../pages/mobile/my-schedule/add-edit-event/add-edit-event.module": [
-		757,
-		19
-	],
-	"../pages/mobile/my-schedule/month-view/month-view.module": [
-		756,
-		43
-	],
-	"../pages/mobile/my-schedule/my-schedule.module": [
-		755,
-		21
-	],
-	"../pages/mobile/my-schedule/view-event/view-event.module": [
-		758,
-		32
-	],
-	"../pages/mobile/my-tasks/add-task/add-task.module": [
-		759,
-		24
-	],
-	"../pages/mobile/my-tasks/edit-task/edit-task.module": [
-		760,
-		23
-	],
-	"../pages/mobile/my-tasks/my-tasks.module": [
-		722,
-		22
-	],
-	"../pages/mobile/my-tasks/task-filter-popover/task-filter-popover.module": [
-		761,
-		42
-	],
-	"../pages/mobile/my-tasks/task-status-popover/task-status-popover.module": [
-		762,
-		41
-	],
-	"../pages/mobile/my-tools/additional-payment-calculator-results/additional-payment-calculator-results.module": [
-		765,
-		40
-	],
-	"../pages/mobile/my-tools/additional-payment-calculator/additional-payment-calculator.module": [
-		764,
-		7
-	],
-	"../pages/mobile/my-tools/affordability-calculator/affordability-calculator-results/affordability-calculator-results.module": [
-		767,
-		27
-	],
-	"../pages/mobile/my-tools/affordability-calculator/affordability-calculator.module": [
-		766,
-		39
-	],
-	"../pages/mobile/my-tools/my-tools.module": [
-		763,
-		38
-	],
-	"../pages/mobile/my-tools/quick-qualifier/quick-qualifier-results/quick-qualifier-results.module": [
-		769,
-		37
-	],
-	"../pages/mobile/my-tools/quick-qualifier/quick-qualifier.module": [
-		768,
-		11
-	],
-	"../pages/mobile/notes-page/notes-page.module": [
-		724,
-		30
-	],
-	"../pages/mobile/picture-editor/picture-editor.module": [
-		770,
-		28
-	],
-	"../pages/mobile/score-card/score-card.module": [
-		771,
-		1
-	],
-	"../pages/mobile/settings/settings.module": [
-		772,
-		36
-	],
-	"../pages/mobile/upcoming-events/add-event/add-event.module": [
-		774,
-		3
-	],
-	"../pages/mobile/upcoming-events/event-details/event-details.module": [
-		775,
-		5
-	],
-	"../pages/mobile/upcoming-events/upcoming-events.module": [
-		773,
-		6
-	],
-	"../pages/mobile/viewer/viewer.module": [
-		776,
-		29
-	]
-};
-function webpackAsyncContext(req) {
-	var ids = map[req];
-	if(!ids)
-		return Promise.reject(new Error("Cannot find module '" + req + "'."));
-	return __webpack_require__.e(ids[1]).then(function() {
-		return __webpack_require__(ids[0]);
-	});
-};
-webpackAsyncContext.keys = function webpackAsyncContextKeys() {
-	return Object.keys(map);
-};
-webpackAsyncContext.id = 204;
-module.exports = webpackAsyncContext;
-
-/***/ }),
-
-/***/ 36:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FeedbackService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(47);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-var FeedbackService = FeedbackService_1 = (function () {
-    function FeedbackService(toastCtrl, loadingCtrl, alertCtrl) {
-        this.toastCtrl = toastCtrl;
-        this.loadingCtrl = loadingCtrl;
-        this.alertCtrl = alertCtrl;
-    }
-    FeedbackService.prototype.showToast = function (message, toastType, duration, position) {
-        if (toastType === void 0) { toastType = "info"; }
-        if (duration === void 0) { duration = 2000; }
-        if (position === void 0) { position = "bottom"; }
-        /*
-         * toastType could be one of ['info', 'warning', 'error']
-         * usage:
-         *      this.feedbackService.showToast(
-         *         <toast message>,
-         *         <toastType>,
-         *         <duration>,
-         *         <position>,
-         *      )
-         */
-        var toast = this.toastCtrl.create({ message: message, duration: duration, position: position,
-            cssClass: "toast__" + toastType,
-        });
-        if (!FeedbackService_1.isToastVisible) {
-            toast.present();
-            FeedbackService_1.isToastVisible = true;
-        }
-        toast.onDidDismiss(function () {
-            FeedbackService_1.isToastVisible = false;
-        });
-    };
-    FeedbackService.prototype.getLoader = function (content) {
-        if (content === void 0) { content = "loading ..."; }
-        // usage:
-        // const loader = feedback.getLoader(<message>)
-        // loader.present() => show loader with the message
-        // loader.dismiss() => dismiss loader
-        var loader = this.loadingCtrl.create({ content: content });
-        return {
-            dismiss: function () { loader.dismiss(); FeedbackService_1.isLoaderVisible = false; },
-            present: function () { loader.present(); FeedbackService_1.isLoaderVisible = true; },
-        };
-    };
-    FeedbackService.prototype.showError = function (text) {
-        var alert = this.alertCtrl.create({
-            buttons: ["OK"],
-            subTitle: text,
-            title: "Error",
-        });
-        alert.present();
-    };
-    return FeedbackService;
-}());
-FeedbackService.isLoaderVisible = false;
-FeedbackService.isToastVisible = false;
-FeedbackService = FeedbackService_1 = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["s" /* ToastController */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["k" /* LoadingController */],
-        __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["b" /* AlertController */]])
-], FeedbackService);
-
-var FeedbackService_1;
-//# sourceMappingURL=feedback.service.js.map
-
-/***/ }),
-
-/***/ 382:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CustomNavService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__feedback_feedback_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(1);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-var CustomNavService = (function () {
-    function CustomNavService(feedback) {
-        this.feedback = feedback;
-    }
-    CustomNavService.prototype.push = function (navCtrl, page, params, opts, done) {
-        var loader = this.feedback.getLoader();
-        loader.present();
-        return navCtrl.push(page, params, opts, done).then(function (response) {
-            loader.dismiss();
-            return response;
-        });
-    };
-    return CustomNavService;
-}());
-CustomNavService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_0__feedback_feedback_service__["a" /* FeedbackService */]])
-], CustomNavService);
-
-//# sourceMappingURL=custom-nav.service.js.map
-
-/***/ }),
-
-/***/ 383:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ApplicationConstants; });
-/* tslint:disable max-line-length*/
-var ApplicationConstants = (function () {
-    function ApplicationConstants() {
-    }
-    return ApplicationConstants;
-}());
-
-ApplicationConstants.CONTACT_ACTIVITY_TYPEID = { CALL: "PHONE_CALL_CONTACT", SMS: "PHONE_CALL_CONTACT", EMAIL: "SEND_EMAIL_CONTACT" };
-ApplicationConstants.CONTACT_ACTIVITY_DETAILTEXT = { CALL: "Outgoing call", SMS: "Message sent", EMAIL: "Email sent" };
-ApplicationConstants.REMINDERS = [{ text: "None", value: "" }, { text: "At start time", value: "0" },
-    { text: "5 minutes before start", value: "5" }, { text: "15 minutes before start", value: "15" },
-    { text: "30 minutes before start", value: "30" }, { text: "1 hour before start", value: "60" },
-    { text: "1.5 hours before start", value: "90" }, { text: "2 hours before start", value: "120" },
-    { text: "3 hours before start", value: "180" }, { text: "6 hours before start", value: "360" },
-    { text: "12 hours before start", value: "720" }, { text: "1 day before start", value: "1440" },
-    { text: "2 days before start", value: "2880" }, { text: "3 days before start", value: "4320" },
-    { text: "4 days before start", value: "5760" }, { text: "5 days before start", value: "7200" },
-    { text: "1 week before start", value: "10080" }, { text: "2 weeks before start", value: "20160" }];
-ApplicationConstants.TIMEZONES = [{ text: "US/Alaska" }, { text: "US/Aleutian" }, { text: "US/Arizona" }, { text: "US/Central" },
-    { text: "US/East-Indiana" }, { text: "US/Eastern" }, { text: "US/Hawaii" }, { text: "US/Indiana-Starke" },
-    { text: "US/Michigan" }, { text: "US/Mountain" }, { text: "US/Pacific" }, { text: "US/Pacific-New" }, { text: "US/Samoa" }];
-ApplicationConstants.ACCOUNT_TYPES = [{ partnerTypeDesc: "Accounting Firm", partnerTypeId: "ACCTFIRM" },
-    { partnerTypeDesc: "Builder", partnerTypeId: "BUILDER" },
-    { partnerTypeDesc: "Law Firm", partnerTypeId: "LAWFIRM" },
-    { partnerTypeDesc: "Mortgage Banker", partnerTypeId: "MTGBANKER" },
-    { partnerTypeDesc: "Mortgage Broker", partnerTypeId: "MTGBROKER" },
-    { partnerTypeDesc: "Real Estate Brokerage", partnerTypeId: "REB" },
-    { partnerTypeDesc: "Title Agency", partnerTypeId: "TITLEAGN" }];
-ApplicationConstants.APP_VERSION = "0.1";
-ApplicationConstants.BUILD_NUMBER = "201704150444";
-ApplicationConstants.RESPONSE_DATA_LIMIT = 25;
-ApplicationConstants.SSN_DIGIT = 9;
-ApplicationConstants.PHONENUMBER_DIGIT = 10;
-ApplicationConstants.POSTALCODE_DIGIT = 5;
-ApplicationConstants.DOB_YEAR_TO_MINUS = 16;
-ApplicationConstants.PICTURE_CROP = 165;
-//# sourceMappingURL=application-constants.config.js.map
-
-/***/ }),
-
-/***/ 384:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ContactService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__common_utils_filters__ = __webpack_require__(59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__ = __webpack_require__(383);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-/*
-  Generated class for the ContactService provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
-var ContactService = (function () {
-    function ContactService(httpservice, filters) {
-        this.httpservice = httpservice;
-        this.filters = filters;
-        this.cache = {
-            contacts: "",
-            total: "",
-        };
-        this.searchobj = {
-            searchparams: {},
-            searchtotal: "",
-            currentpage: "",
-        };
-    }
-    ContactService.prototype.makeParam = function (start, limit) {
-        var param = { start: start, limit: limit };
-        return param;
-    };
-    // Private method to create list of params
-    ContactService.prototype.getParamList = function () {
-        // Hardcoding , this needs to be moved to constants
-        var limit = 25;
-        // tslint:disable-next-line:prefer-const
-        var total = this.cache.total;
-        var paramList = [];
-        var start = 0;
-        while (start <= total) {
-            paramList.push(this.makeParam(start, limit));
-            start = start + limit - 1;
-        }
-        return paramList;
-    };
-    /*
-     * Returns the promise of get contacts list api
-     * Input param object with start and limit
-     * param{
-     *  start: 20,
-     *  limit: 20
-     * }
-     */
-    ContactService.prototype.getContactsPromise = function (param) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_LIST_URL, param).map(function (response) {
-            return (response.data);
-        });
-    };
-    /*
-     * Method to fetch contacts
-     * Returns an array of contact chunks
-     * eg: [chunk1,chunk2...]
-     * where chunk1 is an array containing contacts and so on..
-     */
-    // getContacts() {
-    //   const paramList = this.getParamList();
-    //   return (paramList.map((param) => this.getContactsPromise(param) ));
-    // }
-    ContactService.prototype.searchContacts = function (searchString) {
-        var _this = this;
-        var params = {
-            advSearchYn: true,
-            page: 1,
-            start: 0,
-            limit: 25,
-            name: null,
-            ssn: null,
-            phone: null,
-        };
-        if (Number(searchString)) {
-            //  if (searchString.length === ApplicationConstants.SSN_DIGIT) {
-            //    params.ssn = Filters.formatSSN(searchString);
-            //  }
-            if (searchString.length === __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__["a" /* ApplicationConstants */].PHONENUMBER_DIGIT) {
-                params.phone = __WEBPACK_IMPORTED_MODULE_3__common_utils_filters__["a" /* Filters */].formatPhoneNumber(searchString);
-            }
-        }
-        else {
-            params.name = searchString;
-        }
-        this.searchobj.searchparams = params;
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_FLEX_FIND, this.searchobj.searchparams).map(function (response) {
-            _this.searchobj.searchTotal = response.total;
-            _this.searchobj.currentpage = 1;
-            return response;
-        });
-        // handle errors
-        // .catch(() => {#<{(| do something here |)}>#});
-    };
-    ContactService.prototype.getNextPage = function () {
-        if (this.searchobj.searchtotal) {
-            // tslint:disable-next-line:max-line-length
-            if (this.searchobj.searchtotal > (this.searchobj.currentpage * __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__["a" /* ApplicationConstants */].RESPONSE_DATA_LIMIT)) {
-                // tslint:disable-next-line:max-line-length
-                // tslint:disable-next-line:no-string-literal
-                this.searchobj.searchparams["start"] = this.searchobj.currentpage * __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__["a" /* ApplicationConstants */].RESPONSE_DATA_LIMIT;
-                this.searchobj.currentpage += 1;
-                // tslint:disable-next-line:no-string-literal
-                this.searchobj.searchparams["page"] = this.searchobj.currentpage;
-                return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_FLEX_FIND, this.searchobj.searchparams);
-            }
-        }
-    };
-    /*
-     * Method to fetch cached contacts
-     */
-    ContactService.prototype.getCachedContacts = function () {
-        return this.cache.contacts;
-    };
-    /*
-    * Method to check if contacts cached
-    */
-    ContactService.prototype.isCached = function () {
-        if (this.cache.contacts) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    };
-    /*
-    * Method to search contacts based on the flex value
-    */
-    ContactService.prototype.search = function (flexValue, start, limit) {
-        var params = {
-            advancedSearch: true,
-            start: start,
-            limit: limit,
-        };
-        if (Number(flexValue)) {
-            if (flexValue.toString.length === __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__["a" /* ApplicationConstants */].SSN_DIGIT) {
-                // tslint:disable-next-line:no-string-literal
-                params["ssn"] = flexValue;
-            }
-            if (flexValue.toString.length === __WEBPACK_IMPORTED_MODULE_5__config_application_constants_config__["a" /* ApplicationConstants */].PHONENUMBER_DIGIT) {
-                // tslint:disable-next-line:no-string-literal
-                params["phone"] = flexValue;
-            }
-        }
-        else {
-            // tslint:disable-next-line:no-string-literal
-            params["name"] = flexValue;
-        }
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_SEARCH_URL, params).map(function (response) {
-            return response.data;
-        });
-    };
-    /*
-    * Method to retrive the recent contacts
-    */
-    ContactService.prototype.getRecentContacts = function (start, limit) {
-        var params = {
-            start: start,
-            limit: limit,
-        };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].RECENT_CONTACT_URL, params).map(function (response) {
-            return response.data;
-        });
-    };
-    ContactService.prototype.getTotal = function () {
-        var _this = this;
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_LIST_URL)
-            .map(function (response) {
-            _this.cache.total = response.total;
-            return response.total;
-        });
-    };
-    /*
-    * Filter borrower contacts
-    */
-    ContactService.prototype.filterBorrowerContacts = function (contacts) {
-        var tempContacts = contacts.filter(function (contact) {
-            return (contact.contactTypeId === "INDIVIDUAL");
-        });
-        return tempContacts;
-    };
-    /*
-    * Filter borrower contacts
-    */
-    ContactService.prototype.filterBusinessContacts = function (contacts) {
-        var tempContacts = contacts.filter(function (contact) {
-            return (contact.contactTypeId !== "INDIVIDUAL");
-        });
-        return tempContacts;
-    };
-    ContactService.prototype.getLoanCounts = function (contactId) {
-        var params = {
-            contactId: contactId,
-        };
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_LOANCOUNTS_URL, params).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getContactDetails = function (contactId) {
-        var _this = this;
-        var params = {
-            id: contactId,
-        };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_DETAILS_URL, params).map(function (response) {
-            _this.cache.total = response.total;
-            return response;
-        });
-    };
-    ContactService.prototype.getSalutationsList = function () {
-        var salutationRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].SALUTATION_URL, salutationRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getTelephoneTypes = function () {
-        var telephoneTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].TELEPHONETYPES_URL, telephoneTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getContactTypes = function () {
-        var contactTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACTTYPES_URL, contactTypesRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getStates = function () {
-        var contactTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].STATELOOKUP_URL, contactTypesRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getCityStateLookup = function (zipcode) {
-        var cityStateLookupRequest = { zipCode: zipcode, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CITYSTATELOOKUP_URL, cityStateLookupRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.createContact = function (createContactRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CREATECONTACT_URL, createContactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.updateContact = function (updateContactRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].UPDATECONTACT_URL, updateContactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getCommunicationActivities = function (contactId) {
-        var contactRequest = { contactId: contactId };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].COMMUNICATION_ACTIVITIES_URL, contactRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.getContactActivities = function (contactId) {
-        var contactRequest = { contactId: contactId };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_ACTIVITIES_URL, contactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.addContactActivity = function (activityRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].ADD_CONTACT_ACTIVITY_URL, activityRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ContactService.prototype.updateRecentContact = function (contactId) {
-        var contactRequest = { id: contactId };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].UPDATE_RECENT_CONTACT_URL, contactRequest);
-    };
-    ContactService.prototype.getContactsList = function (start, limit) {
-        var params = {
-            start: start,
-            limit: limit,
-        };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_4__config_service_url_config__["a" /* Config */].CONTACT_LIST_URL, params).map(function (response) {
-            return response.data;
-        });
-    };
-    ContactService.prototype.getContacts = function (apiURL, params) {
-        if (!params) {
-            params = { start: 0, limit: 1000 };
-        }
-        else {
-            // tslint:disable-next-line:no-magic-numbers
-            params.limit = 1000;
-        }
-        return this.httpservice.get(apiURL, params).map(function (response) {
-            return response.data;
-        });
-    };
-    return ContactService;
-}());
-ContactService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */], __WEBPACK_IMPORTED_MODULE_3__common_utils_filters__["a" /* Filters */]])
-], ContactService);
-
-//# sourceMappingURL=contact-service.js.map
-
-/***/ }),
-
-/***/ 385:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return QuoteService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_feedback_feedback_service__ = __webpack_require__(36);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-var QuoteService = (function () {
-    function QuoteService(http, feedback) {
-        this.http = http;
-        this.feedback = feedback;
-    }
-    QuoteService.prototype.getLeadType = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LEAD_TYPES)
-            .map(function (response) {
-            return response.data.map(function (element) { return ({
-                value: element.leadTypeId,
-                name: element.leadTypeDesc,
-            }); });
-        });
-    };
-    QuoteService.prototype.getLeadSource = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LEAD_SOURCES)
-            .map(function (response) {
-            return response.data.map(function (element) { return ({
-                value: element.leadSourceId,
-                name: element.leadSourceDesc,
-            }); });
-        });
-    };
-    QuoteService.prototype.getStatus = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTE_STATUS)
-            .map(function (response) {
-            return response.data.map(function (element) { return ({
-                value: element.quoteStatusTypeId,
-                name: element.quoteStatusDescription,
-            }); });
-        });
-    };
-    QuoteService.prototype.updateStatus = function (quote, item) {
-        var params = {
-            quoteId: quote.quoteId,
-            newStatus: item.value,
-            newStatusDesc: item.name,
-            oldStatusDesc: quote.quoteStatusDescription,
-        };
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTES_STATUS, params);
-    };
-    QuoteService.prototype.getPropertyTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].BUILDING_TYPES);
-    };
-    QuoteService.prototype.getProjectTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].PROJ_CLASS_TYPES);
-    };
-    QuoteService.prototype.getTaxRates = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].TAX_RATE);
-    };
-    QuoteService.prototype.getMIPlanTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].PMI_PLAN_TYPES);
-    };
-    QuoteService.prototype.getCreditRatings = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREDIT_RATINGS);
-    };
-    QuoteService.prototype.getDesiredPricingOptions = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].RATE_LOCK_TYPE);
-    };
-    QuoteService.prototype.getRefinancePurposeTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].REFI_PURPOSE_TYPES);
-    };
-    QuoteService.prototype.getCounty = function (zipCode) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].COUNTIES, {
-            zipCode: zipCode,
-        });
-    };
-    QuoteService.prototype.createQuote = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREATE_QUOTE, params);
-    };
-    QuoteService.prototype.readQuote = function (quoteId) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].READ_QUOTE, {
-            quoteId: quoteId,
-        });
-    };
-    QuoteService.prototype.updateQuoteHome = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_HOME, params);
-    };
-    QuoteService.prototype.updatePurposeAndProperty = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTES_UPDATE_PURPOSE_PROPERTY, params);
-    };
-    QuoteService.prototype.updatePurchaseLoanScenario = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_PURCHASE_LOAN_SCENARIO, params);
-    };
-    QuoteService.prototype.updateRefinanceLoanScenario = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_REFINANCE_LOAN_SCENARIO, params);
-    };
-    QuoteService.prototype.updateEquityLoanScenario = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_EQUITY_LOAN_SCENARIO, params);
-    };
-    QuoteService.prototype.updatePricingGoals = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_PRICING_GOALS, params);
-    };
-    QuoteService.prototype.updateExistingLiens = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_EXISTING_LIENS, params);
-    };
-    QuoteService.prototype.getQuoteResults = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_QUOTE_RESULTS, params);
-    };
-    QuoteService.prototype.getLTVRatios = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CALC_LTV_RATIO, params);
-    };
-    QuoteService.prototype.getMyQuotes = function () {
-        var params = {
-            start: 0,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTES, params);
-    };
-    QuoteService.prototype.getAvailableQuoteStatuses = function (quoteId, statusType) {
-        var params = {
-            quoteId: quoteId,
-            statusType: statusType,
-            start: 0,
-            page: 1,
-            limit: 25,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].AVAILABLE_QUOTE_STATUSES, params);
-    };
-    QuoteService.prototype.getQuoteStatusHistory = function (quoteId) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].READ_QUOTE_STATUS, {
-            quoteId: quoteId,
-        });
-    };
-    QuoteService.prototype.updateQuoteStatus = function (updateQuoteStatusRequest) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTES_STATUS, updateQuoteStatusRequest);
-    };
-    QuoteService.prototype.getMortgageTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].MORTGAGE_TYPES);
-    };
-    QuoteService.prototype.getLiablilityStatusTypes = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIABILITY_STATUS_TYPES);
-    };
-    QuoteService.prototype.saveDesiredProducts = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_QUOTE_DESIRED_PRODUCTS, params);
-    };
-    QuoteService.prototype.emailPDF = function (params) {
-        var formData = new FormData();
-        Object.keys(params).forEach(function (key) {
-            formData.append(key, params[key]);
-        });
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].EMAIL_PDF, formData);
-    };
-    QuoteService.prototype.downloadPDF = function (params) {
-        var formData = new FormData();
-        Object.keys(params).forEach(function (key) {
-            formData.append(key, params[key]);
-        });
-        return this.http.postFile(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].DOWNLOAD_PDF, formData);
-    };
-    QuoteService.prototype.getPaymentAndBalance = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].PAYMENT_BALANCE, params);
-    };
-    QuoteService.prototype.getQuoteFees = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTE_FEES, params);
-    };
-    QuoteService.prototype.getQuoteRates = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTE_RATES, params);
-    };
-    QuoteService.prototype.getQuoteStats = function () {
-        var params = {
-            intervalType: "ALL",
-        };
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTES_STATS, params);
-    };
-    return QuoteService;
-}());
-QuoteService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */],
-        __WEBPACK_IMPORTED_MODULE_4__providers_feedback_feedback_service__["a" /* FeedbackService */]])
-], QuoteService);
-
-//# sourceMappingURL=quote.service.js.map
-
-/***/ }),
-
-/***/ 386:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PricingService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__loans_loan_service__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-var PricingService = (function () {
-    function PricingService(httpservice, loanService) {
-        this.httpservice = httpservice;
-        this.loanService = loanService;
-    }
-    PricingService.prototype.getCityStateLookup = function (zipcode) {
-        var cityStateLookupRequest = { zipCode: zipcode, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CITYSTATELOOKUP_URL, cityStateLookupRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getSubjectPropertyTypes = function (authLoanId) {
-        var subjectPropertyTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_SUBJECT_PROPERTY_TYPES, subjectPropertyTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getProjectTypes = function (authLoanId) {
-        var subjectPropertyTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PROJECT_TYPES, subjectPropertyTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getPropertyTypes = function (authLoanId) {
-        var subjectPropertyTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PROPERTY_TYPES, subjectPropertyTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.updateProperty = function (updatePropertyRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_PROPERTY_INFO, updatePropertyRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLoanHeaderInfo = function (authLoanId, loanId) {
-        var loanHeaderInfoRequest = { authLoanId: authLoanId, loanId: loanId };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PROJECT_TYPES, loanHeaderInfoRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLoanPurposes = function (authLoanId) {
-        var loanPurposesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_PURPOSES, loanPurposesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getRefinancePurposes = function (authLoanId) {
-        var refinancePurposesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_REFINANCE_PURPOSES, refinancePurposesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getDocumentationTypes = function (authLoanId) {
-        var documentationTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_DOCUMENTATION_TYPES, documentationTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getOccupancyTypes = function (authLoanId) {
-        var occupancyTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_OCCUPANCY_TYPES, occupancyTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.saveAllLoanTerms = function (loanTermsRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].SAVE_ALL_LOAN_TERMS, loanTermsRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLockPeriods = function (authLoanId) {
-        var lockPeriodsRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOCK_PERIODS, lockPeriodsRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getPricingAndRateLockInfo = function (authLoanId, id) {
-        var pricingAndRateLockInfoRequest = { authLoanId: authLoanId, id: id };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PRICING_RATELOCK_INFO, pricingAndRateLockInfoRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getHomeLoanMappingDataWithLoanNumber = function (loanNumber) {
-        var _this = this;
-        return this.loanService.getAuthLoanId(loanNumber).flatMap(function (data) {
-            var pricingAndRateLockInfoRequest = {
-                lenderLoanNumber: loanNumber,
-                authLoanId: data.loanId,
-                id: "",
-            };
-            return _this.getHomeLoanMappingDataWithAuthId(pricingAndRateLockInfoRequest);
-        });
-    };
-    PricingService.prototype.getHomeLoanMappingDataWithAuthId = function (pricingAndRateLockInfoRequest) {
-        return this.httpservice
-            .get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_HOME_LOAN_MAPPING_DATA, pricingAndRateLockInfoRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getRetailLoanTermsDataWithLoanNumber = function (loanNumber) {
-        var _this = this;
-        return this.loanService.getAuthLoanId(loanNumber).flatMap(function (data) {
-            var pricingAndRateLockInfoRequest = {
-                lenderLoanNumber: loanNumber,
-                authLoanId: data.loanId,
-                id: "",
-            };
-            return _this.getRetailLoanTermsDataWithAuthId(pricingAndRateLockInfoRequest);
-        });
-    };
-    PricingService.prototype.getRetailLoanTermsDataWithAuthId = function (pricingAndRateLockInfoRequest) {
-        return this.httpservice
-            .get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_RETAIL_LOAN_TERMS, pricingAndRateLockInfoRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getPricingHistoryList = function (authLoanId, loanId) {
-        var listPriceHistoryRequest = this.httpservice.convertJsonToQueryString({ authLoanId: authLoanId, loanId: loanId })
-            .toString();
-        listPriceHistoryRequest = "&" + listPriceHistoryRequest;
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PRICING_HISTORY, "", null, listPriceHistoryRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getRates = function (ratesRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_RATES, ratesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getPricingAdjustments = function (pricingAdjustmentsRequest, authLoanId) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PRICING_ADJUSTMENTS, pricingAdjustmentsRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.updatePricing = function (pricingRequest) {
-        return this.httpservice.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_PRICING, pricingRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getCoreChangeReasons = function (authLoanId) {
-        var coreChangeReasonsRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_CORE_CHANGE_REASONS, coreChangeReasonsRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getExceptionTypes = function (authLoanId) {
-        var exceptionTypesRequest = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_EXCEPTION_TYPES, exceptionTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLoanTypes = function (authLoanId) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_TYPES, { authLoanId: authLoanId })
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLienTypes = function (authLoanId) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_TYPES, { authLoanId: authLoanId })
-            .map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getLookUpData = function (lookupService, authLoanId) {
-        var _this = this;
-        var lookup = lookupService.map(function (url) {
-            return _this.httpservice.get(url, { authLoanId: authLoanId })
-                .map(function (response) {
-                return response.data;
-            }).catch(function (response) { return __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__["Observable"].of([]); });
-        });
-        return __WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__["Observable"].forkJoin.apply(__WEBPACK_IMPORTED_MODULE_5_rxjs_Observable__["Observable"], lookup);
-    };
-    PricingService.prototype.getHomeLoanMappingData = function (homeLoanMappingdataRequest) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_HOME_LOAN_MAPPING_DATA, homeLoanMappingdataRequest).map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.readTerms = function (authLoanId) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].READ_LOAN_TERMS, { id: authLoanId, authLoanId: authLoanId }).map(function (response) {
-            return response;
-        });
-    };
-    PricingService.prototype.getPropertyAddress = function (lenderLoanNumber, authLoanId) {
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].READ_SUBJECT_PROPERTY_URL, { lenderLoanNumber: lenderLoanNumber, authLoanId: authLoanId }).map(function (response) {
-            return response;
-        });
-    };
-    // getLookUpData(url: any, authLoanId) {
-    //   return this.httpservice.get(url, { authLoanId })
-    //     .map((response) => {
-    //       return response.data;
-    //     });
-    // }
-    PricingService.prototype.getLenderInfos = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LENDER_INFOS, params);
-    };
-    PricingService.prototype.getFulfillmentCenters = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_FULFILLMENT_CENTERS, params);
-    };
-    PricingService.prototype.getSalesRegions = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_SALES_REGIONS, params);
-    };
-    PricingService.prototype.getSalesBranches = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_SALES_BRANCHES, params);
-    };
-    PricingService.prototype.getMarketTypes = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_MARKET_TYPES, params);
-    };
-    PricingService.prototype.getLeadTypes = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LEAD_TYPES, params);
-    };
-    PricingService.prototype.getLeadSources = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LEAD_SOURCES, params);
-    };
-    PricingService.prototype.getUserTeams = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_USERTEAMS, params);
-    };
-    PricingService.prototype.getBrokerInfos = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_BROKERINFOS, params);
-    };
-    PricingService.prototype.getSubChannels = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_SUB_CHANNELS, params);
-    };
-    PricingService.prototype.getSalesSubRegions = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_SALESSUBREGIONS, params);
-    };
-    PricingService.prototype.getProductPricingMappings = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PRODUCT_PRICING_MAPPINGS, params);
-    };
-    PricingService.prototype.getBrokerTypes = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_BROKER_TYPES, params);
-    };
-    PricingService.prototype.getChannels = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_CHANNELS, params);
-    };
-    PricingService.prototype.getPromotions = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_PROMOTIONS, params);
-    };
-    PricingService.prototype.getAssignedTeams = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_ASSIGNED_TEAMS, params);
-    };
-    PricingService.prototype.getAssignedUsers = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_ASSIGNED_USERS, params);
-    };
-    PricingService.prototype.getLoanMappingData = function (authLoanId) {
-        var params = { authLoanId: authLoanId, page: 1, start: 0, limit: 25 };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_MAPPING_DATA, params);
-    };
-    PricingService.prototype.getLoanSourceDetails = function (authLoanId) {
-        var params = { authLoanId: authLoanId, id: authLoanId };
-        return this.httpservice.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_SOURCE_DETAILS, params);
-    };
-    return PricingService;
-}());
-PricingService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */],
-        __WEBPACK_IMPORTED_MODULE_4__loans_loan_service__["a" /* LoanService */]])
-], PricingService);
-
-//# sourceMappingURL=pricing.service.js.map
-
-/***/ }),
-
-/***/ 387:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AvatarModule; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__avatar__ = __webpack_require__(700);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-
-
-var AvatarModule = (function () {
-    function AvatarModule() {
-    }
-    return AvatarModule;
-}());
-AvatarModule = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
-        declarations: [
-            __WEBPACK_IMPORTED_MODULE_2__avatar__["a" /* Avatar */],
-        ],
-        imports: [
-            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* IonicModule */],
-        ],
-        exports: [
-            __WEBPACK_IMPORTED_MODULE_2__avatar__["a" /* Avatar */],
-        ],
-    })
-], AvatarModule);
-
-//# sourceMappingURL=avatar.module.js.map
-
-/***/ }),
-
-/***/ 388:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ReferralPartnerService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-/*
-  Generated class for the ReferralPartnerService provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
-var ReferralPartnerService = (function () {
-    function ReferralPartnerService(httpService) {
-        this.httpService = httpService;
-    }
-    ReferralPartnerService.prototype.getAccountsList = function (start, limit) {
-        var params = {
-            start: start,
-            limit: limit,
-        };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_REFERRAL_ACCOUNTS, params).map(function (response) {
-            return response.data;
-        });
-    };
-    ReferralPartnerService.prototype.getPartnersList = function (start, limit) {
-        var params = {
-            start: start,
-            limit: limit,
-        };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_REFERRAL_CONTACTS, params).map(function (response) {
-            return response.data;
-        });
-    };
-    ReferralPartnerService.prototype.getReferralPartners = function (apiURL, params) {
-        if (!params) {
-            params = { start: 0, limit: 1000 };
-        }
-        else {
-            // tslint:disable-next-line:no-magic-numbers
-            params.limit = 1000;
-        }
-        return this.httpService.get(apiURL, params).map(function (response) {
-            return response.data;
-        });
-    };
-    ReferralPartnerService.prototype.getContactDetails = function (contactId) {
-        var params = {
-            id: contactId,
-        };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].REFERRAL_CONTACT_DETAILS, params)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getAccountDetails = function (accountId) {
-        var params = {
-            id: accountId,
-        };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].REFERRAL_ACCOUNT_DETAILS, params)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getSalutationsList = function () {
-        var salutationRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].SALUTATION_URL, salutationRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getTelephoneTypes = function () {
-        var telephoneTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].TELEPHONETYPES_URL, telephoneTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getContactTypes = function () {
-        var contactTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CONTACTTYPES_URL, contactTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getStates = function () {
-        var contactTypesRequest = { page: 1, start: 0, limit: 25 };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].STATELOOKUP_URL, contactTypesRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getCityStateLookup = function (zipcode) {
-        var cityStateLookupRequest = { zipCode: zipcode, page: 1, start: 0, limit: 25 };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CITYSTATELOOKUP_URL, cityStateLookupRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.createContact = function (createContactRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREATECONTACT_URL, createContactRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.updateContact = function (updateContactRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATECONTACT_URL, updateContactRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getCommunicationActivities = function (contactId) {
-        var contactRequest = { contactId: contactId };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].COMMUNICATION_ACTIVITIES_URL, contactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getContactActivities = function (contactId) {
-        var contactRequest = { contactId: contactId };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CONTACT_ACTIVITIES_URL, contactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.addContactActivity = function (activityRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].ADD_CONTACT_ACTIVITY_URL, activityRequest)
-            .map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.updateRecentContact = function (contactId) {
-        var contactRequest = { id: contactId };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_RECENT_CONTACT_URL, contactRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.getReferralAccountContacts = function (partnerId) {
-        var referralAccountContactsRequest = { partnerId: partnerId };
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LIST_REFERRAL_ACCOUNT_CONTACTS, referralAccountContactsRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.createReferralAccount = function (createReferralAccountRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREATE_REFERRAL_ACCOUNT, createReferralAccountRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.updateReferralAccount = function (updateReferralAccountRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_REFERRAL_ACCOUNT, updateReferralAccountRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.searchCompanyNames = function (searchCompanyNamesRequest) {
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].SEARCH_COMPANY_NAMES, searchCompanyNamesRequest);
-    };
-    ReferralPartnerService.prototype.createReferralPartner = function (createReferralPartnerRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].CREATE_REFERRAL_PARTNER, createReferralPartnerRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.updateReferralPartner = function (updateReferralPartnerRequest) {
-        return this.httpService.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UPDATE_REFERRAL_PARTNER, updateReferralPartnerRequest).map(function (response) {
-            return response;
-        });
-    };
-    ReferralPartnerService.prototype.searchCompanyAssociate = function (searchCompanyAssociateRequest) {
-        return this.httpService.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].SEARCH_COMPANY_ASSOCIATE, searchCompanyAssociateRequest).map(function (response) {
-            return response;
-        });
-    };
-    return ReferralPartnerService;
-}());
-ReferralPartnerService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], ReferralPartnerService);
-
-//# sourceMappingURL=referral-partner.service.js.map
-
-/***/ }),
-
-/***/ 390:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return InfiniteScroll; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_http_service__ = __webpack_require__(15);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-/* tslint:disable max-line-length*/
-
-
-var InfiniteScroll = (function () {
-    function InfiniteScroll(httpservice) {
-        this.httpservice = httpservice;
-        this.PARAM_KEY_START = "start";
-        this.PARAM_KEY_PAGE = "page";
-        this.results = {};
-    }
-    InfiniteScroll.prototype.init = function (url, params, results, options) {
-        this.loadDefault();
-        this.url = url;
-        this.params = params;
-        this.results = results;
-        if (options) {
-            if (options.hasOwnProperty("pageSize")) {
-                this.options.pageSize = options.pageSize;
-            }
-            if (options.hasOwnProperty("keyData")) {
-                this.options.keyData = options.keyData;
-            }
-            if (options.hasOwnProperty("keyTotal")) {
-                this.options.keyTotal = options.keyTotal;
-            }
-        }
-    };
-    InfiniteScroll.prototype.loadInitialData = function () {
-        var _this = this;
-        var initialData = this.httpservice.get(this.url, this.params).map(function (response) {
-            if (response) {
-                _this.currentpage = 1;
-                _this.total = response[_this.options.keyTotal];
-                return response.hasOwnProperty(_this.options.keyData) ? response[_this.options.keyData] : {};
-            }
-        });
-        return initialData.toPromise().then(function (results) {
-            return (_a = _this.results).push.apply(_a, results);
-            var _a;
-        }).catch(function (err) {
-            return err;
-        });
-    };
-    InfiniteScroll.prototype.loadMoreData = function (event) {
-        var _this = this;
-        if (this.total) {
-            if (this.total > (this.currentpage * this.options.pageSize)) {
-                this.params[this.PARAM_KEY_START] = this.currentpage * this.options.pageSize;
-                this.currentpage += 1;
-                this.params[this.PARAM_KEY_PAGE] = this.currentpage;
-                this.httpservice.get(this.url, this.params).map(function (response) {
-                    event.complete();
-                    // event.enable(this.total > this.currentpage * this.options.pageSize);
-                    return response[_this.options.keyData];
-                }).subscribe(function (results) {
-                    (_a = _this.results).push.apply(_a, results);
-                    var _a;
-                });
-            }
-            else {
-                event.complete();
-                // event.enable(false);
-            }
-        }
-    };
-    InfiniteScroll.prototype.loadDefault = function () {
-        this.url = null;
-        this.params = null;
-        this.results = null;
-        this.options = { pageSize: 25, keyData: "data", keyTotal: "total" };
-    };
-    return InfiniteScroll;
-}());
-InfiniteScroll = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__utils_http_service__["a" /* HttpService */]])
-], InfiniteScroll);
-
-//# sourceMappingURL=infinite-scroll.js.map
-
-/***/ }),
-
-/***/ 391:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return StatsService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-var StatsService = (function () {
-    function StatsService(http) {
-        this.http = http;
-    }
-    StatsService.prototype.getCompareQuotesConversion = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_COMPARE_QUOTES_CONVERSION, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getMyFundedAndClosedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_MY_CLOSED_LOANS_FUNDED, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getAvgFundedAndClosedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_AVG_CLOSED_LOANS_FUNDED, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getMyAdversedAndClosedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_MY_CLOSED_LOANS_ADVERSED, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getAvgAdversedAndClosedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_AVG_CLOSED_LOANS_ADVERSED, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getMyOriginatedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_MY_CLOSED_LOANS_ORIGIN, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    StatsService.prototype.getAvgOriginatedLoans = function (intervalType, intervalValue) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_AVG_CLOSED_LOANS_ORIGIN, {
-            intervalType: intervalType,
-            intervalValue: intervalValue,
-        });
-    };
-    return StatsService;
-}());
-StatsService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], StatsService);
-
-//# sourceMappingURL=stats.service.js.map
-
-/***/ }),
-
-/***/ 392:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NotesService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-var NotesService = (function () {
-    function NotesService(http) {
-        this.http = http;
-    }
-    NotesService.prototype.getNotes = function (params, type) {
-        var url = type === "contact" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_LIST_URL : type ===
-            "contact_task" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_CONTACT_TASK_LIST_URL : type ===
-            "loan_task" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_LOAN_TASK_LIST_URL : type ===
-            "quote" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTE_GET_NOTES : __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_COND_LIST_URL;
-        return this.http.get(url, params);
-    };
-    NotesService.prototype.saveNote = function (params, type) {
-        var url = type === "contact" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_SAVE_URL : type ===
-            "contact_task" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_CONTACT_TASK_SAVE_URL : type ===
-            "loan_task" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_LOAN_TASK_SAVE_URL : type ===
-            "quote" ? __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUOTE_SAVE_NOTES : __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].NOTES_COND_SAVE_URL;
-        return this.http.post(url, params);
-    };
-    return NotesService;
-}());
-NotesService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], NotesService);
-
-//# sourceMappingURL=notes.service.js.map
-
-/***/ }),
-
-/***/ 394:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Utilities; });
-var Utilities = (function () {
-    function Utilities() {
-    }
-    // mergeObject() merge Orgin object with dest Obejct
-    // dest object is base object over that
-    // orgin object will be applied by iterating based on arrKeys
-    // exceptionList arry is used to
-    // ignore some of the attributes in the orgin object
-    Utilities.mergeObject = function (dest, orgin, exceptionList) {
-        var _this = this;
-        if (!dest && !orgin) {
-            return {};
-        }
-        if (!dest) {
-            return orgin;
-        }
-        if (!orgin) {
-            return dest;
-        }
-        var arrKeys = Object.keys(orgin);
-        arrKeys.forEach(function (key) {
-            if (exceptionList && exceptionList.length > 0
-                && exceptionList.indexOf(key) > 0) {
-                return;
-            }
-            if (orgin[key] && Object.keys(orgin[key]).length > 0) {
-                // Process object
-                if (dest[key]) {
-                    dest[key] = _this.mergeObject(dest[key], orgin[key], exceptionList);
-                }
-                else {
-                    dest[key] = orgin[key];
-                }
-            }
-            else {
-                // all other premitive types
-                dest[key] = orgin[key];
-            }
-        });
-        return dest;
-    };
-    return Utilities;
-}());
-
-//# sourceMappingURL=utilities.js.map
-
-/***/ }),
-
-/***/ 395:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ScorecardService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-
-
-/*
-  Generated class for the ScorecardProvider provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
-var ScorecardService = (function () {
-    function ScorecardService() {
-        this.scoreCardScrollSource = new __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__["Subject"]();
-        this.scoreCardScrollSource$ = this.scoreCardScrollSource.asObservable();
-    }
-    ScorecardService.prototype.scoreCardScorll = function (scrollHeight) {
-        this.scoreCardScrollSource.next(scrollHeight);
-    };
-    return ScorecardService;
-}());
-ScorecardService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])()
-], ScorecardService);
-
-//# sourceMappingURL=scorecard.service.js.map
-
-/***/ }),
-
-/***/ 396:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DashboardService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(60);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__upcoming_events_service__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__schedule_schedule_service__ = __webpack_require__(141);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__tasks_service__ = __webpack_require__(140);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__loans_loan_service__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__ = __webpack_require__(699);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_moment__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_moment__);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-
-
-
-
-
-var DashboardService = (function () {
-    function DashboardService(http, eventsService, scheduleService, tasksService, loanService) {
-        this.http = http;
-        this.eventsService = eventsService;
-        this.scheduleService = scheduleService;
-        this.tasksService = tasksService;
-        this.loanService = loanService;
-        this.eventTypes = [
-            { icon: "icon-birthday", dateTypeDesc: "Birthday" },
-            { icon: "icon-birthday", dateTypeDesc: "Spouse Birthday" },
-            { icon: "icon-anniversary", dateTypeDesc: "Wedding Anniversary" },
-            { icon: "icon-loan-closure", dateTypeDesc: "Closing on New Home Loan" },
-            { icon: "icon-loan-closure", dateTypeDesc: "Closing on Refi Loan" }
-        ];
-        this.taskParams = {
-            sort: '[{"property":"dueDateTime","direction":"ASC"}]',
-        };
-    }
-    DashboardService.prototype.getTaskDueToday = function () {
-        this.taskParams.dueBy = "END_OF_DAY";
-        return this.tasksService.getTasksList(__WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].LIST_DUE_TASKS_URL, this.taskParams);
-    };
-    DashboardService.prototype.getEventsAndAppointments = function () {
-        var services = [];
-        services.push(this.eventsService.getUpcomingEventsForToday());
-        services.push(this.scheduleService.getMyScheduleForToday());
-        return __WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__["Observable"].forkJoin.apply(__WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__["Observable"], services);
-    };
-    DashboardService.prototype.getEventsAndAppointmentsAlerts = function (eventsAndAppointments) {
-        var eventAppointmentCards = [];
-        if (this.isEventsAndAppointmentsEmpty(eventsAndAppointments)) {
-            //  eventAppointmentCards.push(
-            //    this.getEmptyEventsAndAppointments("No Events or Appointments Today"));
-            return eventAppointmentCards;
-        }
-        eventAppointmentCards.push.apply(eventAppointmentCards, this.getEventAlerts(eventsAndAppointments[0]));
-        eventAppointmentCards.push.apply(eventAppointmentCards, this.getAppointmentAlerts(eventsAndAppointments[1]));
-        return eventAppointmentCards;
-    };
-    DashboardService.prototype.getEmptyEventsAndAppointments = function (feedback) {
-        var appointmentEventCard = new __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__["a" /* AlertModel */]();
-        appointmentEventCard.display = true;
-        appointmentEventCard.paragraph = [feedback];
-        return appointmentEventCard;
-    };
-    DashboardService.prototype.isEventsAndAppointmentsEmpty = function (eventsAndAppointments) {
-        var isEventsEmpty = false;
-        var isAppointmentsEmpty = false;
-        if (!eventsAndAppointments) {
-            return true;
-        }
-        if (!eventsAndAppointments[0] || !eventsAndAppointments[0].data
-            || eventsAndAppointments[0].data.length === 0) {
-            isEventsEmpty = true;
-        }
-        if (!eventsAndAppointments[1] || !eventsAndAppointments[1].data
-            || eventsAndAppointments[1].data.length === 0) {
-            isAppointmentsEmpty = true;
-        }
-        if (isEventsEmpty && isAppointmentsEmpty) {
-            return true;
-        }
-        return false;
-    };
-    DashboardService.prototype.getTodaysTaskOverdue = function () {
-        this.taskParams.dueBy = "PAST_DUE";
-        return this.tasksService.getTasksList(__WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].LIST_DUE_TASKS_URL, this.taskParams);
-    };
-    DashboardService.prototype.getTaskOverDueAlerts = function (tasks) {
-        var overDueTasks = new __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__["a" /* AlertModel */]();
-        overDueTasks.header = this.getOverDueCount(tasks);
-        overDueTasks.paragraph = ["Tasks Overdue"];
-        overDueTasks.icon = "icon-overdue";
-        overDueTasks.id = "overdue";
-        overDueTasks.name = "Overdue Tasks";
-        overDueTasks.display = true;
-        overDueTasks.drilldown.page = "MyTasks";
-        overDueTasks.drilldown.params = {
-            segment: "TasksAll",
-            filterBy: "Past Due",
-            dueBy: "PAST_DUE",
-        };
-        return overDueTasks;
-    };
-    DashboardService.prototype.getOverDueCount = function (tasks) {
-        return tasks.contactTasks.length +
-            tasks.contactTasks.length + tasks.referalPartnerTasks.length;
-    };
-    DashboardService.prototype.getLoanAlerts = function (loans) {
-        var loanAlerts = [];
-        var drilldown1 = { page: "MyLoans", params: { alertParams: { url: __WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].UNLOCKED_LOANS_LIST } } };
-        var drilldown2 = { page: "MyLoans", params: { alertParams: { url: __WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].EXPIRED_LOANS_LIST } } };
-        var drilldown3 = { page: "MyLoans", params: { alertParams: { url: __WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].EXPIRING_LOANS_LIST } } };
-        var drilldown4 = { page: "MyLoans", params: { alertParams: { url: __WEBPACK_IMPORTED_MODULE_7__config_service_url_config__["a" /* Config */].EXPIRING_LOANS_LIST } } };
-        if (loans && loans[0].success) {
-            var loanNotLocked = this.getAlertModel(loans[0].count, ["Loans Not locked"], "icon-unlock", "unlock-loans", "Loans Not locked", true, drilldown1);
-            loanAlerts.push(loanNotLocked);
-        }
-        if (loans && loans[1].success) {
-            var rateExpired = this.getAlertModel(loans[1].count, ["Rate Locks Expired"], "icon-expired-ratelock", "rate-lock", "Rate Locks Expired", true, drilldown2);
-            loanAlerts.push(rateExpired);
-        }
-        if (loans && loans[2].success) {
-            var locksDue = this.getAlertModel(loans[2].count, ["Locks Coming Due in 5 Days"], "icon-due", "unlock-due", "Locks Coming Due in 5 Days", true, drilldown3);
-            loanAlerts.push(locksDue);
-        }
-        var exceedServiceLevel = this.getAlertModel(loans[2].count, ["Loans Exceeding Service Level Days"], "icon-exceed", "exceding-level", "Loans Exceeding Service Level Days", true, drilldown4);
-        loanAlerts.push(exceedServiceLevel);
-        return loanAlerts;
-    };
-    DashboardService.prototype.getTaskAlerts = function (tasks) {
-        var drilldown1 = { page: "MyTasks", params: { segment: "TasksContacts", filterBy: "Due Today",
-                dueBy: "END_OF_DAY" } };
-        var drilldown2 = { page: "MyTasks", params: { segment: "TasksLoans", filterBy: "Due Today",
-                dueBy: "END_OF_DAY" } };
-        var drilldown3 = { page: "MyTasks", params: { segment: "TasksReferral", filterBy: "Due Today",
-                dueBy: "END_OF_DAY" } };
-        var contactTasks = this.getAlertModel(tasks.contactTasks.length, ["Contact-related Tasks Due Today"], "icon-contact-task", "contact-task", "Contact Related Tasks", true, drilldown1);
-        var loanTasks = this.getAlertModel(tasks.loanTasks.length, ["Loan-related Tasks Due Today"], "icon-loan-task", "ref-task", "Loan Related Tasks", true, drilldown2);
-        var partnersTask = this.getAlertModel(tasks.referalPartnerTasks.length, ["Referral-related Tasks Due Today"], "icon-ref-task", "referral-task", "Referal Related Tasks", true, drilldown3);
-        return [loanTasks, contactTasks, partnersTask];
-    };
-    DashboardService.prototype.getAppointmentAlerts = function (appointments) {
-        var _this = this;
-        var appointmentCards = [];
-        if (!appointments || !appointments.data) {
-            return;
-        }
-        appointments.data.forEach(function (appointment) {
-            var appointmentCard = new __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__["a" /* AlertModel */]();
-            appointmentCard.id = "meeting";
-            appointmentCard.icon = "icon-meeting";
-            appointmentCard.display = true;
-            if (appointment.contacts[0]) {
-                appointmentCard.header = appointment.contacts[0].contactName;
-            }
-            appointmentCard.paragraph =
-                [appointment.description, _this.getFormattedDateTime(appointment.startDateTime) + " -\n         " + _this.getFormattedDateTime(appointment.endDateTime)];
-            appointmentCard.name = "Appointment";
-            appointmentCards.push(appointmentCard);
-            appointmentCard.drilldown.page = "ViewEvent";
-            appointmentCard.drilldown.params = {
-                appointmentId: appointment.appointmentId,
-            };
-        });
-        return appointmentCards;
-    };
-    DashboardService.prototype.getEventAlerts = function (upcomingEvents) {
-        var _this = this;
-        var eventCards = [];
-        if (!upcomingEvents || !upcomingEvents.data) {
-            return;
-        }
-        upcomingEvents.data.forEach(function (event) {
-            var eventCard = new __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__["a" /* AlertModel */]();
-            eventCard.id = "event";
-            eventCard.icon = _this.getEventIcon(event.dateTypeDesc);
-            eventCard.display = true;
-            eventCard.header = event.contactName;
-            eventCard.paragraph = [event.dateTypeDesc + " Today"];
-            eventCard.name = "event";
-            eventCard.drilldown.page = "EventDetails";
-            eventCard.drilldown.params = event;
-            eventCards.push(eventCard);
-        });
-        return eventCards;
-    };
-    DashboardService.prototype.getLoanAlertsCount = function () {
-        var services = [];
-        services.push(this.loanService.getUnlockedLoansCount());
-        services.push(this.loanService.getExpiredLoansCount());
-        services.push(this.loanService.getExpiringLoansCount());
-        return __WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__["Observable"].forkJoin.apply(__WEBPACK_IMPORTED_MODULE_8_rxjs_Observable__["Observable"], services);
-    };
-    DashboardService.prototype.getAlertModel = function (count, desc, icon, id, name, display, drilldown) {
-        var alertModel = new __WEBPACK_IMPORTED_MODULE_9__common_model_dashboard_alert_model__["a" /* AlertModel */]();
-        alertModel.header = count;
-        alertModel.paragraph = desc;
-        alertModel.icon = icon;
-        alertModel.id = id;
-        alertModel.name = name;
-        alertModel.display = display;
-        alertModel.drilldown = drilldown;
-        return alertModel;
-    };
-    DashboardService.prototype.getEventIcon = function (dateTypeDesc) {
-        return this.getEventTypeByDesc(dateTypeDesc)[0].icon;
-    };
-    DashboardService.prototype.getEventTypeByDesc = function (dateTypeDesc) {
-        return this.eventTypes.filter(function (eventType) {
-            return eventType.dateTypeDesc === dateTypeDesc;
-        });
-    };
-    DashboardService.prototype.getFormattedDateTime = function (dateTime) {
-        return __WEBPACK_IMPORTED_MODULE_10_moment___default()(dateTime).local().format("hh:mm A");
-    };
-    return DashboardService;
-}());
-DashboardService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"],
-        __WEBPACK_IMPORTED_MODULE_3__upcoming_events_service__["a" /* UpcomingEventsService */],
-        __WEBPACK_IMPORTED_MODULE_4__schedule_schedule_service__["a" /* ScheduleService */],
-        __WEBPACK_IMPORTED_MODULE_5__tasks_service__["a" /* TasksService */],
-        __WEBPACK_IMPORTED_MODULE_6__loans_loan_service__["a" /* LoanService */]])
-], DashboardService);
-
-//# sourceMappingURL=dashboard.service.js.map
-
-/***/ }),
-
-/***/ 397:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return OutLookService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_model_session__ = __webpack_require__(75);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-var OutLookService = (function () {
-    function OutLookService(http, session) {
-        this.http = http;
-        this.session = session;
-    }
-    OutLookService.prototype.addScheduleAppoinment = function (appointmentRequest) {
-        // moment
-        var user = this.session.get("currentUser").username;
-        var outlookAppoinment = {
-            userId: user,
-            subject: appointmentRequest.description,
-            content: appointmentRequest.comment,
-            startDateTime: appointmentRequest.startDateTime,
-            endDateTime: appointmentRequest.endDateTime,
-            isOutlookIntegration: "true",
-        };
-        this.addAppoinment(outlookAppoinment);
-    };
-    OutLookService.prototype.addEventAppoinment = function (eventRequest) {
-        var user = this.session.get("currentUser").username;
-        var outlookAppoinment = {
-            userId: user,
-            subject: eventRequest.dateTypeId + " - " + eventRequest.contactId,
-            content: eventRequest.comment,
-            startDateTime: eventRequest.dateValue,
-            EndDateTime: eventRequest.dateValue,
-            isAllDayEvent: "true",
-            isOutlookIntegration: "true",
-        };
-        this.addAppoinment(outlookAppoinment);
-    };
-    OutLookService.prototype.addAppoinment = function (outlookAppoinment) {
-        var user = this.session.get("currentUser").username;
-        outlookAppoinment.userId = user;
-        this.http.post(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].INTEGRATION_OUTLOOK_APPOINMENT, outlookAppoinment)
-            .subscribe(function (response) {
-            if (response && response.status) {
-                // console.log(response.status)
-            }
-        });
-        // .catch((error) => {
-        //   // console.log('Error : ', error)
-        // });
-    };
-    return OutLookService;
-}());
-OutLookService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__["a" /* HttpService */], __WEBPACK_IMPORTED_MODULE_4__common_model_session__["a" /* Session */]])
-], OutLookService);
-
-//# sourceMappingURL=outlook-integration.service.js.map
-
-/***/ }),
-
-/***/ 398:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ToolsService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-var ToolsService = (function () {
-    function ToolsService(http) {
-        this.http = http;
-    }
-    ToolsService.prototype.getAdditionalCalculatorResults = function (params) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].ADDITIONAL_PAYMENT_CALCULATOR, params);
-    };
-    return ToolsService;
-}());
-ToolsService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], ToolsService);
-
-//# sourceMappingURL=tools.service.js.map
-
-/***/ }),
-
-/***/ 399:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AffordabilityCalculatorService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-var AffordabilityCalculatorService = (function () {
-    function AffordabilityCalculatorService(http) {
-        this.http = http;
-    }
-    AffordabilityCalculatorService.prototype.getAffordabilityResult = function (params) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].AFFORDABILITY_CALCULATOR, params);
-    };
-    AffordabilityCalculatorService.prototype.getRequiredIncomeResult = function (params) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].REQUIRED_INCOME_CALCULATOR, params);
-    };
-    AffordabilityCalculatorService.prototype.getMaxLoanAmountResult = function (params) {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].MAX_LOAN_AMOUNT_CALCULATOR, params);
-    };
-    return AffordabilityCalculatorService;
-}());
-AffordabilityCalculatorService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], AffordabilityCalculatorService);
-
-//# sourceMappingURL=affordability-calculator.service.js.map
-
-/***/ }),
-
-/***/ 400:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return QuickQualifierService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-var QuickQualifierService = (function () {
-    function QuickQualifierService(http) {
-        this.http = http;
-    }
-    QuickQualifierService.prototype.getQualifingResults = function (params) {
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].QUICK_QUALIFIER_URL, params);
-    };
-    return QuickQualifierService;
-}());
-QuickQualifierService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */]])
-], QuickQualifierService);
-
-//# sourceMappingURL=quick-qualifier.service.js.map
-
-/***/ }),
-
-/***/ 401:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(402);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(406);
-
-
-Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_1__app_module__["a" /* AppModule */]);
-//# sourceMappingURL=main.js.map
-
-/***/ }),
-
-/***/ 406:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(60);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(156);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(161);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ionic_angular__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__common_model_session__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__common_utils_infinite_scroll__ = __webpack_require__(390);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__common_utils_utilities__ = __webpack_require__(394);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_mobile_progress_bar_progress_bar__ = __webpack_require__(718);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__providers_schedule_schedule_service__ = __webpack_require__(141);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__providers_upcoming_events_service__ = __webpack_require__(143);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__providers_auth_service__ = __webpack_require__(138);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__providers_feedback_app_error_handler__ = __webpack_require__(719);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__providers_feedback_exception_service__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__providers_feedback_feedback_service__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__providers_home_service__ = __webpack_require__(142);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__providers_tasks_service__ = __webpack_require__(140);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__app_component__ = __webpack_require__(720);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__providers_contact_service__ = __webpack_require__(384);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__providers_referral_partner_service__ = __webpack_require__(388);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__common_utils_filters__ = __webpack_require__(59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__providers_loans_loan_service__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__providers_loans_stats_service__ = __webpack_require__(391);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__providers_notes_service__ = __webpack_require__(392);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__providers_quick_qualifier_service__ = __webpack_require__(400);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__providers_affordability_calculator_service__ = __webpack_require__(399);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__providers_tools_service__ = __webpack_require__(398);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__providers_outlook_integration_service__ = __webpack_require__(397);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__providers_nav_custom_nav_service__ = __webpack_require__(382);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__providers_quotes_quote_service__ = __webpack_require__(385);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__providers_pricing_service__ = __webpack_require__(386);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__providers_dashboard_dashboard_service__ = __webpack_require__(396);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_34__components_avatar_avatar_module__ = __webpack_require__(387);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_35__providers_menu_service__ = __webpack_require__(144);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_36__providers_scorecard_scorecard_service__ = __webpack_require__(395);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var AppModule = (function () {
-    function AppModule() {
-    }
-    return AppModule;
-}());
-AppModule = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
-        bootstrap: [__WEBPACK_IMPORTED_MODULE_5_ionic_angular__["f" /* IonicApp */]],
-        declarations: [
-            __WEBPACK_IMPORTED_MODULE_19__app_component__["a" /* MyApp */],
-            __WEBPACK_IMPORTED_MODULE_10__pages_mobile_progress_bar_progress_bar__["a" /* ProgressBar */],
-        ],
-        entryComponents: [
-            __WEBPACK_IMPORTED_MODULE_19__app_component__["a" /* MyApp */],
-            __WEBPACK_IMPORTED_MODULE_10__pages_mobile_progress_bar_progress_bar__["a" /* ProgressBar */],
-        ],
-        imports: [
-            __WEBPACK_IMPORTED_MODULE_34__components_avatar_avatar_module__["a" /* AvatarModule */],
-            __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["a" /* BrowserModule */],
-            __WEBPACK_IMPORTED_MODULE_1__angular_http__["HttpModule"],
-            __WEBPACK_IMPORTED_MODULE_5_ionic_angular__["g" /* IonicModule */].forRoot(__WEBPACK_IMPORTED_MODULE_19__app_component__["a" /* MyApp */], {
-                backButtonIcon: "arrow-left",
-                backButtonText: "",
-            }, {
-                links: [
-                    { loadChildren: '../pages/mobile/home/home.module#HomePageModule', name: 'HomePage', segment: 'home', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/dashboard/dashboard.module#DashboardModule', name: 'Dashboard', segment: 'dashboard', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/dashboard/edit-dashboard/edit-dashboard.module#EditDashboardModule', name: 'EditDashboard', segment: 'edit-dashboard', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/loans.module#LoansModule', name: 'MyLoans', segment: 'loans', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/advanced-search/advanced-search.module#AdvancedSearchModule', name: 'advanced-search', segment: 'advanced-search', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/condition-summary/condition-summary.module#ConditionSummaryModule', name: 'conditionSummary', segment: 'condition-summary', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/conditions/conditions.module#ConditionsModule', name: 'conditions', segment: 'conditions', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/documents/documents.module#DocumentsModule', name: 'documents', segment: 'documents', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/loan-summary/loan-summary.module#LoanSummaryModule', name: 'loan-summary', segment: 'loan-summary', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/pricing/pricing.module#PricingModule', name: 'Pricing', segment: 'pricing', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/pricing-history/pricing-history.module#PricingHistoryModule', name: 'pricing-history', segment: 'pricing-history', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/loans/select-rate/select-rate.module#SelectRateModule', name: 'SelectRate', segment: 'select-rate', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/login/login.module#LoginPageModule', name: 'LoginPage', segment: 'login', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-contacts/my-contacts.module#MyContactsModule', name: 'MyContacts', segment: 'my-contacts', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-contacts/add-edit-contact/add-edit-contact.module#AddEditContactModule', name: 'AddEditContact', segment: 'add-edit-contact', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-contacts/communication-log/communication-log.module#CommunicationLogModule', name: 'CommunicationLog', segment: 'communication-log', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-contacts/contact-details/contact-details.module#ContactDetailsModule', name: 'ContactDetails', segment: 'contact-details', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/my-quotes.module#MyQuotesModule', name: 'MyQuotes', segment: 'my-quotes', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/advanced-search/advanced-search.module#AdvancedSearchModule', name: 'QuotesAdvancedSearch', segment: 'advanced-search', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/eligible-products/eligible-products.module#EligibleProductsModule', name: 'EligibleProducts', segment: 'eligible-products', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/loan-calculator/loan-calculator.module#LoanCalculatorModule', name: 'LoanCalculator', segment: 'loan-calculator', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/new-quote/new-quote.module#NewQuoteModule', name: 'NewQuote', segment: 'new-quote', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/notes-page/notes-page.module#NotesPageModule', name: 'NotesPage', segment: 'notes-page', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/quotes-calculator/quotes-calculator.module#QuotesCalculatorModule', name: 'QuotesCalculator', segment: 'quotes-calculator', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/quotes-comparison/quotes-comparison.module#QuotesComparisonModule', name: 'QuotesComparison', segment: 'quotes-comparison', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/quotes-product/quotes-product.module#QuotesProductModule', name: 'QuotesProduct', segment: 'quotes-product', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-quotes/quotes-rates/quotes-rates.module#QuotesRatesModule', name: 'QuotesRates', segment: 'quotes-rates', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/my-referral-partners.module#MyReferralPartnersModule', name: 'MyReferralPartners', segment: 'my-referral-partners', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/add-edit-referral-account/add-edit-referral-account.module#AddEditReferralAccountModule', name: 'AddEditReferralAccount', segment: 'add-edit-referral-account', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/add-edit-referral-partner/add-edit-referral-partner.module#AddEditReferralPartnerModule', name: 'AddEditReferralPartner', segment: 'add-edit-referral-partner', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/referral-account-contacts/referral-account-contacts.module#ReferralAccountContactsModule', name: 'ReferralAccountContacts', segment: 'referral-account-contacts', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/referral-account-details/referral-account-details.module#ReferralAccountDetailsModule', name: 'ReferralAccountDetails', segment: 'referral-account-details', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tasks/my-tasks.module#MyTasksModule', name: 'MyTasks', segment: 'my-tasks', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-referral-partners/referral-partner-details/referral-partner-details.module#ReferralPartnerDetailsModule', name: 'ReferralPartnerDetails', segment: 'referral-partner-details', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-schedule/my-schedule.module#MyScheduleModule', name: 'MySchedule', segment: 'my-schedule', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-schedule/month-view/month-view.module#MonthViewModule', name: 'MonthView', segment: 'month-view', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-schedule/add-edit-event/add-edit-event.module#AddEditEventModule', name: 'AddEditEvent', segment: 'add-edit-event', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-schedule/view-event/view-event.module#ViewEventModule', name: 'ViewEvent', segment: 'view-event', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tasks/add-task/add-task.module#AddTaskModule', name: 'AddTask', segment: 'add-task', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tasks/edit-task/edit-task.module#EditTaskModule', name: 'EditTask', segment: 'edit-task', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tasks/task-filter-popover/task-filter-popover.module#TaskFilterPopoverModule', name: 'TaskFilterPopover', segment: 'task-filter-popover', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tasks/task-status-popover/task-status-popover.module#TaskStatusPopoverModule', name: 'TaskStatusPopover', segment: 'task-status-popover', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/my-tools.module#MyToolsModule', name: 'MyTools', segment: 'my-tools', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/additional-payment-calculator/additional-payment-calculator.module#AdditionalPaymentCalculatorModule', name: 'AdditionalPaymentCalculator', segment: 'additional-payment-calculator', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/additional-payment-calculator-results/additional-payment-calculator-results.module#AdditionalPaymentCalculatorResultsModule', name: 'AdditionalPaymentCalculatorResults', segment: 'additional-payment-calculator-results', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/affordability-calculator/affordability-calculator.module#AffordabilityCalculatorModule', name: 'AffordabilityCalculator', segment: 'affordability-calculator', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/affordability-calculator/affordability-calculator-results/affordability-calculator-results.module#AffordabilityCalculatorResultsModule', name: 'AffordabilityCalculatorResults', segment: 'affordability-calculator-results', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/quick-qualifier/quick-qualifier.module#QuickQualifierModule', name: 'QuickQualifier', segment: 'quick-qualifier', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/my-tools/quick-qualifier/quick-qualifier-results/quick-qualifier-results.module#QuickQualifierResultsModule', name: 'QuickQualifierResults', segment: 'quick-qualifier-results', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/picture-editor/picture-editor.module#PictureEditorModule', name: 'PictureEditor', segment: 'picture-editor', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/score-card/score-card.module#ScoreCardPageModule', name: 'ScoreCardPage', segment: 'score-card', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/settings/settings.module#SettingsModule', name: 'Settings', segment: 'settings', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/upcoming-events/upcoming-events.module#UpcomingEventsModule', name: 'UpcomingEvents', segment: 'upcoming-events', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/upcoming-events/add-event/add-event.module#AddEventModule', name: 'AddEvent', segment: 'add-event', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/upcoming-events/event-details/event-details.module#EventDetailsModule', name: 'EventDetails', segment: 'event-details', priority: 'low', defaultHistory: [] },
-                    { loadChildren: '../pages/mobile/viewer/viewer.module#ViewerModule', name: 'viewer', segment: 'viewer', priority: 'low', defaultHistory: [] }
-                ]
-            }),
-        ],
-        providers: [
-            __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__["a" /* StatusBar */],
-            __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */],
-            __WEBPACK_IMPORTED_MODULE_7__common_utils_http_service__["a" /* HttpService */],
-            __WEBPACK_IMPORTED_MODULE_13__providers_auth_service__["a" /* AuthService */],
-            __WEBPACK_IMPORTED_MODULE_10__pages_mobile_progress_bar_progress_bar__["a" /* ProgressBar */],
-            __WEBPACK_IMPORTED_MODULE_16__providers_feedback_feedback_service__["a" /* FeedbackService */],
-            __WEBPACK_IMPORTED_MODULE_17__providers_home_service__["a" /* HomeService */],
-            __WEBPACK_IMPORTED_MODULE_8__common_utils_infinite_scroll__["a" /* InfiniteScroll */],
-            __WEBPACK_IMPORTED_MODULE_9__common_utils_utilities__["a" /* Utilities */],
-            __WEBPACK_IMPORTED_MODULE_12__providers_upcoming_events_service__["a" /* UpcomingEventsService */],
-            __WEBPACK_IMPORTED_MODULE_20__providers_contact_service__["a" /* ContactService */],
-            __WEBPACK_IMPORTED_MODULE_21__providers_referral_partner_service__["a" /* ReferralPartnerService */],
-            __WEBPACK_IMPORTED_MODULE_22__common_utils_filters__["a" /* Filters */],
-            __WEBPACK_IMPORTED_MODULE_11__providers_schedule_schedule_service__["a" /* ScheduleService */],
-            __WEBPACK_IMPORTED_MODULE_18__providers_tasks_service__["a" /* TasksService */],
-            __WEBPACK_IMPORTED_MODULE_6__common_model_session__["a" /* Session */],
-            __WEBPACK_IMPORTED_MODULE_15__providers_feedback_exception_service__["a" /* ExceptionService */],
-            __WEBPACK_IMPORTED_MODULE_23__providers_loans_loan_service__["a" /* LoanService */],
-            __WEBPACK_IMPORTED_MODULE_24__providers_loans_stats_service__["a" /* StatsService */],
-            __WEBPACK_IMPORTED_MODULE_25__providers_notes_service__["a" /* NotesService */],
-            __WEBPACK_IMPORTED_MODULE_26__providers_quick_qualifier_service__["a" /* QuickQualifierService */],
-            __WEBPACK_IMPORTED_MODULE_29__providers_outlook_integration_service__["a" /* OutLookService */],
-            __WEBPACK_IMPORTED_MODULE_27__providers_affordability_calculator_service__["a" /* AffordabilityCalculatorService */],
-            __WEBPACK_IMPORTED_MODULE_28__providers_tools_service__["a" /* ToolsService */],
-            __WEBPACK_IMPORTED_MODULE_30__providers_nav_custom_nav_service__["a" /* CustomNavService */],
-            __WEBPACK_IMPORTED_MODULE_31__providers_quotes_quote_service__["a" /* QuoteService */],
-            __WEBPACK_IMPORTED_MODULE_32__providers_pricing_service__["a" /* PricingService */],
-            __WEBPACK_IMPORTED_MODULE_33__providers_dashboard_dashboard_service__["a" /* DashboardService */],
-            __WEBPACK_IMPORTED_MODULE_35__providers_menu_service__["a" /* MenuService */],
-            { provide: __WEBPACK_IMPORTED_MODULE_0__angular_core__["ErrorHandler"], useClass: __WEBPACK_IMPORTED_MODULE_14__providers_feedback_app_error_handler__["a" /* AppErrorHandler */] }, __WEBPACK_IMPORTED_MODULE_36__providers_scorecard_scorecard_service__["a" /* ScorecardService */],
-        ],
-    })
-], AppModule);
-
-//# sourceMappingURL=app.module.js.map
-
-/***/ }),
-
-/***/ 59:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Filters; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_moment___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_moment__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-// tslint:disable
-
-
-
-var Filters = Filters_1 = (function () {
-    function Filters() {
-    }
-    /**
-     * Currency filter
-     * 12345 => $12,345.00
-     * @param {Number} value
-     * @param {String} Currency ($)
-     * @param {Number} decimals Decimal places
-     */
-    Filters.currency = function (value, currency, decimals) {
-        var digitsRE = /(\d{3})(?=\d)/g;
-        value = parseFloat(value);
-        if (!isFinite(value) || (!value && value !== 0)) {
-            return "";
-        }
-        currency = currency != null ? currency : "$";
-        var SOME = 2;
-        decimals = decimals != null ? decimals : SOME;
-        var STRINGIFIED = Math.abs(value).toFixed(decimals);
-        var interger = decimals
-            ? STRINGIFIED.slice(0, -1 - decimals)
-            : STRINGIFIED;
-        var i = interger.length % 3;
-        var head = i > 0
-            ? (interger.slice(0, i) + (interger.length > 3 ? "," : ""))
-            : "";
-        var floatValue = decimals
-            ? STRINGIFIED.slice(-1 - decimals)
-            : "";
-        var sign = value < 0 ? "-" : "";
-        return sign + currency + head +
-            interger.slice(i).replace(digitsRE, "$1,") +
-            floatValue;
-    };
-    /**
-     Percent filter
-      10 => 10.00%
-       20.012 => 20.012%
-       0 => 0.00%
-       @param {Number} value
-       @param {Number} decimals Decimal places
-     */
-    Filters.percent = function (value, decimals) {
-        value = parseFloat(value);
-        if (!isFinite(value) || (!value && value !== 0)) {
-            return "";
-        }
-        decimals = decimals != null ? decimals : 2;
-        if (Number.isInteger(value)) {
-            var stringified = Math.abs(value).toFixed(decimals);
-            return stringified + "%";
-        }
-        return value + "%";
-    };
-    //
-    Filters.stripPhoneFormatting = function (phone) {
-        return phone.replace(/[^\d]/g, "");
-    };
-    //
-    Filters.formatPhoneNumber = function (phone) {
-        phone = Filters_1.stripPhoneFormatting(phone);
-        return "(" + phone.substr(0, 3) + ") " + phone.substr(3, 3) + "-" + phone.substr(6, 4);
-    };
-    Filters.formatSSN = function (ssn) {
-        return ssn.substr(0, 3) + "-" + ssn.substr(3, 2) + "-" + ssn.substr(5, 4);
-    };
-    // public camelize(str) {
-    //   return str
-    //       .replace(/\s(.)/g, function($1) { return $1.toUpperCase() })
-    //       .replace(/\s/g, "")
-    //       .replace(/^(.)/, function($1) { return $1.toLowerCase() });
-    // }
-    //
-    // tslint:disable-next-line:member-ordering
-    Filters.concat = function (value1, value2, delimiter) {
-        if (!value2 && !value1) {
-            return "";
-        }
-        delimiter = delimiter != null ? delimiter : "/";
-        if (!value1) {
-            return delimiter + " " + value2;
-        }
-        if (!value2) {
-            return value1 + " " + delimiter;
-        }
-        return value1 + " " + delimiter + " " + value2;
-    };
-    // public formatDateTime(dateTime) {
-    //   if (!this.isDate(dateTime)) {
-    //     return "";
-    //   }
-    //   return Moment(dateTime).format("MM/DD/YYYY HH:mm A");
-    // }
-    //
-    // public calendar(date) {
-    //   if (!this.isDate(date)) {
-    //     return "";
-    //   }
-    //   date = date.toString();
-    //   return Moment(new Date(date)).calendar(null, {
-    //     sameDay: "[Today] HH:mm A",
-    //     nextDay: "[Tomorrow] HH:mm A",
-    //     nextWeek: "MM/DD/YYYY HH:mm A",
-    //     lastDay: "[Yesterday] HH:mm A",
-    //     lastWeek: "MM/DD/YYYY HH:mm A",
-    //     sameElse: "MM/DD/YYYY HH:mm A",
-    //   });
-    // }
-    // Returns USA FORMAT MM/DD/YYYY
-    Filters.formatDate = function (date) {
-        if (!Filters_1.isDate(date)) {
-            return "";
-        }
-        return __WEBPACK_IMPORTED_MODULE_1_moment___default()(date).format("MM/DD/YYYY");
-    };
-    // format Currency - Billions like  $1B, Millions like $1M, Thousands like $1K
-    Filters.formatCurrencyShort = function (num, doNotShowCurrency, enableHtml) {
-        if (enableHtml === void 0) { enableHtml = false; }
-        var currency = doNotShowCurrency ? '' : '$';
-        if (num >= 1000000000) {
-            return currency + (num / 1000000000).toFixed(1).replace(/\.0$/, "") + (enableHtml ? "<i>B</i>" : "B");
-        }
-        if (num >= 1000000) {
-            return currency + (num / 1000000).toFixed(1).replace(/\.0$/, "") + (enableHtml ? "<i>M</i>" : "M");
-        }
-        if (num >= 1000) {
-            return currency + (num / 1000).toFixed(1).replace(/\.0$/, "") + (enableHtml ? "<i>K</i>" : "K");
-        }
-        return currency + num;
-    };
-    // /**
-    //    get Date in the format "Saturday 24th June 2017"
-    //    "Saturday 24th June 2017"
-    //    @param {date} Date
-    // */
-    Filters.getFullDateString = function (date) {
-        return __WEBPACK_IMPORTED_MODULE_1_moment___default()(date).format("dddd Do MMMM YYYY");
-    };
-    // /**
-    //   * get Time in the format "2:56 PM"
-    //   * "2:56 PM"
-    //   * @param {date} Date
-    // */
-    Filters.getTimeString = function (date) {
-        return __WEBPACK_IMPORTED_MODULE_1_moment___default()(date).format("LT");
-    };
-    // Method to check if the string can be parsed to date
-    Filters.isDate = function (date) {
-        if (!date) {
-            return false;
-        }
-        if (isNaN(Date.parse(date))) {
-            return false;
-        }
-        return true;
-    };
-    Filters.removePercent = function (value) {
-        return parseFloat(value.toString().replace("%", ""));
-    };
-    Filters.getFullMonth = function (monthShortForm) {
-        var months = ["January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December", ""];
-        var myDate = new Date(monthShortForm + " 1, 2000");
-        var monthDigit = myDate.getMonth();
-        return months[isNaN(monthDigit) ? 12 : (monthDigit)];
-    };
-    // returns in objects- { currency: '$', value: '2.5', denomination: 'B'}
-    Filters.formatCurrencyShortObject = function (num, doNotShowCurrency) {
-        var currency = doNotShowCurrency ? '' : '$';
-        if (num >= 1000000000) {
-            return { currency: currency, value: (num / 1000000000).toFixed(1).replace(/\.0$/, ""), denomination: "B" };
-        }
-        if (num >= 1000000) {
-            return { currency: currency, value: (num / 1000000).toFixed(1).replace(/\.0$/, ""), denomination: "M" };
-        }
-        if (num >= 1000) {
-            return { currency: currency, value: (num / 1000).toFixed(1).replace(/\.0$/, ""), denomination: "K" };
-        }
-        return { currency: currency, value: num, denomination: '' };
-    };
-    return Filters;
-}());
-Filters = Filters_1 = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])()
-], Filters);
-
-var Filters_1;
-//# sourceMappingURL=filters.js.map
-
-/***/ }),
-
-/***/ 61:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoanService; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__config_service_url_config__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__ = __webpack_require__(59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_model_loan_loan_summary_model__ = __webpack_require__(695);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__common_model_loan_loan_model__ = __webpack_require__(696);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__common_model_loan_borrower_model__ = __webpack_require__(697);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__common_model_loan_property_model__ = __webpack_require__(698);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__ = __webpack_require__(36);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-
-
-
-
-var LoanService = (function () {
-    function LoanService(http, feedback) {
-        this.http = http;
-        this.feedback = feedback;
-    }
-    LoanService.prototype.getAllLoanStatus = function () {
-        var _this = this;
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_STATUS_TYPES)
-            .map(function (response) {
-            var result = [];
-            if (response && response.data) {
-                result = response.data.map(function (element) { return ({
-                    value: element.loanStatusTypeId, name: element.loanStatusDescription,
-                }); });
-                result.push.apply(result, _this.getStaticLoanTypes());
-                return result;
-            }
-        });
-    };
-    LoanService.prototype.getAllLockStatus = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_LOCK_STATUS_TYPES)
-            .map(function (response) {
-            return response.data.map(function (element) { return ({
-                value: element.rateLockStatusTypeId,
-                name: element.rateLockStatusTypeDesc,
-            }); });
-        });
-    };
-    LoanService.prototype.getAllLoanPurpose = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_PURPOSE_TYPES)
-            .map(function (response) {
-            return response.data.map(function (element) { return ({
-                value: element.loanPurposeTypeId, name: element.loanPurposeTypeDesc,
-            }); });
-        });
-    };
-    LoanService.prototype.getMyPipelines = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].PIPLINE_SUMMARY_URL);
-    };
-    LoanService.prototype.getAuthLoanId = function (loanNumber) {
-        var params = {
-            lenderLoanNumber: loanNumber,
-        };
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].OPEN_LOAN_URL, params);
-    };
-    LoanService.prototype.setBorrowerDetails = function (borrowers, borrowerLoanDetails) {
-        if (!borrowerLoanDetails) {
-            return;
-        }
-        borrowerLoanDetails.forEach(function (borrower) {
-            var borrowerInfo = new __WEBPACK_IMPORTED_MODULE_7__common_model_loan_borrower_model__["a" /* BorrowerModel */]();
-            borrowerInfo.income = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].currency(borrower.borrowerIncome, "$", 0);
-            borrowerInfo.assets = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].currency(borrower.borrowerTotalAssets, "$", 0);
-            borrowerInfo.liabilites = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].currency(borrower.borrowerTotalLiabilities, "$", 0);
-            borrowerInfo.telephone = borrower.borrowerContactNumber;
-            borrowerInfo.name = borrower.borrowerName;
-            borrowerInfo.type = borrower.borrowerRoleId;
-            borrowerInfo.email = borrower.emailAddress;
-            borrowerInfo.contactId = borrower.contactId;
-            borrowers.push(borrowerInfo);
-        });
-    };
-    LoanService.prototype.setSummary = function (loan, readSummary) {
-        if (!readSummary) {
-            return;
-        }
-        loan.status = readSummary.loanStatusDesc;
-        loan.intrest = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].percent(readSummary.interestRate, 2);
-        loan.ltvcltv = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].concat(__WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].percent(readSummary.ltvRatioPct, 2), __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].percent(readSummary.cltvRatioPct, 2));
-        loan.product = readSummary.loanProductDesc;
-        loan.program = readSummary.loanProgramTypeDesc;
-        loan.purpose = readSummary.loanPurposeTypeDesc;
-        loan.creditScore = readSummary.qualCreditScore;
-        loan.frontBackRatio = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].concat(__WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].percent(readSummary.housingExpenseRatio, 2), __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].percent(readSummary.debtRatio, 2));
-        loan.amount = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].currency(readSummary.totalLoanAmt, "$", 2);
-        loan.amountWithoutFormat = readSummary.totalLoanAmt;
-    };
-    LoanService.prototype.setPropertyInfo = function (property, subjectProperty, summary) {
-        if (!property || !subjectProperty || !summary) {
-            return;
-        }
-        property.address = subjectProperty.addressLineOne + ", " + subjectProperty.city + ",\n     " + subjectProperty.stateId + " " + subjectProperty.postalCodeId;
-        property.type = subjectProperty.propertyTypeId;
-        property.occupancy = summary.occupancyTypeDesc;
-        property.purchasePrice = __WEBPACK_IMPORTED_MODULE_4__common_utils_filters__["a" /* Filters */].currency(summary.purchasePrice, "$", 2);
-    };
-    LoanService.prototype.getLoanSummary = function (loanNumber) {
-        var _this = this;
-        var params = {
-            loanNumber: loanNumber,
-        };
-        var loader = this.feedback.getLoader();
-        loader.present();
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].LOAN_SUMMARY_AGGREGATOR_API, params)
-            .map(function (response) {
-            var loanSummaryModel = new __WEBPACK_IMPORTED_MODULE_5__common_model_loan_loan_summary_model__["a" /* LoanSummaryModel */]();
-            var loan = new __WEBPACK_IMPORTED_MODULE_6__common_model_loan_loan_model__["a" /* LoanModel */]();
-            var borrowers = [];
-            var propertyInfo = new __WEBPACK_IMPORTED_MODULE_8__common_model_loan_property_model__["a" /* PropertyModel */]();
-            _this.setSummary(loan, response.loanSummary);
-            loan.loanNumber = loanNumber;
-            _this.setBorrowerDetails(borrowers, response.borrowers);
-            _this.setPropertyInfo(propertyInfo, response.propertyInfo, response.loanSummary);
-            loanSummaryModel.loan = loan;
-            loanSummaryModel.borrowers = borrowers;
-            loanSummaryModel.property = propertyInfo;
-            return loanSummaryModel;
-        }).finally(function () {
-            loader.dismiss();
-        });
-    };
-    LoanService.prototype.getStaticLoanTypes = function () {
-        return [
-            {
-                name: "0000..0099 - All Lead",
-                value: "0000..0099",
-            },
-            {
-                name: "0100..0199 - All Prospect",
-                value: "0100..0199",
-            },
-            {
-                name: "0200..0299 - All Application",
-                value: "0200..0299",
-            },
-            {
-                name: "0300..0399 - All Set-Up ",
-                value: "0300..0399",
-            },
-            {
-                name: "0400..0499 - All Processing",
-                value: "0400..0499",
-            },
-            {
-                name: "0500..0599 - All Underwriting",
-                value: "0500..0599",
-            },
-            {
-                name: "0600..0699 - All Approved",
-                value: "0600..0699",
-            },
-            {
-                name: "0700..0799 - All Clear to Close",
-                value: "0700..0799",
-            },
-            {
-                name: "0800..0899 - All Closing",
-                value: "0800..0899",
-            },
-            {
-                name: "0900..1099 - All Funding",
-                value: "0900..1099",
-            },
-            {
-                name: "1100..1199 - All Post Closing",
-                value: "1100..1199",
-            },
-            {
-                name: "1200..1299 - All Delivery",
-                value: "1200..1299",
-            },
-            {
-                name: "1300..1399 - All Withdrawn",
-                value: "1300..1399",
-            },
-            {
-                name: "1400..1499 - All Cancelled",
-                value: "1400..1499",
-            },
-            {
-                name: "1500..9999 - All Denied ",
-                value: "1500..9999",
-            },
-        ];
-    };
-    LoanService.prototype.getUnlockedLoansCount = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UNLOCKED_LOANS_COUNT);
-    };
-    LoanService.prototype.getExpiredLoansCount = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].EXPIRED_LOANS_COUNT);
-    };
-    LoanService.prototype.getExpiringLoansCount = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].EXPIRING_LOANS_COUNT);
-    };
-    LoanService.prototype.getLoanLockedStatus = function (lenderLoanNumber) {
-        var loanLockedStatusRequest = { lenderLoanNumber: lenderLoanNumber };
-        var formData = new FormData();
-        formData.append("lenderLoanNumber", lenderLoanNumber);
-        return this.http.post(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].GET_LOAN_LOCKED_STATUS, formData);
-    };
-    LoanService.prototype.unlockLockedLoans = function () {
-        return this.http.get(__WEBPACK_IMPORTED_MODULE_3__config_service_url_config__["a" /* Config */].UNLOCK_LOCKED_LOANS);
-    };
-    return LoanService;
-}());
-LoanService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__common_utils_http_service__["a" /* HttpService */],
-        __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__["a" /* FeedbackService */]])
-], LoanService);
-
-//# sourceMappingURL=loan.service.js.map
-
-/***/ }),
-
-/***/ 63:
+/***/ 322:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ExceptionService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__ = __webpack_require__(206);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__ = __webpack_require__(232);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__feedback_service__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__feedback_service__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4204,267 +3496,1286 @@ var ExceptionService = (function () {
     ExceptionService.prototype.log = function (error) {
         // Todo add logic to log the errors in the server side
     };
+    ExceptionService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__feedback_service__["a" /* FeedbackService */]])
+    ], ExceptionService);
     return ExceptionService;
 }());
-ExceptionService = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__feedback_service__["a" /* FeedbackService */]])
-], ExceptionService);
 
 //# sourceMappingURL=exception.service.js.map
 
 /***/ }),
 
-/***/ 694:
-/***/ (function(module, exports, __webpack_require__) {
+/***/ 323:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-var map = {
-	"./af": 228,
-	"./af.js": 228,
-	"./ar": 229,
-	"./ar-dz": 230,
-	"./ar-dz.js": 230,
-	"./ar-kw": 231,
-	"./ar-kw.js": 231,
-	"./ar-ly": 232,
-	"./ar-ly.js": 232,
-	"./ar-ma": 233,
-	"./ar-ma.js": 233,
-	"./ar-sa": 234,
-	"./ar-sa.js": 234,
-	"./ar-tn": 235,
-	"./ar-tn.js": 235,
-	"./ar.js": 229,
-	"./az": 236,
-	"./az.js": 236,
-	"./be": 237,
-	"./be.js": 237,
-	"./bg": 238,
-	"./bg.js": 238,
-	"./bn": 239,
-	"./bn.js": 239,
-	"./bo": 240,
-	"./bo.js": 240,
-	"./br": 241,
-	"./br.js": 241,
-	"./bs": 242,
-	"./bs.js": 242,
-	"./ca": 243,
-	"./ca.js": 243,
-	"./cs": 244,
-	"./cs.js": 244,
-	"./cv": 245,
-	"./cv.js": 245,
-	"./cy": 246,
-	"./cy.js": 246,
-	"./da": 247,
-	"./da.js": 247,
-	"./de": 248,
-	"./de-at": 249,
-	"./de-at.js": 249,
-	"./de-ch": 250,
-	"./de-ch.js": 250,
-	"./de.js": 248,
-	"./dv": 251,
-	"./dv.js": 251,
-	"./el": 252,
-	"./el.js": 252,
-	"./en-au": 253,
-	"./en-au.js": 253,
-	"./en-ca": 254,
-	"./en-ca.js": 254,
-	"./en-gb": 255,
-	"./en-gb.js": 255,
-	"./en-ie": 256,
-	"./en-ie.js": 256,
-	"./en-nz": 257,
-	"./en-nz.js": 257,
-	"./eo": 258,
-	"./eo.js": 258,
-	"./es": 259,
-	"./es-do": 260,
-	"./es-do.js": 260,
-	"./es.js": 259,
-	"./et": 261,
-	"./et.js": 261,
-	"./eu": 262,
-	"./eu.js": 262,
-	"./fa": 263,
-	"./fa.js": 263,
-	"./fi": 264,
-	"./fi.js": 264,
-	"./fo": 265,
-	"./fo.js": 265,
-	"./fr": 266,
-	"./fr-ca": 267,
-	"./fr-ca.js": 267,
-	"./fr-ch": 268,
-	"./fr-ch.js": 268,
-	"./fr.js": 266,
-	"./fy": 269,
-	"./fy.js": 269,
-	"./gd": 270,
-	"./gd.js": 270,
-	"./gl": 271,
-	"./gl.js": 271,
-	"./gom-latn": 272,
-	"./gom-latn.js": 272,
-	"./he": 273,
-	"./he.js": 273,
-	"./hi": 274,
-	"./hi.js": 274,
-	"./hr": 275,
-	"./hr.js": 275,
-	"./hu": 276,
-	"./hu.js": 276,
-	"./hy-am": 277,
-	"./hy-am.js": 277,
-	"./id": 278,
-	"./id.js": 278,
-	"./is": 279,
-	"./is.js": 279,
-	"./it": 280,
-	"./it.js": 280,
-	"./ja": 281,
-	"./ja.js": 281,
-	"./jv": 282,
-	"./jv.js": 282,
-	"./ka": 283,
-	"./ka.js": 283,
-	"./kk": 284,
-	"./kk.js": 284,
-	"./km": 285,
-	"./km.js": 285,
-	"./kn": 286,
-	"./kn.js": 286,
-	"./ko": 287,
-	"./ko.js": 287,
-	"./ky": 288,
-	"./ky.js": 288,
-	"./lb": 289,
-	"./lb.js": 289,
-	"./lo": 290,
-	"./lo.js": 290,
-	"./lt": 291,
-	"./lt.js": 291,
-	"./lv": 292,
-	"./lv.js": 292,
-	"./me": 293,
-	"./me.js": 293,
-	"./mi": 294,
-	"./mi.js": 294,
-	"./mk": 295,
-	"./mk.js": 295,
-	"./ml": 296,
-	"./ml.js": 296,
-	"./mr": 297,
-	"./mr.js": 297,
-	"./ms": 298,
-	"./ms-my": 299,
-	"./ms-my.js": 299,
-	"./ms.js": 298,
-	"./my": 300,
-	"./my.js": 300,
-	"./nb": 301,
-	"./nb.js": 301,
-	"./ne": 302,
-	"./ne.js": 302,
-	"./nl": 303,
-	"./nl-be": 304,
-	"./nl-be.js": 304,
-	"./nl.js": 303,
-	"./nn": 305,
-	"./nn.js": 305,
-	"./pa-in": 306,
-	"./pa-in.js": 306,
-	"./pl": 307,
-	"./pl.js": 307,
-	"./pt": 308,
-	"./pt-br": 309,
-	"./pt-br.js": 309,
-	"./pt.js": 308,
-	"./ro": 310,
-	"./ro.js": 310,
-	"./ru": 311,
-	"./ru.js": 311,
-	"./sd": 312,
-	"./sd.js": 312,
-	"./se": 313,
-	"./se.js": 313,
-	"./si": 314,
-	"./si.js": 314,
-	"./sk": 315,
-	"./sk.js": 315,
-	"./sl": 316,
-	"./sl.js": 316,
-	"./sq": 317,
-	"./sq.js": 317,
-	"./sr": 318,
-	"./sr-cyrl": 319,
-	"./sr-cyrl.js": 319,
-	"./sr.js": 318,
-	"./ss": 320,
-	"./ss.js": 320,
-	"./sv": 321,
-	"./sv.js": 321,
-	"./sw": 322,
-	"./sw.js": 322,
-	"./ta": 323,
-	"./ta.js": 323,
-	"./te": 324,
-	"./te.js": 324,
-	"./tet": 325,
-	"./tet.js": 325,
-	"./th": 326,
-	"./th.js": 326,
-	"./tl-ph": 327,
-	"./tl-ph.js": 327,
-	"./tlh": 328,
-	"./tlh.js": 328,
-	"./tr": 329,
-	"./tr.js": 329,
-	"./tzl": 330,
-	"./tzl.js": 330,
-	"./tzm": 331,
-	"./tzm-latn": 332,
-	"./tzm-latn.js": 332,
-	"./tzm.js": 331,
-	"./uk": 333,
-	"./uk.js": 333,
-	"./ur": 334,
-	"./ur.js": 334,
-	"./uz": 335,
-	"./uz-latn": 336,
-	"./uz-latn.js": 336,
-	"./uz.js": 335,
-	"./vi": 337,
-	"./vi.js": 337,
-	"./x-pseudo": 338,
-	"./x-pseudo.js": 338,
-	"./yo": 339,
-	"./yo.js": 339,
-	"./zh-cn": 340,
-	"./zh-cn.js": 340,
-	"./zh-hk": 341,
-	"./zh-hk.js": 341,
-	"./zh-tw": 342,
-	"./zh-tw.js": 342
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RuleListComponentModule", function() { return RuleListComponentModule; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rule_list_component__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-function webpackContext(req) {
-	return __webpack_require__(webpackContextResolve(req));
+
+
+
+
+var RuleListComponentModule = (function () {
+    function RuleListComponentModule() {
+    }
+    RuleListComponentModule = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
+            declarations: [
+                __WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */],
+            ],
+            imports: [
+                __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* IonicPageModule */].forChild(__WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */]),
+                __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__["NgDatepickerModule"],
+            ],
+            providers: [
+                __WEBPACK_IMPORTED_MODULE_2__rule_list_component__["a" /* RuleListComponent */],
+            ],
+        })
+    ], RuleListComponentModule);
+    return RuleListComponentModule;
+}());
+
+//# sourceMappingURL=rule-list.component.module.js.map
+
+/***/ }),
+
+/***/ 367:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(368);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(372);
+
+
+Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_1__app_module__["a" /* AppModule */]);
+//# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ 372:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(363);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(366);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_http__ = __webpack_require__(231);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_component__ = __webpack_require__(695);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_login_login_component__ = __webpack_require__(120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_home_home_component__ = __webpack_require__(117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component__ = __webpack_require__(113);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__pages_login_login_component_module__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_home_home_component_module__ = __webpack_require__(226);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_rule_list_rule_list_component_module__ = __webpack_require__(323);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__pages_form_form_component_module__ = __webpack_require__(217);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__common_model_session__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__common_utils_http_service__ = __webpack_require__(230);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__providers_feedback_exception_service__ = __webpack_require__(322);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__providers_feedback_feedback_service__ = __webpack_require__(80);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__providers_auth_service__ = __webpack_require__(121);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__providers_fields_service__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__providers_operators_service__ = __webpack_require__(221);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__providers_logical_service__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__providers_rules_service__ = __webpack_require__(114);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__providers_result_service__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__providers_ruleList_service__ = __webpack_require__(115);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-function webpackContextResolve(req) {
-	var id = map[req];
-	if(!(id + 1)) // check for number or string
-		throw new Error("Cannot find module '" + req + "'.");
-	return id;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var AppModule = (function () {
+    function AppModule() {
+    }
+    AppModule = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["NgModule"])({
+            declarations: [
+                __WEBPACK_IMPORTED_MODULE_6__app_component__["a" /* MyApp */],
+            ],
+            imports: [
+                __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
+                __WEBPACK_IMPORTED_MODULE_11__pages_login_login_component_module__["LoginPageModule"],
+                __WEBPACK_IMPORTED_MODULE_12__pages_home_home_component_module__["HomeComponentModule"],
+                __WEBPACK_IMPORTED_MODULE_13__pages_rule_list_rule_list_component_module__["RuleListComponentModule"],
+                __WEBPACK_IMPORTED_MODULE_14__pages_form_form_component_module__["FormComponentModule"],
+                __WEBPACK_IMPORTED_MODULE_5__angular_http__["b" /* HttpModule */],
+                __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["e" /* IonicModule */].forRoot(__WEBPACK_IMPORTED_MODULE_6__app_component__["a" /* MyApp */], {}, {
+                    links: [
+                        { loadChildren: '../pages/form/form.component.module#FormComponentModule', name: 'form', segment: 'form/:rule-name', priority: 'low', defaultHistory: [] },
+                        { loadChildren: '../pages/home/home.component.module#HomeComponentModule', name: 'home', segment: 'home', priority: 'low', defaultHistory: [] },
+                        { loadChildren: '../pages/login/login.component.module#LoginPageModule', name: 'LoginPage', segment: 'login.component', priority: 'low', defaultHistory: [] },
+                        { loadChildren: '../pages/rule-list/rule-list.component.module#RuleListComponentModule', name: 'rule-list', segment: 'rule-list', priority: 'low', defaultHistory: [] }
+                    ]
+                })
+            ],
+            bootstrap: [__WEBPACK_IMPORTED_MODULE_2_ionic_angular__["c" /* IonicApp */]],
+            entryComponents: [
+                __WEBPACK_IMPORTED_MODULE_6__app_component__["a" /* MyApp */],
+                __WEBPACK_IMPORTED_MODULE_7__pages_login_login_component__["a" /* LoginPage */],
+                __WEBPACK_IMPORTED_MODULE_8__pages_home_home_component__["a" /* HomeComponent */],
+                __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component__["a" /* RuleListComponent */],
+                __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component__["a" /* FormComponent */]
+            ],
+            providers: [
+                __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__["a" /* StatusBar */],
+                __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */],
+                { provide: __WEBPACK_IMPORTED_MODULE_1__angular_core__["ErrorHandler"], useClass: __WEBPACK_IMPORTED_MODULE_2_ionic_angular__["d" /* IonicErrorHandler */] },
+                __WEBPACK_IMPORTED_MODULE_15__common_model_session__["a" /* Session */],
+                __WEBPACK_IMPORTED_MODULE_16__common_utils_http_service__["a" /* HttpService */],
+                __WEBPACK_IMPORTED_MODULE_17__providers_feedback_exception_service__["a" /* ExceptionService */],
+                __WEBPACK_IMPORTED_MODULE_18__providers_feedback_feedback_service__["a" /* FeedbackService */],
+                __WEBPACK_IMPORTED_MODULE_19__providers_auth_service__["a" /* AuthService */],
+                __WEBPACK_IMPORTED_MODULE_20__providers_fields_service__["a" /* FieldsService */],
+                __WEBPACK_IMPORTED_MODULE_21__providers_operators_service__["a" /* OperatorsService */],
+                __WEBPACK_IMPORTED_MODULE_22__providers_logical_service__["a" /* LogicalOperatorsService */],
+                __WEBPACK_IMPORTED_MODULE_23__providers_rules_service__["a" /* RulesService */],
+                __WEBPACK_IMPORTED_MODULE_24__providers_result_service__["a" /* ResultsService */],
+                __WEBPACK_IMPORTED_MODULE_25__providers_ruleList_service__["a" /* RuleListService */],
+            ]
+        })
+    ], AppModule);
+    return AppModule;
+}());
+
+//# sourceMappingURL=app.module.js.map
+
+/***/ }),
+
+/***/ 392:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var data = [
+    {
+        "rule_name": "EX-04001",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 150% for a DU Refi Plus single family primary residence.",
+        "rule_logic": "occupancyType = 'p' AND numberOfUnits = 1 AND loanToValueRatio > 150",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04002",
+        "rule_category": { "name": "Purchase", "value": "P" },
+        "rule_desc": "The maximum LTV is 150% for a DU Refi Plus two family primary residence.",
+        "rule_logic": "occupancyType = 'p' AND numberOfUnits = 2 AND loanToValueRatio > 150",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-12-25T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04003",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 150% for a DU Refi Plus three family primary residence.",
+        "rule_logic": "occupancyType = 'p' AND numberOfUnits = 3 AND loanToValueRatio > 150",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-12-25T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04004",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 150% for a DU Refi Plus four family primary residence.",
+        "rule_logic": "occupancyType = 'p' AND numberOfUnits = 4 AND loanToValueRatio > 150",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04005",
+        "rule_category": { "name": "Purchase", "value": "P" },
+        "rule_desc": "The maximum LTV is 150% for a DU Refi Plus single family second home.",
+        "rule_logic": "occupancyType = 's' AND numberOfUnits = 1 AND loanToValueRatio > 150",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04006",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 125% for a DU Refi Plus single family investment property.",
+        "rule_logic": "occupancyType = 'I' AND numberOfUnits = 1 AND loanToValueRatio > 125",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04007",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 125% for a DU Refi Plus two family investment property.",
+        "rule_logic": "occupancyType = 'I' AND numberOfUnits = 2 AND loanToValueRatio > 125",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04008",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum LTV is 125% for a DU Refi Plus three family investment property.",
+        "rule_logic": "occupancyType = 'I' AND numberOfUnits = 3 AND loanToValueRatio > 125",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04009",
+        "rule_category": { "name": "Purchase", "value": "P" },
+        "rule_desc": "The maximum LTV is 125% for a DU Refi Plus four family investment property.",
+        "rule_logic": "occupancyType = 'I' AND numberOfUnits = 4 AND loanToValueRatio > 125",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04010",
+        "rule_category": { "name": "Other", "value": "O" },
+        "rule_desc": "The maximum loan amount for a conforming, single family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 1 AND propertyState NOT IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04011",
+        "rule_category": { "name": "Other", "value": "O" },
+        "rule_desc": "The maximum loan amount for a conforming, two family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 2 AND propertyState NOT IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04012",
+        "rule_category": { "name": "Other", "value": "O" },
+        "rule_desc": "The maximum loan amount for a conforming, three family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 3 AND propertyState NOT IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04013",
+        "rule_category": { "name": "Other", "value": "O" },
+        "rule_desc": "The maximum loan amount for a conforming, four family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 4 AND propertyState NOT IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04014",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum loan amount for a conforming, single family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 1 AND propertyState IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04015",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum loan amount for a conforming, two family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 2 AND propertyState IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04016",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum loan amount for a conforming, three family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 3 AND propertyState IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04017",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum loan amount for a conforming, four family loan has been exceeded.",
+        "rule_logic": "pricingTier = 'CONF' AND numberOfUnits = 4 AND propertyState IN ('AK', 'HI') AND totalLoanAmount > conformingLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04018",
+        "rule_category": { "name": "Refinance", "value": "R" },
+        "rule_desc": "The maximum loan amount for a high balance, single family loan has been exceeded.",
+        "rule_logic": "pricingTier <> 'CONF' AND numberOfUnits = 1 AND propertyState NOT IN ('AK', 'HI') AND maximumLoanLimitAmount > conformingLoanLimitAmount AND totalLoanAmount > maximumLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04019",
+        "rule_category": { "name": "Purchase", "value": "P" },
+        "rule_desc": "The maximum loan amount for a high balance, two family loan has been exceeded.",
+        "rule_logic": "pricingTier <> 'CONF' AND numberOfUnits = 2 AND propertyState NOT IN ('AK', 'HI') AND maximumLoanLimitAmount > conformingLoanLimitAmount AND totalLoanAmount > maximumLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    },
+    {
+        "rule_name": "EX-04020",
+        "rule_category": { "name": "Other", "value": "O" },
+        "rule_desc": "The maximum loan amount for a high balance, three family loan has been exceeded.",
+        "rule_logic": "pricingTier <> 'CONF' AND numberOfUnits = 3 AND propertyState NOT IN ('AK', 'HI') AND maximumLoanLimitAmount > conformingLoanLimitAmount AND totalLoanAmount > maximumLoanLimitAmount",
+        "rule_exception": "Loan cannot be processed",
+        "effective_date": "2017-12-25T17:36:43.704Z",
+        "last_modified": "2017-11-11T17:36:43.704Z",
+        "last_published": "2017-11-05T17:36:43.704Z",
+        "expiry_date": "2017-12-25T17:36:43.704Z",
+        "rule_author": "Steve Octaviano",
+        "rule_logic_array": [{ "name": "IF", "elementType": "starter", "value": "if" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "is", "elementType": "operator", "value": "is" }, { "name": "Purchase", "elementType": "value", "value": "p" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "is equal to", "elementType": "operator", "value": "=" }, { "name": "Enter a number", "elementType": "value", "value": "1" }, { "name": "and", "elementType": "logicalOperator", "value": "&&" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }, { "name": "is greater than", "elementType": "operator", "value": ">" }, { "name": "Enter a number", "elementType": "value", "value": "150" }, { "name": "then", "elementType": "logicalOperator", "value": "then" }, { "name": "Add Loan Exception", "elementType": "result", "value": "addLoanException" }, { "name": "Enter a number", "elementType": "value", "value": "the maximum ltv is 150% for DU Refi Plus Single family primary residency" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Occupancy Type", "elementType": "field", "value": "occupancyType", "type": "options" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Number Of Units", "elementType": "field", "value": "numberOfUnits", "type": "number" }, { "name": "Add Rule Input Parameter", "elementType": "result", "value": "addRuleInputParameter" }, { "name": "Loan To Value Ratio", "elementType": "field", "value": "loanToValueRatio", "type": "number" }]
+    }
+];
+/* harmony default export */ __webpack_exports__["a"] = (data);
+//# sourceMappingURL=rule_list.js.map
+
+/***/ }),
+
+/***/ 393:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return EditorComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_fields_service__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__ = __webpack_require__(221);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_result_service__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_rules_service__ = __webpack_require__(114);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-webpackContext.keys = function webpackContextKeys() {
-	return Object.keys(map);
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-webpackContext.resolve = webpackContextResolve;
-module.exports = webpackContext;
-webpackContext.id = 694;
+
+
+
+
+
+
+var EditorComponent = (function () {
+    function EditorComponent(fieldsService, logicalOperatorsService, operatorsService, rulesService, resultsService) {
+        this.fieldsService = fieldsService;
+        this.logicalOperatorsService = logicalOperatorsService;
+        this.operatorsService = operatorsService;
+        this.rulesService = rulesService;
+        this.resultsService = resultsService;
+        this.ruleLogic = [];
+        this.mode = 'text';
+        this.ruleEditMode = false;
+        this.fields = [];
+        this.logicalOperators = [];
+        this.operators = [];
+        this.values = [];
+        this.results = [];
+        this.dropDownTypes = [
+            'fields',
+            'operators',
+            'values',
+            'logicalOperators',
+            'results',
+        ];
+        this.dropDownType = 0;
+        this.dropDown = [];
+        this.fieldsLogic = {
+            name: '',
+            elementType: 'field',
+            value: '',
+        };
+        this.operatorsLogic = {
+            name: '',
+            elementType: 'operator',
+            value: '',
+        };
+        this.valuesLogic = {
+            name: '',
+            elementType: 'value',
+            value: '',
+        };
+        this.logicalOperatorsLogic = {
+            name: '',
+            elementType: 'logicalOperator',
+            value: '',
+        };
+        this.resultsLogic = {
+            name: '',
+            elementType: 'result',
+            value: '',
+        };
+        this.inputFieldsLogic = {
+            name: '',
+            elementType: 'inputField',
+            value: '',
+        };
+        this.messagesLogic = {
+            name: '',
+            elementType: 'value',
+            value: '',
+        };
+        this.currentFieldSelected = { type: '', options: [] };
+        this.currentText = "";
+        this.dropDownSelectedIndex = -1;
+        this.customMode = false;
+        this.customString = '';
+        this.resultMode = false;
+        this.currentResult = { value: '' };
+        this.inputParameters = [];
+        this.openParanthesis = 0;
+        this.dropDownIndex = 0;
+        this.deletedElements = [];
+    }
+    EditorComponent.prototype.clickedOutside = function ($event) {
+        this.exitEditingMode($event);
+    };
+    EditorComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.fieldsService.field.subscribe(function (res) {
+            _this.fields = res; //.slice();
+        });
+        this.logicalOperatorsService.logicalOperator.subscribe(function (res) {
+            _this.logicalOperators = res; //.slice();
+        });
+        this.operatorsService.operator.subscribe(function (res) {
+            _this.operators = res; //.slice();
+        });
+        this.resultsService.result.subscribe(function (res) {
+            _this.results = res.slice();
+        });
+        // console .log(this.helpText);
+        this.ruleLogic = this.ruleLogic.length ? this.ruleLogic : [
+            {
+                name: 'IF',
+                elementType: 'starter',
+                value: 'if',
+            },
+        ];
+        if (this.ruleLogic.length > 1) {
+            this.ruleLogic = this.addOptionsToRules(this.ruleLogic);
+            this.addRulesToObservable(this.ruleLogic);
+        }
+    };
+    EditorComponent.prototype.addOptionsToRules = function (ruleLogic) {
+        var fields = this.fields;
+        return ruleLogic.map(function (rule) {
+            if (rule.elementType === 'field' && rule.type === 'options') {
+                var field = fields.find(function (f) {
+                    return f.value === rule.value;
+                });
+                rule.options = field.options;
+            }
+            return rule;
+        });
+    };
+    EditorComponent.prototype.addRuleToObservable = function (rule) {
+        // this.rulesService.addRule(rule);
+    };
+    EditorComponent.prototype.addRulesToObservable = function (rules) {
+        var _this = this;
+        if (!this.testRule) {
+            return;
+        }
+        rules.forEach(function (rule) {
+            _this.rulesService.addRule(rule);
+        });
+    };
+    EditorComponent.prototype.isNewLineRequired = function (logic) {
+        if ((logic.elementType === 'logicalOperator' && logic.value != 'then') || logic.elementType === 'starter') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    EditorComponent.prototype.enterEditingMode = function (event) {
+        if (!this.testRule) {
+            return;
+        }
+        var element = event.srcElement;
+        if (!this.ruleEditMode) {
+            this.ruleEditMode = true;
+            // if(this.ruleLogic[this.ruleLogic.length -1].elementType === 'value') {
+            //   this.ruleLogic.pop();
+            // }
+            if (this.ruleLogic.length === 0) {
+                this.ruleLogic.push({
+                    name: 'IF',
+                    elementType: 'starter',
+                    value: 'if',
+                });
+            }
+            this.setDropdown({ code: '' });
+        }
+        // $event.preventDefault();
+        event.stopPropagation();
+    };
+    EditorComponent.prototype.setCurrentElement = function () {
+        var ruleElements = [].slice.call(this.ruleEditor.nativeElement.children[0].children);
+        var element = ruleElements[this.dropDownIndex];
+        this.currentElement = element;
+    };
+    EditorComponent.prototype.exitEditingMode = function (event) {
+        this.ruleEditMode = false;
+        this.addRulesToObservable(this.ruleLogic);
+    };
+    EditorComponent.prototype.setNextDropDownType = function (result, exception, input) {
+        if (result === void 0) { result = false; }
+        if (exception === void 0) { exception = false; }
+        if (input === void 0) { input = false; }
+        this.dropDownType++;
+        if (!result && this.dropDownType >= this.dropDownTypes.length - 1 || this.dropDownType < 0) {
+            this.dropDownType = 0;
+        }
+        if (result && this.dropDownType >= this.dropDownTypes.length) {
+            this.dropDownType = 0;
+        }
+        // if (exception || input ) {
+        //   this.dropDownType = 1;
+        // }
+    };
+    EditorComponent.prototype.emptyDropDown = function () {
+        this.dropDown = [];
+    };
+    EditorComponent.prototype.rightArrow = function () {
+        if (this.dropDownIndex < this.ruleLogic.length - 1) {
+            this.dropDownIndex++;
+            this.setCurrentElement();
+            this.setDropDownPosOnEdit(this.currentElement);
+            this.pushDropDownElements(this.dropDownIndex);
+        }
+    };
+    EditorComponent.prototype.leftArrow = function () {
+        // .log('leftArrow', this.dropDownIndex);
+        if (this.dropDownIndex > 0) {
+            this.dropDownIndex--;
+            this.setCurrentElement();
+            this.setDropDownPosOnEdit(this.currentElement);
+            this.pushDropDownElements(this.dropDownIndex);
+        }
+    };
+    EditorComponent.prototype.backspace = function (event) {
+        event.preventDefault();
+        if (this.ruleLogic[this.ruleLogic.length - 1].customMode
+            || this.ruleLogic[this.dropDownIndex].customMode) {
+            this.setCustomString(this.customString.substring(0, this.customString.length - 1));
+            return;
+        }
+        if (this.currentText.length) {
+            this.setCurrentText(this.currentText.substring(0, this.currentText.length - 1));
+            this.filterDropDown(this.currentText, true);
+            return;
+        }
+        this.deleteRuleBlock(this.ruleLogic[this.dropDownIndex], this.dropDownIndex, this.ruleLogic);
+    };
+    EditorComponent.prototype.deleteRuleBlock = function (ruleElement, index, ruleLogic) {
+        var elementType = ruleElement.elementType;
+        var deleteStartIndex = 0;
+        var deleteEndIndex = 0;
+        var noOfElementsToDelete = 0;
+        if (elementType === 'field' || elementType === 'value') {
+            elementType = (ruleLogic[index - 1].elementType === 'result')
+                ? 'result-param'
+                : elementType;
+        }
+        switch (elementType) {
+            case 'value':
+                deleteStartIndex = index - 2;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 4;
+                break;
+            case 'field':
+                deleteStartIndex = index;
+                deleteEndIndex = index + 3;
+                noOfElementsToDelete = 4;
+                break;
+            case 'operator':
+                deleteStartIndex = index - 2;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 4;
+                break;
+            case 'logicalOperator':
+                deleteStartIndex = index - 3;
+                deleteEndIndex = index;
+                noOfElementsToDelete = 4;
+                break;
+            case 'result':
+                deleteStartIndex = index;
+                deleteEndIndex = index + 1;
+                noOfElementsToDelete = 2;
+                break;
+            case 'result-param':
+                deleteStartIndex = index - 1;
+                deleteEndIndex = index;
+                noOfElementsToDelete = 2;
+                break;
+        }
+        var deletedElements = this.ruleLogic.splice(deleteStartIndex, noOfElementsToDelete);
+        this.deletedElements.push({ elementsDeleted: deletedElements, index: deleteStartIndex });
+        this.setDropdown({ code: '' }, true);
+    };
+    EditorComponent.prototype.undoDelete = function () {
+        if (this.deletedElements.length) {
+            var deletedElement = this.deletedElements.pop();
+            (_a = this.ruleLogic).splice.apply(_a, [deletedElement.index, 0].concat(deletedElement.elementsDeleted));
+        }
+        this.setDropdown({ code: '' }, true);
+        var _a;
+    };
+    EditorComponent.prototype.setDropdown = function (event, empty) {
+        if (empty === void 0) { empty = false; }
+        var code = event.code;
+        var key = event.key;
+        if (empty) {
+            this.emptyDropDown();
+        }
+        if (event.preventDefault) {
+            event.preventDefault();
+        }
+        switch (code) {
+            case '':
+                this.pushLogic();
+                this.pushDropDownElements();
+                break;
+            case 'Space':
+                if (!this.customMode) {
+                    // this.dropDownSelectedIndex = 0;
+                    // this.enter();
+                    this.setCurrentText(this.currentText + key);
+                    this.filterDropDown(this.currentText);
+                }
+                if (this.ruleLogic[this.ruleLogic.length - 1].customMode) {
+                    this.setCustomString(this.customString + key);
+                }
+                break;
+            case 'Backslash':
+                this.setCurrentText(this.currentText.substr(0, this.currentText.length - 2));
+                this.filterDropDown(this.currentText);
+                break;
+            case 'Enter':
+                if (this.customMode) {
+                    this.exitCustomMode();
+                    this.setCustomValueInRule(this.customString);
+                }
+                else {
+                    this.dropDownSelectedIndex = 0;
+                    this.enter();
+                }
+                break;
+            default:
+                if (this.ruleLogic[this.dropDownIndex].customMode) {
+                    this.setCustomString(this.customString + key);
+                    return;
+                }
+                this.setCurrentText(this.currentText + key);
+                this.filterDropDown(this.currentText);
+                break;
+        }
+        var base = this;
+        setTimeout(function () {
+            base.setDropDownPos(base);
+        }, 20);
+    };
+    EditorComponent.prototype.setEndOfContenteditable = function (event) {
+        var contentEditableElement = event.srcElement;
+        var range, selection;
+        if (document.createRange) {
+            range = document.createRange();
+            range.selectNodeContents(contentEditableElement);
+            range.collapse(false);
+            selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    };
+    EditorComponent.prototype.filterDropDown = function (text, backspace) {
+        var dropDown = this.filterList(this.dropDown, text);
+        this.dropDown = dropDown;
+        if (backspace) {
+            this.pushDropDownElements();
+            var dropDown_1 = this.filterList(this.dropDown, text);
+            this.dropDown = dropDown_1;
+        }
+        if (dropDown.length < 1) {
+            this.emptyCurrentText();
+            this.pushDropDownElements();
+        }
+    };
+    EditorComponent.prototype.filterList = function (list, text) {
+        return list.filter(function (l) {
+            return l.name.toUpperCase().startsWith(text.toUpperCase());
+        });
+    };
+    EditorComponent.prototype.pushLogic = function () {
+        this.dropDownIndex++;
+        if (this.dropDownIndex > this.ruleLogic.length) {
+            this.dropDownIndex = this.ruleLogic.length - 1;
+        }
+        this.setCurrentElement();
+        var logic = this.ruleLogic[this.dropDownIndex]
+            ? this.ruleLogic[this.dropDownIndex]
+            : this[this.dropDownTypes[this.dropDownType] + 'Logic'];
+        var dropDownType = logic.elementType + 's';
+        this.ruleLogic.push(this[dropDownType + 'Logic']);
+    };
+    EditorComponent.prototype.getStringFields = function () {
+        return this.fields.filter(function (f) {
+            return f.type === 'string';
+        });
+    };
+    EditorComponent.prototype.getNumberFields = function () {
+        return this.fields.filter(function (f) {
+            return f.type === 'number';
+        });
+    };
+    EditorComponent.prototype.pushDropDownElements = function (dropDownIndex) {
+        this.emptyDropDown();
+        var logic = this.ruleLogic[this.dropDownIndex] ? this.ruleLogic[this.dropDownIndex] : this[this.dropDownTypes[this.dropDownType] + 'Logic'];
+        var dropDownType = logic.elementType + 's';
+        // let dropDownType = this.dropDownTypes[this.dropDownType];
+        if (this.ruleLogic[dropDownIndex] === undefined) {
+            // console .log('undefiend rule logic')
+        }
+        if (dropDownIndex != undefined) {
+            dropDownType = this.ruleLogic[dropDownIndex].elementType + 's';
+        }
+        if (this['get' + dropDownType] === undefined) {
+            return;
+        }
+        var dropDownElements = this['get' + dropDownType]();
+        if (dropDownType === 'fields') {
+            this.dropDown.push(this.getOpenParanthesis());
+        }
+        else if (dropDownType === 'logicalOperators' && this.openParanthesis > 0) {
+            this.dropDown.push(this.getCloseParanthesis());
+        }
+        (_a = this.dropDown).push.apply(_a, dropDownElements);
+        var _a;
+    };
+    EditorComponent.prototype.getOpenParanthesis = function () {
+        return {
+            name: '(',
+            value: 'OPEN_PARANTHESIS',
+            elementType: 'paranthesis',
+        };
+    };
+    EditorComponent.prototype.getCloseParanthesis = function () {
+        return {
+            name: ')',
+            value: 'CLOSE_PARANTHESIS',
+            elementType: 'paranthesis',
+        };
+    };
+    EditorComponent.prototype.getfields = function () {
+        return this.fields;
+    };
+    EditorComponent.prototype.getlogicalOperators = function () {
+        var _this = this;
+        return Object.keys(this.logicalOperators).map(function (k) {
+            return _this.logicalOperators[k];
+        });
+    };
+    EditorComponent.prototype.getoperators = function () {
+        var fieldType = this.currentFieldSelected.type;
+        if (this.dropDownIndex < this.ruleLogic.length - 1 && this.ruleLogic[this.dropDownIndex - 1] != undefined) {
+            fieldType = this.ruleLogic[this.dropDownIndex - 1].type;
+        }
+        return this.operators[fieldType];
+    };
+    EditorComponent.prototype.getvalues = function () {
+        var dropdown = [];
+        if (this.resultMode) {
+            dropdown.push.apply(dropdown, this.getEnterAStringObject());
+            return dropdown;
+        }
+        var fieldType = this.currentFieldSelected.type;
+        if (this.dropDownIndex < this.ruleLogic.length - 1 && this.ruleLogic[this.dropDownIndex - 2] != undefined) {
+            fieldType = this.ruleLogic[this.dropDownIndex - 2].type;
+        }
+        switch (fieldType) {
+            case 'number':
+                dropdown.push({
+                    name: 'Enter a number',
+                    value: 'CUSTOM',
+                    custom: true,
+                });
+                dropdown.push.apply(dropdown, this.getNumberFields());
+                return dropdown;
+            case 'string':
+                dropdown = this.getEnterAStringObject();
+                dropdown.push.apply(dropdown, this.getStringFields());
+                return dropdown;
+            case 'options':
+                if (this.dropDownIndex === this.ruleLogic.length - 1) {
+                    return this.currentFieldSelected.options;
+                }
+                else {
+                    return this.ruleLogic[this.dropDownIndex - 2].options;
+                }
+        }
+    };
+    EditorComponent.prototype.getresults = function () {
+        return this.results;
+    };
+    EditorComponent.prototype.getmessages = function () {
+        return this.getEnterAStringObject();
+    };
+    EditorComponent.prototype.getEnterAStringObject = function () {
+        return [{
+                name: 'Enter a string',
+                value: 'CUSTOM',
+                custom: true,
+            }];
+    };
+    EditorComponent.prototype.getinputFields = function () {
+        return this.inputParameters;
+    };
+    EditorComponent.prototype.upArrow = function (event) {
+        this.dropDownSelectedIndex--;
+        this.dropDownSelectedIndex = this.dropDownSelectedIndex < 0
+            ? 0
+            : this.dropDownSelectedIndex;
+    };
+    EditorComponent.prototype.downArrow = function (event) {
+        this.dropDownSelectedIndex++;
+        this.dropDownSelectedIndex = this.dropDownSelectedIndex >= this.dropDown.length
+            ? this.dropDown.length
+            : this.dropDownSelectedIndex;
+    };
+    EditorComponent.prototype.enter = function (event) {
+        event && event.preventDefault ? event.preventDefault() : {};
+        var selectedDropDown = this.dropDown[this.dropDownSelectedIndex];
+        this.selectOption(selectedDropDown);
+        this.dropDownSelectedIndex = -1;
+    };
+    EditorComponent.prototype.setDropDownPos = function (base) {
+        base = base ? base : this;
+        if (this.dropDownIndex != this.ruleLogic.length - 1 && this.currentElement != undefined) {
+            this.setDropDownPosOnEdit(this.currentElement);
+            return;
+        }
+        var dropDown = this.dropDownElement;
+        var endElement = this.endElement;
+        var ruleEditor = this.ruleEditor;
+        var offsetLeft = ruleEditor.nativeElement.offsetLeft;
+        var offsetTop = ruleEditor.nativeElement.offsetTop;
+        var fontHeight = parseFloat(getComputedStyle(endElement.nativeElement).fontSize);
+        var x = endElement.nativeElement.offsetTop + (fontHeight * 2);
+        var y = endElement.nativeElement.offsetLeft;
+        dropDown.nativeElement.style.top = x + 'px';
+        dropDown.nativeElement.style.left = y + 'px';
+    };
+    EditorComponent.prototype.setDropDownPosOnEdit = function (element) {
+        var base = this;
+        var dropDown = this.dropDownElement;
+        var ruleEditor = this.ruleEditor;
+        var offsetLeft = ruleEditor.nativeElement.offsetLeft;
+        var offsetTop = ruleEditor.nativeElement.offsetTop;
+        var fontHeight = parseFloat(getComputedStyle(element).fontSize);
+        var x = element.offsetTop + (fontHeight * 2);
+        var y = element.offsetLeft;
+        dropDown.nativeElement.style.top = x + 'px';
+        dropDown.nativeElement.style.left = y + 'px';
+    };
+    EditorComponent.prototype.selectOption = function (dropDownEle) {
+        var ruleIndex = this.dropDownIndex;
+        this.dropDownSelectedIndex = -1;
+        var move = true;
+        if (this.dropDownIndex < this.ruleLogic.length - 1) {
+            move = false;
+        }
+        if (dropDownEle.value === 'OPEN_PARANTHESIS' || dropDownEle.value === 'CLOSE_PARANTHESIS') {
+            this.ruleLogic.splice(this.ruleLogic.length - 1, 0, dropDownEle);
+            this.addRuleToObservable(this.ruleLogic[this.ruleLogic.length - 2]);
+            this.dropDownType = 0;
+            if (dropDownEle.value === 'CLOSE_PARANTHESIS') {
+                this.dropDownType = -1;
+                move = false;
+            }
+            dropDownEle.value === 'OPEN_PARANTHESIS' ? this.openParanthesis++ : this.openParanthesis--;
+            this.moveToNextElement();
+            return;
+        }
+        var ruleLogic = this.ruleLogic[ruleIndex];
+        this.ruleLogic[ruleIndex] = Object.assign({}, ruleLogic, dropDownEle);
+        ruleLogic = this.ruleLogic[ruleIndex];
+        if (ruleLogic.elementType === 'field' && !this.resultMode) {
+            var inputParamIndex = this.inputParameters.findIndex(function (i) { return i.value === ruleLogic.value; });
+            if (inputParamIndex < 0) {
+                this.inputParameters.push(dropDownEle);
+            }
+            this.currentFieldSelected = ruleLogic;
+        }
+        this.emptyCurrentText();
+        this.emptyDropDown();
+        if (dropDownEle.custom) {
+            this.setCustomOption();
+            return;
+        }
+        if (this.resultMode) {
+            this.currentResult = ruleLogic;
+            if (ruleLogic.value === 'addLoanException') {
+                this.results.splice(0, 1);
+                this.askCustomMessage();
+            }
+            if (ruleLogic.value === 'addRuleInputParameter') {
+                this.setInputParametersInDropDown();
+            }
+        }
+        if (ruleLogic.elementType === 'field' && this.resultMode) {
+            var inputParamIndex = this.inputParameters.findIndex(function (i) { return i.value === dropDownEle.value; });
+            this.inputParameters.splice(inputParamIndex, 1);
+            this.addRuleToObservable(this.ruleLogic[this.ruleLogic.length - 1]);
+            if (this.inputParameters.length === 0) {
+                var resultIndex = this.results.findIndex(function (i) { return i.value === 'addRuleInputParameter'; });
+                this.results.splice(resultIndex, 1);
+            }
+            var resultExceptionIndex = this.results.findIndex(function (i) { return i.value === 'addLoanException'; });
+            if (this.inputParameters.length || resultExceptionIndex >= 0) {
+                this.moveToNextElement(true);
+            }
+            // end of rule logic is reached
+            if (this.inputParameters.length === 0 && resultExceptionIndex < 0) {
+                console.log('End of Rule Logic..', this.ruleLogic);
+            }
+            this.addRulesToObservable(this.ruleLogic);
+            return;
+        }
+        if (ruleLogic.elementType === 'logicalOperator' && ruleLogic.name === 'then') {
+            this.addRuleToObservable(this.ruleLogic[ruleIndex]);
+            this.moveToResult();
+            return;
+        }
+        this.addRuleToObservable(this.ruleLogic[ruleIndex]);
+        if (this.dropDownIndex === this.ruleLogic.length - 2) {
+            this.dropDownIndex = this.ruleLogic.length - 1;
+        }
+        this.moveToNextElement(this.resultMode, move);
+    };
+    EditorComponent.prototype.setCustomOption = function () {
+        this.setFocusToRuleEditor();
+        this.enterCustomMode();
+        // this.ruleLogic[this.ruleLogic.length - 1].value = '';
+        this.ruleLogic[this.dropDownIndex].value = '';
+    };
+    EditorComponent.prototype.setCustomString = function (text) {
+        this.customString = text;
+    };
+    EditorComponent.prototype.enterCustomMode = function () {
+        this.ruleLogic[this.dropDownIndex].customMode = true;
+        // this.ruleLogic[this.ruleLogic.length - 1].customMode = true;
+        this.customMode = true;
+    };
+    EditorComponent.prototype.exitCustomMode = function () {
+        this.ruleLogic[this.dropDownIndex].customMode = false;
+        this.customMode = false;
+    };
+    EditorComponent.prototype.setCustomValueInRule = function (customString) {
+        this.ruleLogic[this.dropDownIndex].value = customString;
+        this.addRuleToObservable(this.ruleLogic[this.dropDownIndex]);
+        this.setCustomString('');
+        if (this.resultMode) {
+            this.addRulesToObservable(this.ruleLogic);
+        }
+        this.moveToNextElement(this.resultMode);
+    };
+    EditorComponent.prototype.moveToNextElement = function (result, move) {
+        if (result === void 0) { result = false; }
+        if (move === void 0) { move = true; }
+        if (move) {
+            this.setNextDropDownType(result);
+        }
+        this.setDropdown({ code: '' }, true);
+        this.setFocusToRuleEditor();
+    };
+    EditorComponent.prototype.moveToResult = function () {
+        this.resultMode = true;
+        this.moveToNextElement(true);
+    };
+    EditorComponent.prototype.askCustomMessage = function () {
+        this.dropDownType = -1;
+        this.dropDownTypes = ['messages', 'results'];
+    };
+    EditorComponent.prototype.setInputParametersInDropDown = function () {
+        this.dropDownType = -1;
+        this.dropDownTypes = ['inputFields', 'results'];
+    };
+    EditorComponent.prototype.emptyCurrentText = function () {
+        this.currentText = '';
+    };
+    EditorComponent.prototype.setCurrentText = function (text) {
+        this.currentText = text;
+    };
+    EditorComponent.prototype.setFocusToRuleEditor = function () {
+        this.setFocusToElement(this.ruleEditor.nativeElement);
+        this.dropDownSelectedIndex = -1;
+    };
+    EditorComponent.prototype.setFocusToDropDown = function () {
+        this.setFocusToElement(this.dropDownElement.nativeElement);
+        this.dropDownSelectedIndex++;
+    };
+    EditorComponent.prototype.setFocusToElement = function (element) {
+        var p = element, s = window.getSelection(), r = document.createRange();
+        r.setStart(p, 0);
+        r.setEnd(p, 0);
+        s.removeAllRanges();
+        s.addRange(r);
+    };
+    EditorComponent.prototype.prevent = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+    EditorComponent.prototype.logicClicked = function (event, logic, index) {
+        this.dropDownIndex = index;
+        if (logic.value === 'then' || logic.elementType === 'result') {
+            this.emptyDropDown();
+            return;
+        }
+        this.setDropDownPosOnEdit(event.target);
+        this.pushDropDownElements(this.dropDownIndex);
+    };
+    EditorComponent.prototype.getClasses = function (logic) {
+        switch (logic.elementType) {
+            case 'field':
+                return 'col-2';
+            case 'operator':
+                return 'col-3';
+            case 'value':
+                return 'col-4';
+            case 'logicalOperator':
+                return 'col-6';
+        }
+    };
+    EditorComponent.prototype.getOptions = function (logic, index) {
+        this.dropDownIndex = index;
+        var options = this['get' + logic.elementType + 's']();
+        return options;
+    };
+    EditorComponent.prototype.logicSelectChange = function (logic, index, event) {
+        var _a = event.target.value.split(','), name = _a[0], value = _a[1];
+        if (value === undefined) {
+            logic.value = name;
+            this.ruleLogic[index] = logic;
+            return;
+        }
+        logic.name = name;
+        logic.value = value;
+        this.ruleLogic[index] = logic;
+    };
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])('helpText'),
+        __metadata("design:type", String)
+    ], EditorComponent.prototype, "helpText", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])('ruleLogic'),
+        __metadata("design:type", Object)
+    ], EditorComponent.prototype, "ruleLogic", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])('testRule'),
+        __metadata("design:type", Boolean)
+    ], EditorComponent.prototype, "testRule", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])('mode'),
+        __metadata("design:type", String)
+    ], EditorComponent.prototype, "mode", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])('dropDownElement'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], EditorComponent.prototype, "dropDownElement", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])('endElement'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], EditorComponent.prototype, "endElement", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])('ruleEditor'),
+        __metadata("design:type", __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"])
+    ], EditorComponent.prototype, "ruleEditor", void 0);
+    __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])('document:click', ['$event']),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object]),
+        __metadata("design:returntype", void 0)
+    ], EditorComponent.prototype, "clickedOutside", null);
+    EditorComponent = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.esc)        = exitEditingMode()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          {{ logic.customMode ? customString : logic.value }}\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select\n          class="col-2"\n          *ngIf="logic.elementType===\'field\' && logic.name !== \'\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-3"\n          *ngIf="logic.elementType===\'operator\' && logic.name !== \'\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-4"\n          *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'\')"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input\n        class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\') &&\n                logic.name !== \'\'"\n        [value] = "logic.value"\n        (change) = "logicSelectChange(logic, i, $event)">\n\n    <select\n          class="col-6"\n          *ngIf="logic.elementType===\'logicalOperator\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\' && logic.name !== \'\'"\n        [value] = "logic.name"\n        readonly>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__providers_fields_service__["a" /* FieldsService */],
+            __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__["a" /* LogicalOperatorsService */],
+            __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__["a" /* OperatorsService */],
+            __WEBPACK_IMPORTED_MODULE_5__providers_rules_service__["a" /* RulesService */],
+            __WEBPACK_IMPORTED_MODULE_4__providers_result_service__["a" /* ResultsService */]])
+    ], EditorComponent);
+    return EditorComponent;
+}());
+
+//# sourceMappingURL=editor.component.js.map
+
+/***/ }),
+
+/***/ 673:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Config; });
+/* tslint:disable max-line-length*/
+var Config = (function () {
+    function Config() {
+    }
+    Config.LOGIN_URL = BASE_URL + "crm/api/login";
+    Config.USER_URL = BASE_URL + "crm/v1/api/login/loginInfo";
+    return Config;
+}());
+
+//# sourceMappingURL=service-url.config.js.map
+
+/***/ }),
+
+/***/ 674:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FeedbackMessage; });
+/**
+ * Class to define all the feedback message
+ *
+ * usage: FeedbackMessage.LOGIN_ERROR type is FeedbackMessage
+ */
+var FeedbackMessage;
+(function (FeedbackMessage) {
+    FeedbackMessage[FeedbackMessage["LOGIN_ERROR"] = "Invalid credentials , please try again"] = "LOGIN_ERROR";
+    FeedbackMessage[FeedbackMessage["INSERT_CREDENTIALS"] = "Please insert credentials"] = "INSERT_CREDENTIALS";
+    FeedbackMessage[FeedbackMessage["NO_CHANGES"] = "No changes are made"] = "NO_CHANGES";
+})(FeedbackMessage || (FeedbackMessage = {}));
+//# sourceMappingURL=feedback.messages.js.map
 
 /***/ }),
 
@@ -4472,292 +4783,13 @@ webpackContext.id = 694;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoanSummaryModel; });
-var LoanSummaryModel = (function () {
-    function LoanSummaryModel() {
-    }
-    return LoanSummaryModel;
-}());
-
-//# sourceMappingURL=loan-summary.model.js.map
-
-/***/ }),
-
-/***/ 696:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoanModel; });
-var LoanModel = (function () {
-    function LoanModel() {
-    }
-    return LoanModel;
-}());
-
-//# sourceMappingURL=loan.model.js.map
-
-/***/ }),
-
-/***/ 697:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BorrowerModel; });
-var BorrowerModel = (function () {
-    function BorrowerModel() {
-    }
-    return BorrowerModel;
-}());
-
-//# sourceMappingURL=borrower.model.js.map
-
-/***/ }),
-
-/***/ 698:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PropertyModel; });
-var PropertyModel = (function () {
-    function PropertyModel() {
-    }
-    return PropertyModel;
-}());
-
-//# sourceMappingURL=property.model.js.map
-
-/***/ }),
-
-/***/ 699:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AlertModel; });
-var AlertModel = (function () {
-    function AlertModel() {
-        this.drilldown = {
-            page: null,
-            params: null,
-        };
-    }
-    return AlertModel;
-}());
-
-//# sourceMappingURL=alert.model.js.map
-
-/***/ }),
-
-/***/ 700:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Avatar; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-var Avatar = (function () {
-    // tslint:disable-next-line:no-empty
-    function Avatar() {
-        this.size = "45px";
-        this.letters = 2;
-        this.borderradius = "";
-    }
-    Avatar.prototype.getRandomColor = function () {
-        var letters = "0123456789ABCDEF".split("");
-        var color = "#";
-        // tslint:disable-next-line:no-magic-numbers
-        for (var i = 0; i < 6; i++) {
-            // tslint:disable-next-line:no-magic-numbers
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    };
-    Avatar.prototype.ngOnChanges = function () {
-        if (this.name && this.name.trim().length) {
-            var nameInitials = this.name.match(/\b(\w)/g);
-            // const nameLetters = nameInitials.slice(0, 3).join('');
-            this.name = nameInitials.slice(0, 3).join("").toUpperCase();
-            if (this.letters > 0) {
-                this.name = this.name.substr(0, this.letters);
-            }
-        }
-        switch (this.displayType) {
-            case "rounded":
-                this.borderradius = "5%";
-                break;
-            case "circle":
-                this.borderradius = "50%";
-                break;
-            default:
-                this.borderradius = "50%";
-        }
-    };
-    return Avatar;
-}());
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])("imageUrl"),
-    __metadata("design:type", String)
-], Avatar.prototype, "imageUrl", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])("name"),
-    __metadata("design:type", String)
-], Avatar.prototype, "name", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])("size"),
-    __metadata("design:type", String)
-], Avatar.prototype, "size", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])("displayType"),
-    __metadata("design:type", String)
-], Avatar.prototype, "displayType", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])("letters"),
-    __metadata("design:type", Number)
-], Avatar.prototype, "letters", void 0);
-Avatar = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-        selector: "avatar",template:/*ion-inline-start:"/Office/SFA-Angular2/src/components/avatar/avatar.html"*/'<div class="avatar" [style.width]="size" [style.line-height]=\'size\' [style.height]=\'size\' [style.border-radius]=\'borderradius\'>\n  <img *ngIf="imageUrl" [src]="imageUrl" />\n  <span *ngIf="name" class="name">{{ name }}</span>\n</div>'/*ion-inline-end:"/Office/SFA-Angular2/src/components/avatar/avatar.html"*/,
-    }),
-    __metadata("design:paramtypes", [])
-], Avatar);
-
-//# sourceMappingURL=avatar.js.map
-
-/***/ }),
-
-/***/ 718:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ProgressBar; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-/*
- * USAGE:
- * - include <progress-bar></progress-bar> in the html file
- * - To set progress value programatically:
- *    - inject ProgressBar in constructor
- *    - this.progressBar.setProgress(<progress value>)
- *  progressvalue should be in the range (0, 100)
- */
-var ProgressBar = (function () {
-    function ProgressBar() {
-    }
-    ProgressBar.prototype.setProgress = function (progress) {
-        if (!this.progressBarEl) {
-            this.progressBarEl = document.getElementById("progress-value");
-        }
-        if (progress >= 0 && progress <= 100) {
-            this.progressBarEl.style.width = progress + "vw";
-        }
-    };
-    return ProgressBar;
-}());
-ProgressBar = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-        selector: "progress-bar",template:/*ion-inline-start:"/Office/SFA-Angular2/src/pages/mobile/progress-bar/progress-bar.html"*/'<div id="progress-bar" class="progress-bar">\n  <div id="progress-value" class="progress">\n  </div>\n</div>\n'/*ion-inline-end:"/Office/SFA-Angular2/src/pages/mobile/progress-bar/progress-bar.html"*/,
-    })
-], ProgressBar);
-
-//# sourceMappingURL=progress-bar.js.map
-
-/***/ }),
-
-/***/ 719:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppErrorHandler; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__exception_service__ = __webpack_require__(63);
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-/**
- * Default implementation of ErrorHandler.
- * This is a global error handler, handles all the errors thrown
- * from the low level implementations.
- */
-var AppErrorHandler = (function (_super) {
-    __extends(AppErrorHandler, _super);
-    function AppErrorHandler(exceptionService) {
-        var _this = _super.call(this) || this;
-        _this.exceptionService = exceptionService;
-        return _this;
-    }
-    /**
-     * Logs the error in the console.
-     */
-    AppErrorHandler.prototype.handleError = function (error) {
-        this.log(error);
-        _super.prototype.handleError.call(this, error);
-    };
-    /**
-     * Logs the error in the server side
-     */
-    AppErrorHandler.prototype.log = function (error) {
-        this.exceptionService.log(error);
-    };
-    return AppErrorHandler;
-}(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ErrorHandler"]));
-AppErrorHandler = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__exception_service__["a" /* ExceptionService */]])
-], AppErrorHandler);
-
-//# sourceMappingURL=app-error.handler.js.map
-
-/***/ }),
-
-/***/ 720:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyApp; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ionic_native_splash_screen__ = __webpack_require__(156);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(161);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ionic_angular__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_auth_service__ = __webpack_require__(138);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_home_service__ = __webpack_require__(142);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__providers_menu_service__ = __webpack_require__(144);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__common_utils_http_service__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__providers_nav_custom_nav_service__ = __webpack_require__(382);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__providers_loans_loan_service__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__providers_feedback_feedback_messages__ = __webpack_require__(139);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__providers_feedback_feedback_service__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(366);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(363);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_login_login_component__ = __webpack_require__(120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_auth_service__ = __webpack_require__(121);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4767,12 +4799,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-
-
-
-
-
-
 
 
 
@@ -4780,263 +4806,49 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var MyApp = (function () {
-    function MyApp(platform, statusBar, splashScreen, auth, homeService, ngZone, app, http, navService, menuService, menuCtrl, modalCtrl, loanService, feedbackService) {
-        this.platform = platform;
-        this.auth = auth;
-        this.homeService = homeService;
-        this.ngZone = ngZone;
-        this.app = app;
-        this.http = http;
-        this.navService = navService;
-        this.menuService = menuService;
-        this.menuCtrl = menuCtrl;
-        this.modalCtrl = modalCtrl;
-        this.loanService = loanService;
-        this.feedbackService = feedbackService;
-        this.rootPage = "LoginPage";
-        this.firstTime = true;
-        this.firstLoad = true;
-        this.activePage = "Dashboard";
-        this.displayMenu = true;
-        this.pictureURL = "assets/images/steve.jpg";
-        this.showSplitPane = false;
+    function MyApp(platform, statusBar, splashScreen, auth, app) {
+        this.rootPage = __WEBPACK_IMPORTED_MODULE_4__pages_login_login_component__["a" /* LoginPage */];
         platform.ready().then(function () {
+            // Okay, so the platform is ready and our plugins are available.
+            // Here you can do any higher level native things you might need.
             statusBar.styleDefault();
             splashScreen.hide();
         });
-        this.initPages();
-        this.onResize();
+        this.app = app;
+        this.auth = auth;
     }
-    MyApp.prototype.ngOnInit = function () {
-        var _this = this;
-        // this.persistPage();
-        // Logout if the session has expired
-        this.hasSessionExpired = this.http.hasSessionExpiredObservable.subscribe(function (value) {
-            if (value) {
-                _this.logout();
-            }
-        });
-    };
-    /**
-     * 1) Observe changes everytime a new page is entered
-     * 2) If it is a fresh instance of the app and if a entry for the last visted
-     *  page exists in the local storage, navigate to that page to resume state
-     * 3) Set the new instance flag to false and set the new page entered into the local storage
-     */
-    MyApp.prototype.persistPage = function () {
-        var _this = this;
-        this.nav.viewDidEnter.subscribe(function (view) {
-            var pageName = view.instance.constructor.name;
-            if (typeof (Storage) !== "undefined") {
-                if (_this.firstLoad &&
-                    window.localStorage.getItem("currentLocation") &&
-                    window.localStorage.getItem("currentLocation") !== pageName) {
-                    _this.firstLoad = false;
-                    _this.nav.setRoot(window.localStorage.getItem("currentLocation")).then(function () {
-                        // tslint:disable:no-magic-numbers
-                        _this.activePage = window.localStorage.getItem("currentLocation");
-                        if (window.innerWidth >= 800 && window.localStorage.getItem("currentLocation") !== "Dashboard"
-                            && window.localStorage.getItem("currentLocation") !== "LoginPage") {
-                            _this.showSplitPane = true;
-                        }
-                    });
-                }
-                _this.firstLoad = false;
-                window.localStorage.setItem("currentLocation", pageName);
-            }
-        });
-    };
-    MyApp.prototype.menuOpened = function () {
-        if (this.firstTime) {
-            this.getLiveCounts();
-            this.username = this.auth.getUserName();
-            this.firstTime = false;
-        }
-    };
-    MyApp.prototype.onResize = function () {
-        // tslint:disable-next-line:no-magic-numbers
-        if (window.innerWidth >= 800 && this.activePage !== "Dashboard") {
-            this.showSplitPane = true;
-        }
-        else {
-            this.showSplitPane = false;
-        }
-    };
-    MyApp.prototype.openMenuContentPage = function (menuItem) {
-        var _this = this;
-        if (this.activePage === "MyLoans") {
-            this.loanService.unlockLockedLoans().subscribe(function (response) {
-                if (response && !response.success) {
-                    _this.feedbackService.showError(__WEBPACK_IMPORTED_MODULE_10__providers_feedback_feedback_messages__["a" /* FeedbackMessage */].GENERIC_ERROR_MESSAGE.toString());
-                }
-            });
-        }
-        this.activePage = menuItem;
-        this.onResize();
-        this.nav.setRoot(menuItem);
-    };
-    MyApp.prototype.getLiveCounts = function () {
-        var _this = this;
-        this.homeService.getDashboardCounts().subscribe(function (response) {
-            _this.contactsCount = response.contacts;
-            _this.tasksCount = response.tasks;
-            _this.referralCount = response.referalPartners;
-            _this.scheduleCount = response.appointments;
-            _this.eventsCount = response.events;
-            _this.quotesCount = response.quotes;
-            _this.ngZone.run(function () {
-                // console.log('Value Updated !');
-            });
-        }, function (error) {
-            // console.log(error);
-        });
-        this.homeService.getLoanCounts().subscribe(function (response) {
-            _this.loanCount = response.total;
-            _this.ngZone.run(function () {
-                // console.log('Value Updated !');
-            });
-        }, function (error) {
-            // console.log(error);
-        });
+    MyApp.prototype.authenticated = function () {
+        return this.auth.authentication;
     };
     MyApp.prototype.logout = function () {
         var _this = this;
         this.app.getRootNav().setRoot("LoginPage").then(function () {
-            _this.auth.logout().subscribe(function (response) {
-                if (response && response.success) {
-                    _this.menuCtrl.enable(false, "menu");
-                    _this.auth.destroy();
-                    _this.firstTime = true;
-                    _this.firstLoad = true;
-                    _this.showSplitPane = false;
-                    _this.activePage = "Dashboard";
-                }
-                else {
-                    _this.feedbackService.showError(__WEBPACK_IMPORTED_MODULE_10__providers_feedback_feedback_messages__["a" /* FeedbackMessage */].GENERIC_ERROR_MESSAGE.toString());
-                }
-            });
+            _this.auth.logout();
         });
     };
-    MyApp.prototype.authenticated = function () {
-        if (this.auth.authentication) {
-            this.menuOpened();
-        }
-        return this.auth.authentication;
-    };
-    MyApp.prototype.isLargeScreen = function () {
-        if ((this.platform.is("core") || this.platform.is("ipad") || this.platform.is("tablet"))
-            && (this.platform.isLandscape())) {
-            return true;
-        }
-        return false;
-    };
-    MyApp.prototype.getValue = function (key) {
-        return this[key];
-    };
-    MyApp.prototype.checkActive = function (page) {
-        return page === this.activePage;
-    };
-    MyApp.prototype.initPages = function () {
-        this.pages = [
-            { id: "home", title: "Home", pageName: "Dashboard", count: "", icon: "icon-home", iconBgColor: "#396" },
-            {
-                id: "contacts", title: "My Contacts", pageName: "MyContacts",
-                count: "contactsCount", icon: "icon-users", iconBgColor: "#4798ba",
-            },
-            {
-                id: "partners", title: "My Referral Partners", pageName: "MyReferralPartners",
-                count: "referralCount", icon: "icon-business1", iconBgColor: "#4772ba",
-            },
-            {
-                id: "loans", title: "My Loans", pageName: "MyLoans",
-                count: "loanCount", icon: "icon-house", iconBgColor: "#8d68ad",
-            },
-            {
-                id: "quotes", title: "My Quotes", pageName: "MyQuotes",
-                count: "quotesCount", icon: "icon-quotes", iconBgColor: "#ad68a9",
-            },
-            {
-                id: "scorecard", title: "My Scorecard", pageName: "ScoreCardPage",
-                count: "", icon: "icon-stats", iconBgColor: "#b55d7e",
-            },
-            {
-                id: "tasks", title: "My Tasks", pageName: "MyTasks",
-                count: "tasksCount", icon: "icon-task", iconBgColor: "#b5a35d",
-            },
-            {
-                id: "schedule", title: "My Schedule", pageName: "MySchedule",
-                count: "scheduleCount", icon: "icon-schedule-1", iconBgColor: "#9db55d",
-            },
-            {
-                id: "events", title: "My Upcoming Events", pageName: "UpcomingEvents",
-                count: "eventsCount", icon: "icon-events", iconBgColor: "#7ab55d",
-            },
-            {
-                id: "tools", title: "My Tools", pageName: "MyTools", count: "",
-                icon: "icon-calculator", iconBgColor: "#67bfba ",
-            },
-        ];
-        this.activePage = this.pages[0].pageName;
-    };
-    MyApp.prototype.openPictureEditor = function (pictureURL) {
-        var _this = this;
-        var pictureEditorModalWindow = this.modalCtrl.create("PictureEditor", {
-            paramObject: {
-                pictureURL: pictureURL,
-            },
-        }, {
-            showBackdrop: true,
-        });
-        pictureEditorModalWindow.onDidDismiss(function (response) {
-            _this.pictureURL = response.pictureURL;
-        });
-        pictureEditorModalWindow.present();
-    };
+    MyApp = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({template:/*ion-inline-start:"/Office/Rule-Editor/src/app/app.html"*/'<ion-header>\n  <div class="title">\n    Blue Sage <strong> Rules Editor</strong>\n  </div>\n  <div class="user-info" *ngIf="authenticated()">\n    <div class="user-name">\n      Steve Octaviano\n    </div>\n    <div class="mug-shot mugshot-circle" (click)="logout()"></div>\n  </div>\n</ion-header>\n<ion-content>\n	<ion-nav [root]="rootPage"></ion-nav>\n</ion-content>\n'/*ion-inline-end:"/Office/Rule-Editor/src/app/app.html"*/
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["l" /* Platform */],
+            __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */],
+            __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */],
+            __WEBPACK_IMPORTED_MODULE_5__providers_auth_service__["a" /* AuthService */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["b" /* App */]])
+    ], MyApp);
     return MyApp;
 }());
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])("appContent"),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["n" /* NavController */])
-], MyApp.prototype, "nav", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["ViewChild"])(__WEBPACK_IMPORTED_MODULE_3_ionic_angular__["d" /* Content */]),
-    __metadata("design:type", __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["d" /* Content */])
-], MyApp.prototype, "content", void 0);
-__decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["HostListener"])("window:resize"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], MyApp.prototype, "onResize", null);
-MyApp = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({template:/*ion-inline-start:"/Office/SFA-Angular2/src/app/app.html"*/'<!-- <ion-split-pane [when]="menuService.shouldShow()"></ion-split-pane> -->\n<ion-split-pane [when]="showSplitPane">\n    <ion-nav #appContent [root]="rootPage" main ></ion-nav>\n    <ng-container *ngIf="authenticated()">\n        <ion-menu id="menu" persistent="true" type="overlay" [content]="appContent">\n            <ion-header class="menu-top">\n                <ion-item class="menu-header">\n                    <ion-avatar *ngIf="pictureURL">\n                        <img class="menu-avatar" [src]="pictureURL" (click)="openPictureEditor(pictureURL)">\n                    </ion-avatar>\n                    <avatar class="avatar-align" *ngIf="!pictureURL" name="{{username}}" size="60px" (click)="openPictureEditor(pictureURL)"></avatar>\n                    <ion-title id="menu-title" mode="ios" class="font-regular-large" text-capitalize>{{username}}</ion-title>\n                </ion-item>\n            </ion-header>\n            <ion-content overflow-scroll="true">\n                <ion-list id="optionsList" class="options-list" no-padding no-lines>\n                    <button ion-item [id]="page.id" *ngFor="let page of pages" [class.active-highlight]=checkActive(page.pageName) (click)="openMenuContentPage(page.pageName)" menuClose detail-none>\n                        <ion-icon class="tab-icon font-bold-small" [ngClass]="page.icon" item-left [ngStyle]="{\'background-color\': page.iconBgColor}"></ion-icon>\n                        <span class="font-bold-small" [class.active-highlight-font]=checkActive(page.pageName)>{{page.title}}</span>\n                        <label class="font-regular-small" item-right>\n                          {{getValue(page.count)}}\n                        </label>\n                    </button>\n                </ion-list>\n                <ion-list class="options-list" no-lines>\n                    <button ion-item id="logout" (click)="logout()" menuClose detail-none>\n                        <ion-icon class="icon-logout font-bold-small tab-icon" item-left></ion-icon>\n                        <span class="font-bold-small">Log Out</span>\n                    </button>\n                </ion-list>\n            </ion-content>\n        </ion-menu>\n    </ng-container>\n</ion-split-pane>\n'/*ion-inline-end:"/Office/SFA-Angular2/src/app/app.html"*/,
-    }),
-    __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3_ionic_angular__["p" /* Platform */],
-        __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */],
-        __WEBPACK_IMPORTED_MODULE_1__ionic_native_splash_screen__["a" /* SplashScreen */],
-        __WEBPACK_IMPORTED_MODULE_4__providers_auth_service__["a" /* AuthService */],
-        __WEBPACK_IMPORTED_MODULE_5__providers_home_service__["a" /* HomeService */],
-        __WEBPACK_IMPORTED_MODULE_0__angular_core__["NgZone"],
-        __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["c" /* App */],
-        __WEBPACK_IMPORTED_MODULE_7__common_utils_http_service__["a" /* HttpService */],
-        __WEBPACK_IMPORTED_MODULE_8__providers_nav_custom_nav_service__["a" /* CustomNavService */],
-        __WEBPACK_IMPORTED_MODULE_6__providers_menu_service__["a" /* MenuService */],
-        __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["l" /* MenuController */],
-        __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["m" /* ModalController */],
-        __WEBPACK_IMPORTED_MODULE_9__providers_loans_loan_service__["a" /* LoanService */],
-        __WEBPACK_IMPORTED_MODULE_11__providers_feedback_feedback_service__["a" /* FeedbackService */]])
-], MyApp);
 
 //# sourceMappingURL=app.component.js.map
 
 /***/ }),
 
-/***/ 75:
+/***/ 80:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Session; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FeedbackService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -5047,35 +4859,67 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
-var Session = (function () {
-    function Session() {
-        this.map = {};
-        if (typeof (Storage) !== "undefined" && window.localStorage.getItem("sessionMap")) {
-            this.map = JSON.parse(window.localStorage.getItem("sessionMap"));
-        }
-    }
-    Session.prototype.set = function (key, value) {
-        this.map[key] = value;
-        if (typeof (Storage) !== "undefined") {
-            window.localStorage.setItem("sessionMap", JSON.stringify(this.map));
-        }
-    };
-    Session.prototype.get = function (key) {
-        return this.map[key];
-    };
-    Session.prototype.expire = function () {
-        this.map = {};
-    };
-    return Session;
-}());
-Session = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [])
-], Session);
 
-//# sourceMappingURL=session.js.map
+var FeedbackService = (function () {
+    function FeedbackService(toastCtrl, loadingCtrl, alertCtrl) {
+        this.toastCtrl = toastCtrl;
+        this.loadingCtrl = loadingCtrl;
+        this.alertCtrl = alertCtrl;
+    }
+    FeedbackService_1 = FeedbackService;
+    FeedbackService.prototype.showToast = function (message, toastType, duration, position) {
+        if (toastType === void 0) { toastType = "info"; }
+        if (duration === void 0) { duration = 2000; }
+        if (position === void 0) { position = "bottom"; }
+        /*
+         * toastType could be one of ['info', 'warning', 'error']
+         * usage:
+         *      this.feedbackService.showToast(
+         *         <toast message>,
+         *         <toastType>,
+         *         <duration>,
+         *         <position>,
+         *      )
+         */
+        var toast = this.toastCtrl.create({ message: message, duration: duration, position: position,
+            cssClass: "toast__" + toastType,
+        });
+        toast.present();
+    };
+    FeedbackService.prototype.getLoader = function (content) {
+        if (content === void 0) { content = "loading ..."; }
+        // usage:
+        // const loader = feedback.getLoader(<message>)
+        // loader.present() => show loader with the message
+        // loader.dismiss() => dismiss loader
+        var loader = this.loadingCtrl.create({ content: content });
+        return {
+            dismiss: function () { loader.dismiss(); FeedbackService_1.isLoaderVisible = false; },
+            present: function () { loader.present(); FeedbackService_1.isLoaderVisible = true; },
+        };
+    };
+    FeedbackService.prototype.showError = function (text) {
+        var alert = this.alertCtrl.create({
+            buttons: ["OK"],
+            subTitle: text,
+            title: "Fail",
+        });
+        alert.present();
+    };
+    FeedbackService.isLoaderVisible = false;
+    FeedbackService = FeedbackService_1 = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["m" /* ToastController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["h" /* LoadingController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */]])
+    ], FeedbackService);
+    return FeedbackService;
+    var FeedbackService_1;
+}());
+
+//# sourceMappingURL=feedback.service.js.map
 
 /***/ })
 
-},[401]);
+},[367]);
 //# sourceMappingURL=main.js.map
