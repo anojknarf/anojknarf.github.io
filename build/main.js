@@ -7,10 +7,10 @@ webpackJsonp([0],{
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FormComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_element_element_component__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_element_element_component__ = __webpack_require__(219);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_rules_service__ = __webpack_require__(114);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__ = __webpack_require__(115);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__ = __webpack_require__(134);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -71,17 +71,19 @@ var FormComponent = (function () {
         this.ruleListPage = __WEBPACK_IMPORTED_MODULE_5__rule_list_rule_list_component__["a" /* RuleListComponent */];
     }
     FormComponent.prototype.ionViewWillLoad = function () {
+        var _this = this;
         console.log(this.navParams.data);
         if (this.navParams.get('rule-name')) {
             this.pageTitle = "Edit Rule";
             this.ruleName = this.navParams.get('rule-name');
-            var rule = this.ruleListService.getRule(this.ruleName);
-            this.ruleDescription = rule.rule_desc;
-            this.ruleLogic = rule.rule_logic;
-            this.effectiveDate = new Date(rule.effective_date);
-            this.expiryDate = new Date(rule.expiry_date);
-            this.ruleLogicArray = rule.rule_logic_array;
-            console.log("form component..", this.ruleLogicArray);
+            this.ruleListService.getRule(this.ruleName).subscribe(function (rule) {
+                _this.ruleDescription = rule.rule_desc;
+                _this.ruleLogic = rule.rule_logic;
+                _this.effectiveDate = new Date(rule.effective_date);
+                _this.expiryDate = new Date(rule.expiry_date);
+                _this.ruleLogicArray = rule.rule_logic_array;
+                console.log("form component..", _this.ruleLogicArray);
+            });
         }
     };
     FormComponent.prototype.ngOnInit = function () {
@@ -101,9 +103,13 @@ var FormComponent = (function () {
         this.exceptionStack = [];
         this.ruleString = "";
         var resultBlockFound = false;
+        console.log(this.elementStack);
         this.elementStack.forEach(function (elem, indx) {
             if (elem.elementType == 'field' && !resultBlockFound) {
                 var commandString = " #" + elem['value'];
+                if (elem['type'] == "date") {
+                    commandString = " new Date(#" + elem['value'] + ").getTime() ";
+                }
                 var operatorElem = _this.elementStack[indx + 1];
                 var valueElem = _this.elementStack[indx + 2];
                 var fieldCompareTest = _this.elementStack[indx - 2];
@@ -134,6 +140,27 @@ var FormComponent = (function () {
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "<") {
                     commandString += " < " + value;
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isEqualTo") {
+                    commandString += " == new Date(" + value + ").getTime() ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isAfter") {
+                    commandString += " > new Date(" + value + ").getTime() ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isBefore") {
+                    commandString += " < new Date(" + value + ").getTime() ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isAfterEqualTo") {
+                    commandString += " >= new Date(" + value + ").getTime() ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "isBeforeEqualTo") {
+                    commandString += " <= new Date(" + value + ").getTime() ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "hasNoVal") {
+                    commandString += " == null ";
+                }
+                else if (operatorElem['value'] && operatorElem['value'] == "hasAnyVal") {
+                    commandString += " > 0 ";
                 }
                 if (!_this.checkIfExists(elem, _this.formElems)) {
                     _this.formElems.push(elem);
@@ -228,7 +255,7 @@ var FormComponent = (function () {
         console.log("Element Stack ::", this.elementStack, "Exception Stack ::", this.exceptionStack);
         var finalRule = {
             'rule_name': this.ruleName ? this.ruleName : '',
-            'rule_category': this.ruleCatagory ? this.ruleCatagory : '',
+            'rule_category': this.ruleCatagory ? JSON.parse(this.ruleCatagory) : '',
             'rule_desc': this.ruleDescription ? this.ruleDescription : '',
             'rule_logic': this.ruleString,
             'rule_exception': this.errorMessage ? this.errorMessage : '',
@@ -258,7 +285,23 @@ var FormComponent = (function () {
         this.mode = this.mode === 'text' ? 'dropdown' : 'text';
     };
     FormComponent.prototype.getRuleJSONString = function () {
-        return JSON.stringify(this.getCleanRuleArray(), null, "  ");
+        return JSON.stringify(this.getCleanRuleArray(), null, "\t");
+    };
+    FormComponent.prototype.changeJSON = function (event) {
+        var ruleJSON = [];
+        try {
+            ruleJSON = JSON.parse(event.target.textContent);
+            var elementStack = this.elementStack;
+            var changedIndex = elementStack.findIndex(function (e, i) {
+                return e.value != ruleJSON[i].value ||
+                    e.name != ruleJSON[i].name;
+            });
+            if (changedIndex > 0) {
+            }
+        }
+        catch (err) {
+            //console.log(err);
+        }
     };
     FormComponent.prototype.stringify = function (value) {
         return JSON.stringify(value);
@@ -269,7 +312,7 @@ var FormComponent = (function () {
     ], FormComponent.prototype, "elements", void 0);
     FormComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'rule-form',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/form/form.component.html"*/'<div class="page-title">\n	<div>\n		<span class="title-a" [navPush]="ruleListPage">Loan Validation</span>\n		<span>&nbsp;/&nbsp;</span>\n		<span class="title-b">{{pageTitle}}</span>\n	</div>\n</div>\n<div class="rule-form">\n	<div class="tabs">\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'rule\')}" (click)="tab=\'rule\'">Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'testRule\')}" (click)="tab=\'testRule\'">Test Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'droolsFormat\')}" (click)="tab=\'droolsFormat\'">Drools Format</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'jsonFormat\')}" (click)="tab=\'jsonFormat\'">JSON Format</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'rule\')}" class="tab-content">\n		<div class="rule-section">\n			<div class="row">\n				<div class="short-sec">\n					<div class="rule-label">Rule Name</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleName">\n				</div>\n				<div class="middle-sec">\n					<div class="rule-label">Rule Category</div>\n				    <ion-select class="type-dropdown" [(ngModel)]="ruleCatagory">\n				      <ion-option *ngFor="let opt of ruleCatagories" [value]="stringify(opt)">{{opt.name}}</ion-option>\n				    </ion-select>\n				</div>\n				<div class="rule-start short-sec">\n					<div class="sec">\n						<div class="rule-label">Effective Date</div>\n						<ng-datepicker [(ngModel)]="effectiveDate" position="bottom-right" [options]="options"></ng-datepicker>\n					</div>\n					<div class="sec">\n						<div class="rule-label">Expiration Date</div>\n						<ng-datepicker [(ngModel)]="expiryDate" position="bottom-left" [options]="options"></ng-datepicker>\n					</div>\n				</div>\n			</div>\n			<div class="row">\n				<div class="large-sec">\n					<div class="rule-label">Description</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleDescription">\n				</div>\n			</div>\n			<div class="rule-logic-heading">\n				<span>\n					<div class="rule-label">Rule Logic</div>\n					<div class="rule-sub-label">{{helpText}}</div>\n				</span>\n				<button class="editor-type-button" (click)="changeEditorMode()">\n					{{ mode === \'text\' ? \'dropdown\' : \'text\' }} Mode\n				</button>\n			</div>\n			<rule-editor [helpText]="helpText" [mode]="mode" [ruleLogic]="ruleLogicArray" [testRule]="true"></rule-editor>\n			<div class="rule-last-row">\n				<div class="rule-button clear disabled">Validate</div>\n				<div class="rule-end">\n					<div class="rule-button delete" [ngClass]="{\'disabled\':pageTitle == \'Create New Rule\'}" (click)="deleteRule()">Delete</div>\n					<div class="rule-button save" (click)="saveRule()">Save</div>\n				</div>\n			</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'testRule\')}"  class="tab-content">\n		<div class="rule-creator">\n			<div class="rule-label">Rule Logic</div>\n			<rule-editor [helpText]="helpText" mode=\'text\' [ruleLogic]="elementStack" [testRule]="false"></rule-editor>\n		</div>\n		<div class="rule-test">\n			<div class="rule-label">Test Rule</div>\n			<element *ngFor="let elem of formElems" [elementObject]="elem"></element>\n			<div class="rule-button test" (click)="evaluateResults()" *ngIf="formElems.length > 0" [ngClass]="{ \'disabled\': errorMessage == \'\'}">Test</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'droolsFormat\')}" class="tab-content">\n		<div class="drools-box">\n			<pre>\n1: package org.drools;\n2:\n3: rule "DU Refi Rule [EX-04001]"\n4:   when\n5:     BSLP_LoanExceptionServiceInputData(occupancyType == ""P"", numberOfUnits == 2, loanToValueRatio > 150)\n6:   then\n7:     BusinessRuleFactList facts = new BusinessRuleFactList();\n8:     facts.addFact(""Occupancy Type"", $l.getOccupancyType());\n9:     facts.addNumericFact(""Number of Units"", $l.getNumberOfUnits());\n10:    facts.addPercentageFact(""LTV Ratio"", $l.getLoanToValueRatio(), 2);\n11:    BusinessRulesList.add(""EX-04002"", false, facts.toArray());\n12: end\n			</pre>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'jsonFormat\')}" class="tab-content">\n			<div class="drools-box">\n				<pre>{{getRuleJSONString()}}</pre>\n			</div>\n		</div>\n</div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/form/form.component.html"*/
+            selector: 'rule-form',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/form/form.component.html"*/'<div class="page-title">\n	<div>\n		<span class="title-a" [navPush]="ruleListPage">Loan Validation</span>\n		<span>&nbsp;/&nbsp;</span>\n		<span class="title-b">{{pageTitle}}</span>\n	</div>\n</div>\n<div class="rule-form">\n	<div class="tabs">\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'rule\')}" (click)="tab=\'rule\'">Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'testRule\')}" (click)="tab=\'testRule\'">Test Rule</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'droolsFormat\')}" (click)="tab=\'droolsFormat\'">Drools Format</div>\n		<div class="tab" [ngClass]="{\'highlight-tab\' : (tab == \'jsonFormat\')}" (click)="tab=\'jsonFormat\'">JSON Format</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'rule\')}" class="tab-content">\n		<div class="rule-section">\n			<div class="row">\n				<div class="short-sec">\n					<div class="rule-label">Rule Name</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleName">\n				</div>\n				<div class="middle-sec">\n					<div class="rule-label">Rule Category</div>\n				    <ion-select class="type-dropdown" [(ngModel)]="ruleCatagory">\n				      <ion-option *ngFor="let opt of ruleCatagories" [value]="stringify(opt)">{{opt.name}}</ion-option>\n				    </ion-select>\n				</div>\n				<div class="rule-start short-sec">\n					<div class="sec">\n						<div class="rule-label">Effective Date</div>\n						<ng-datepicker [(ngModel)]="effectiveDate" position="bottom-right" [options]="options"></ng-datepicker>\n					</div>\n					<div class="sec">\n						<div class="rule-label">Expiration Date</div>\n						<ng-datepicker [(ngModel)]="expiryDate" position="bottom-left" [options]="options"></ng-datepicker>\n					</div>\n				</div>\n			</div>\n			<div class="row">\n				<div class="large-sec">\n					<div class="rule-label">Description</div>\n					<input class="text-box-long rule-text-box" [(ngModel)]="ruleDescription">\n				</div>\n			</div>\n			<div class="rule-logic-heading">\n				<span>\n					<div class="rule-label">Rule Logic</div>\n					<div class="rule-sub-label">{{helpText}}</div>\n				</span>\n				<button class="editor-type-button" (click)="changeEditorMode()">\n					{{ mode === \'text\' ? \'dropdown\' : \'text\' }} Mode\n				</button>\n			</div>\n			<rule-editor [helpText]="helpText" [mode]="mode" [ruleLogic]="ruleLogicArray" [testRule]="true"></rule-editor>\n			<div class="rule-last-row">\n				<div class="rule-button clear disabled">Validate</div>\n				<div class="rule-end">\n					<div class="rule-button delete" [ngClass]="{\'disabled\':pageTitle == \'Create New Rule\'}" (click)="deleteRule()">Delete</div>\n					<div class="rule-button save" (click)="saveRule()">Save</div>\n				</div>\n			</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'testRule\')}"  class="tab-content">\n		<div class="rule-creator">\n			<div class="rule-label">Rule Logic</div>\n			<rule-editor [helpText]="helpText" mode=\'text\' [ruleLogic]="elementStack" [testRule]="false"></rule-editor>\n		</div>\n		<div class="rule-test">\n			<div class="rule-label">Test Rule</div>\n			<element *ngFor="let elem of formElems" [elementObject]="elem"></element>\n			<div class="rule-button test" (click)="evaluateResults()" *ngIf="formElems.length > 0" [ngClass]="{ \'disabled\': errorMessage == \'\'}">Test</div>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'droolsFormat\')}" class="tab-content">\n		<div class="drools-box">\n			<pre>\n1: package org.drools;\n2:\n3: rule "DU Refi Rule [EX-04001]"\n4:   when\n5:     BSLP_LoanExceptionServiceInputData(occupancyType == ""P"", numberOfUnits == 2, loanToValueRatio > 150)\n6:   then\n7:     BusinessRuleFactList facts = new BusinessRuleFactList();\n8:     facts.addFact(""Occupancy Type"", $l.getOccupancyType());\n9:     facts.addNumericFact(""Number of Units"", $l.getNumberOfUnits());\n10:    facts.addPercentageFact(""LTV Ratio"", $l.getLoanToValueRatio(), 2);\n11:    BusinessRulesList.add(""EX-04002"", false, facts.toArray());\n12: end\n			</pre>\n		</div>\n	</div>\n	<div [ngClass]="{\'show-tab\' : (tab == \'jsonFormat\')}" class="tab-content">\n			<div class="drools-box" contenteditable="true" (keydown) ="changeJSON($event)">\n				<pre>{{getRuleJSONString()}}</pre>\n			</div>\n		</div>\n</div>\n'/*ion-inline-end:"/Office/Rule-Editor/src/pages/form/form.component.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__providers_rules_service__["a" /* RulesService */], __WEBPACK_IMPORTED_MODULE_4__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */],
             __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["k" /* NavParams */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */]])
@@ -336,7 +379,9 @@ var RulesService = (function () {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__ = __webpack_require__(393);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__config_service_url_config__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__ = __webpack_require__(116);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -348,33 +393,48 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
+
+
 var RuleListService = (function () {
-    function RuleListService() {
+    function RuleListService(http) {
+        this.http = http;
         this.ruleList = [];
         console.log(__WEBPACK_IMPORTED_MODULE_1__assets_rule_list__["a" /* default */]);
         this.ruleList = __WEBPACK_IMPORTED_MODULE_1__assets_rule_list__["a" /* default */];
     }
+    RuleListService.prototype.getAllRules = function () {
+        return this.http.get(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].RULE_LIST);
+    };
     RuleListService.prototype.getRule = function (name) {
-        return this.ruleList.filter(function (elem) {
-            if (elem['rule_name'] == name) {
-                return true;
-            }
-            return false;
-        })[0];
+        // return this.ruleList.filter((elem) => {
+        // 	if (elem['rule_name'] == name) {
+        // 		return true;
+        // 	}
+        // 	return false;
+        // })[0];
+        return this.http.get(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].GET_RULE + "/" + name);
     };
     RuleListService.prototype.updateRule = function (rule) {
-        this.deleteRule(rule.rule_name);
-        this.saveRule(rule);
+        return this.http.put(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].UPDATE_RULE + "/" + rule.name, rule);
+    };
+    RuleListService.prototype.saveRuleSubscribe = function (rule) {
+        return this.http.put(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].CREATE_RULE, rule);
     };
     RuleListService.prototype.saveRule = function (rule) {
-        this.ruleList.push(rule);
+        // this.ruleList.push(rule);
+        this.saveRuleSubscribe(rule).subscribe(function (res) {
+            console.log(res);
+        });
     };
     RuleListService.prototype.deleteRule = function (name) {
-        this.ruleList = this.ruleList.filter(function (elem) {
-            if (elem['rule_name'] == name) {
-                return false;
-            }
-            return true;
+        // this.ruleList = this.ruleList.filter((elem) => {
+        // 	if (elem['rule_name'] == name) {
+        // 		return false;
+        // 	}
+        // 	return true;
+        // });
+        this.http.delete(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].DELETE_RULE + "/" + name).subscribe(function (res) {
+            console.log(res);
         });
     };
     RuleListService.prototype.cloneRule = function (rule) {
@@ -382,11 +442,12 @@ var RuleListService = (function () {
         newRule.rule_name = newRule.rule_name + " - Copy";
         newRule.last_published = "";
         newRule.last_modified = new Date();
-        this.ruleList.push(newRule);
+        // this.ruleList.push(newRule);
+        return this.saveRuleSubscribe(newRule);
     };
     RuleListService = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_3__common_utils_http_service__["a" /* HttpService */]])
     ], RuleListService);
     return RuleListService;
 }());
@@ -399,11 +460,270 @@ var RuleListService = (function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HttpService; });
+/* unused harmony export CONTENT_TYPE_FORM */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(221);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__model_session__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__ = __webpack_require__(80);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+
+
+
+
+/**
+ * Wrapper for @angular/http
+ */
+var HttpService = (function () {
+    function HttpService(http, session, feedbackService) {
+        this.http = http;
+        this.session = session;
+        this.feedbackService = feedbackService;
+    }
+    /**
+     * Performs a request with `get` http method.
+     * @param url
+     * @param params
+     * @returns {Observable<any>}
+     */
+    HttpService.prototype.get = function (url, params, headers) {
+        // let loader: any;
+        // if (!FeedbackService.isLoaderVisible) {
+        //   loader = this.feedbackService.getLoader();
+        //   loader.present();
+        // }
+        params = this.addAccessTokenToParams(params);
+        return this.intercept(this.http.get(url, this.getRequestOptions(params)));
+    };
+    /**
+     * Performs a request with `Post` http method.
+     * @param url
+     * @param params
+     * @returns {Observable<any>}
+     */
+    HttpService.prototype.post = function (url, body, headers, queryString) {
+        // let loader: any;
+        // if (!FeedbackService.isLoaderVisible) {
+        //   loader = this.feedbackService.getLoader();
+        //   loader.present();
+        // }
+        var authUrl = this.addAccesstokenToUrl(url);
+        if (queryString) {
+            authUrl = authUrl + queryString;
+        }
+        // Create a request option
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({ headers: headers });
+        return this.intercept(this.http.post(authUrl, body, options));
+    };
+    /**
+     * Performs a request with `Put` http method.
+     * @param url
+     * @param params
+     * @returns {Observable<any>}
+     */
+    HttpService.prototype.put = function (url, body, headers, queryString) {
+        // let loader: any;
+        // if (!FeedbackService.isLoaderVisible) {
+        //   loader = this.feedbackService.getLoader();
+        //   loader.present();
+        // }
+        var authUrl = this.addAccesstokenToUrl(url);
+        if (queryString) {
+            authUrl = authUrl + queryString;
+        }
+        // Create a request option
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({ headers: headers });
+        return this.intercept(this.http.put(authUrl, body, options));
+    };
+    /**
+     * Performs a request with `Delete` http method.
+     * @param url
+     * @returns {Observable<any>}
+     */
+    HttpService.prototype.delete = function (url, headers, queryString) {
+        // let loader: any;
+        // if (!FeedbackService.isLoaderVisible) {
+        //   loader = this.feedbackService.getLoader();
+        //   loader.present();
+        // }
+        var authUrl = this.addAccesstokenToUrl(url);
+        if (queryString) {
+            authUrl = authUrl + queryString;
+        }
+        // Create a request option
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({ headers: headers });
+        return this.intercept(this.http.delete(authUrl, options));
+    };
+    HttpService.prototype.postFile = function (url, body) {
+        var authUrl = this.addAccesstokenToUrl(url);
+        var opts = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({
+            responseType: __WEBPACK_IMPORTED_MODULE_1__angular_http__["d" /* ResponseContentType */].ArrayBuffer,
+        });
+        return this.http.post(authUrl, body, opts);
+    };
+    /**
+     * To retrive accesstoken for the logged in user
+     * @returns {String} accessToken
+     */
+    HttpService.prototype.getAccessToken = function () {
+        if (this.session.get("currentUser")) {
+            return this.session.get("currentUser").access_token;
+        }
+        return null;
+    };
+    /**
+     * Converts the JSON object to query
+     */
+    HttpService.prototype.convertJsonToQueryString = function (params) {
+        var reqParams = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["e" /* URLSearchParams */]();
+        for (var _i = 0, _a = Object.keys(params); _i < _a.length; _i++) {
+            var key = _a[_i];
+            reqParams.set(key, params[key]);
+        }
+        return reqParams;
+    };
+    HttpService.prototype.getRequestOptions = function (params, headers) {
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]();
+        options.search = this.convertJsonToQueryString(params);
+        options.headers = headers;
+        return options;
+    };
+    HttpService.prototype.onCatch = function (error, caught) {
+        return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error);
+    };
+    HttpService.prototype.onSubscribeSuccess = function (response) {
+        // Todo
+    };
+    HttpService.prototype.onSubscribeError = function (error) {
+        // Todo
+    };
+    HttpService.prototype.onFinally = function () {
+        // Todo
+    };
+    HttpService.prototype.addAccesstokenToUrl = function (serviceURL) {
+        var accessToken = this.getAccessToken();
+        // if (serviceURL && accessToken) {
+        //   serviceURL += "?access_token=" + accessToken;
+        // }
+        return serviceURL;
+    };
+    HttpService.prototype.addAccessTokenToParams = function (data) {
+        var computedData = {
+            access_token: null,
+        };
+        if (data) {
+            computedData = JSON.parse(JSON.stringify(data));
+        }
+        if (!computedData.access_token) {
+            var accessToken = this.getAccessToken();
+            if (accessToken) {
+                computedData.access_token = accessToken;
+            }
+        }
+        return computedData;
+    };
+    HttpService.prototype.intercept = function (observable) {
+        var _this = this;
+        return observable.map(function (response) { return response.json(); })
+            .catch(this.onCatch)
+            .do(function (res) {
+            _this.onSubscribeSuccess(res);
+        }, function (error) {
+            _this.onSubscribeError(error);
+        })
+            .finally(function () {
+            // this.checkAndCloseLoader(loader);
+            _this.onFinally();
+        });
+    };
+    HttpService.prototype.checkAndCloseLoader = function (loader) {
+        if (loader) {
+            loader.dismiss();
+        }
+    };
+    HttpService = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["a" /* Http */],
+            __WEBPACK_IMPORTED_MODULE_4__model_session__["a" /* Session */],
+            __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__["a" /* FeedbackService */]])
+    ], HttpService);
+    return HttpService;
+}());
+
+var CONTENT_TYPE_FORM = "Content-Type: application/x-www-form-urlencoded";
+//# sourceMappingURL=http.service.js.map
+
+/***/ }),
+
+/***/ 133:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Session; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var Session = (function () {
+    function Session() {
+        this.map = {};
+        if (typeof (Storage) !== "undefined" && window.localStorage.getItem("sessionMap")) {
+            this.map = JSON.parse(window.localStorage.getItem("sessionMap"));
+        }
+    }
+    Session.prototype.set = function (key, value) {
+        this.map[key] = value;
+        if (typeof (Storage) !== "undefined") {
+            window.localStorage.setItem("sessionMap", JSON.stringify(this.map));
+        }
+    };
+    Session.prototype.get = function (key) {
+        return this.map[key];
+    };
+    Session.prototype.expire = function () {
+        this.map = {};
+    };
+    Session = __decorate([
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
+        __metadata("design:paramtypes", [])
+    ], Session);
+    return Session;
+}());
+
+//# sourceMappingURL=session.js.map
+
+/***/ }),
+
+/***/ 134:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return RuleListComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__ = __webpack_require__(115);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__home_home_component__ = __webpack_require__(117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__home_home_component__ = __webpack_require__(135);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__form_form_component__ = __webpack_require__(113);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -437,7 +757,24 @@ var RuleListComponent = (function () {
         this.formPage = __WEBPACK_IMPORTED_MODULE_4__form_form_component__["a" /* FormComponent */];
     }
     RuleListComponent.prototype.ngOnInit = function () {
-        this.localRuleList = this.cachedRuleList = this.ruleListService.ruleList;
+        var _this = this;
+        // this.localRuleList = this.cachedRuleList = this.ruleListService.ruleList;
+        this.ruleListService.getAllRules().subscribe(function (resp) {
+            _this.localRuleList = _this.cachedRuleList = resp;
+            _this.localRuleList.sort(function (a, b) {
+                var compA = a["rule_name"];
+                var compB = b["rule_name"];
+                if (compA < compB) {
+                    return -1;
+                }
+                else if (compA > compB) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            });
+        });
     };
     RuleListComponent.prototype.formatDate = function (date) {
         if (date) {
@@ -519,27 +856,16 @@ var RuleListComponent = (function () {
     RuleListComponent.prototype.cloneRules = function () {
         var _this = this;
         this.selectedRules.forEach(function (rule) {
-            _this.ruleListService.cloneRule(rule);
-        });
-        this.ngOnInit();
-        this.localRuleList.sort(function (a, b) {
-            var compA = a["rule_name"];
-            var compB = b["rule_name"];
-            if (compA < compB) {
-                return -1;
-            }
-            else if (compA > compB) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        });
-        var ruleListRowElements = this.ruleListRows.nativeElement.querySelectorAll('input');
-        ruleListRowElements.forEach(function (elem) {
-            if (elem.checked) {
-                elem.click();
-            }
+            _this.ruleListService.cloneRule(rule).subscribe(function (res) {
+                console.log(res);
+                _this.ngOnInit();
+                var ruleListRowElements = _this.ruleListRows.nativeElement.querySelectorAll('input');
+                ruleListRowElements.forEach(function (elem) {
+                    if (elem.checked) {
+                        elem.click();
+                    }
+                });
+            });
         });
     };
     RuleListComponent.prototype.tickAll = function (event) {
@@ -586,7 +912,7 @@ var RuleListComponent = (function () {
 
 /***/ }),
 
-/***/ 117:
+/***/ 135:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -703,14 +1029,14 @@ var HomeComponent = (function () {
 
 /***/ }),
 
-/***/ 120:
+/***/ 136:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return LoginPage; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_auth_service__ = __webpack_require__(121);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_auth_service__ = __webpack_require__(137);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -774,22 +1100,22 @@ var LoginPage = (function () {
 
 /***/ }),
 
-/***/ 121:
+/***/ 137:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AuthService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__ = __webpack_require__(236);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_add_operator_catch__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(119);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__ = __webpack_require__(128);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_add_operator_map__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_model_session__ = __webpack_require__(122);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__ = __webpack_require__(230);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__config_service_url_config__ = __webpack_require__(673);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__ = __webpack_require__(322);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__common_model_session__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__common_utils_http_service__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__config_service_url_config__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__providers_feedback_exception_service__ = __webpack_require__(323);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__providers_feedback_feedback_messages__ = __webpack_require__(674);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__providers_feedback_feedback_service__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -874,7 +1200,7 @@ var AuthService = (function () {
                 _this.session.set("currentUser", response);
                 _this.currentUser = response;
                 _this.authentication = true;
-                _this.getAuthUser();
+                // this.getAuthUser();
                 _this.setLocalStorageUser();
             }
             return _this.authentication;
@@ -924,53 +1250,7 @@ var AuthService = (function () {
 
 /***/ }),
 
-/***/ 122:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Session; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-var Session = (function () {
-    function Session() {
-        this.map = {};
-        if (typeof (Storage) !== "undefined" && window.localStorage.getItem("sessionMap")) {
-            this.map = JSON.parse(window.localStorage.getItem("sessionMap"));
-        }
-    }
-    Session.prototype.set = function (key, value) {
-        this.map[key] = value;
-        if (typeof (Storage) !== "undefined") {
-            window.localStorage.setItem("sessionMap", JSON.stringify(this.map));
-        }
-    };
-    Session.prototype.get = function (key) {
-        return this.map[key];
-    };
-    Session.prototype.expire = function () {
-        this.map = {};
-    };
-    Session = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-        __metadata("design:paramtypes", [])
-    ], Session);
-    return Session;
-}());
-
-//# sourceMappingURL=session.js.map
-
-/***/ }),
-
-/***/ 171:
+/***/ 172:
 /***/ (function(module, exports) {
 
 function webpackEmptyAsyncContext(req) {
@@ -983,25 +1263,25 @@ function webpackEmptyAsyncContext(req) {
 webpackEmptyAsyncContext.keys = function() { return []; };
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 module.exports = webpackEmptyAsyncContext;
-webpackEmptyAsyncContext.id = 171;
+webpackEmptyAsyncContext.id = 172;
 
 /***/ }),
 
-/***/ 216:
+/***/ 217:
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
 	"../pages/form/form.component.module": [
-		217
+		218
 	],
 	"../pages/home/home.component.module": [
-		226
+		321
 	],
 	"../pages/login/login.component.module": [
-		227
+		322
 	],
 	"../pages/rule-list/rule-list.component.module": [
-		323
+		324
 	]
 };
 function webpackAsyncContext(req) {
@@ -1015,12 +1295,12 @@ function webpackAsyncContext(req) {
 webpackAsyncContext.keys = function webpackAsyncContextKeys() {
 	return Object.keys(map);
 };
-webpackAsyncContext.id = 216;
+webpackAsyncContext.id = 217;
 module.exports = webpackAsyncContext;
 
 /***/ }),
 
-/***/ 217:
+/***/ 218:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1029,9 +1309,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__form_component__ = __webpack_require__(113);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__ = __webpack_require__(393);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__ = __webpack_require__(218);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_editor_editor_component__ = __webpack_require__(673);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_element_element_component__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__ = __webpack_require__(320);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_ng2_datepicker__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -1071,7 +1351,7 @@ var FormComponentModule = (function () {
 
 /***/ }),
 
-/***/ 218:
+/***/ 219:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1124,7 +1404,7 @@ var ElementComponent = (function () {
     ], ElementComponent.prototype, "elementObject", void 0);
     ElementComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'element',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/element/element.component.html"*/'<div class="element-container">\n	<div class="element-label">{{elementObject.name}}</div>\n	<ion-select *ngIf="elementObject.type == \'options\'" class="element-value type-dropdown" [(ngModel)]="selectedValue">\n    	<ion-option *ngFor="let opt of elementObject.options" [value]="opt">{{opt.name}}</ion-option>\n  	</ion-select>\n	<input *ngIf="elementObject.type == \'number\'" (click)="suppress()" (keypress)=\'numberRestrict(event)\' [(ngModel)]="selectedValue" class="element-value type-number">\n	<input *ngIf="elementObject.type == \'string\'" (click)="suppress()" [(ngModel)]="selectedValue" class="element-value">\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/components/element/element.component.html"*/
+            selector: 'element',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/element/element.component.html"*/'<div class="element-container">\n	<div class="element-label">{{elementObject.name}}</div>\n	<ion-select *ngIf="elementObject.type == \'options\'" class="element-value type-dropdown" [(ngModel)]="selectedValue">\n    	<ion-option *ngFor="let opt of elementObject.options" [value]="opt">{{opt.name}}</ion-option>\n  	</ion-select>\n	<input *ngIf="elementObject.type == \'number\'" (click)="suppress()" (keypress)=\'numberRestrict(event)\' [(ngModel)]="selectedValue" class="element-value type-number">\n	<input *ngIf="elementObject.type == \'string\'" (click)="suppress()" [(ngModel)]="selectedValue" class="element-value">\n	<input *ngIf="elementObject.type == \'date\'" type="date" (click)="suppress()" [(ngModel)]="selectedValue" class="element-value">\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/components/element/element.component.html"*/
         }),
         __metadata("design:paramtypes", [])
     ], ElementComponent);
@@ -1135,7 +1415,31 @@ var ElementComponent = (function () {
 
 /***/ }),
 
-/***/ 219:
+/***/ 220:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Config; });
+/* tslint:disable max-line-length*/
+var Config = (function () {
+    function Config() {
+    }
+    Config.LOGIN_URL = BASE_URL + "/login";
+    Config.USER_URL = BASE_URL + "crm/v1/api/login/loginInfo";
+    Config.RULE_LIST = BASE_URL + "/rule_list";
+    Config.GET_RULE = BASE_URL + "/rule_list";
+    Config.UPDATE_RULE = BASE_URL + "/rule_list";
+    Config.DELETE_RULE = BASE_URL + "/rule_list";
+    Config.CREATE_RULE = BASE_URL + "/rule_list";
+    Config.DOWNLOAD_XLS = BASE_URL + "/download_file";
+    return Config;
+}());
+
+//# sourceMappingURL=service-url.config.js.map
+
+/***/ }),
+
+/***/ 316:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2958,7 +3262,7 @@ var FieldsService = (function () {
 
 /***/ }),
 
-/***/ 220:
+/***/ 317:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3009,7 +3313,7 @@ var LogicalOperatorsService = (function () {
 
 /***/ }),
 
-/***/ 221:
+/***/ 318:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3152,7 +3456,7 @@ var OperatorsService = (function () {
 
 /***/ }),
 
-/***/ 222:
+/***/ 319:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3201,7 +3505,7 @@ var ResultsService = (function () {
 
 /***/ }),
 
-/***/ 226:
+/***/ 321:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3209,7 +3513,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HomeComponentModule", function() { return HomeComponentModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__home_component__ = __webpack_require__(117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__home_component__ = __webpack_require__(135);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3242,7 +3546,7 @@ var HomeComponentModule = (function () {
 
 /***/ }),
 
-/***/ 227:
+/***/ 322:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3250,7 +3554,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LoginPageModule", function() { return LoginPageModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__login_component__ = __webpack_require__(120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__login_component__ = __webpack_require__(136);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -3283,187 +3587,13 @@ var LoginPageModule = (function () {
 
 /***/ }),
 
-/***/ 230:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HttpService; });
-/* unused harmony export CONTENT_TYPE_FORM */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_http__ = __webpack_require__(231);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__ = __webpack_require__(232);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_Rx__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__model_session__ = __webpack_require__(122);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__ = __webpack_require__(80);
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-
-
-
-
-/**
- * Wrapper for @angular/http
- */
-var HttpService = (function () {
-    function HttpService(http, session, feedbackService) {
-        this.http = http;
-        this.session = session;
-        this.feedbackService = feedbackService;
-    }
-    /**
-     * Performs a request with `get` http method.
-     * @param url
-     * @param params
-     * @returns {Observable<any>}
-     */
-    HttpService.prototype.get = function (url, params, headers) {
-        // let loader: any;
-        // if (!FeedbackService.isLoaderVisible) {
-        //   loader = this.feedbackService.getLoader();
-        //   loader.present();
-        // }
-        params = this.addAccessTokenToParams(params);
-        return this.intercept(this.http.get(url, this.getRequestOptions(params)));
-    };
-    /**
-     * Performs a request with `Post` http method.
-     * @param url
-     * @param params
-     * @returns {Observable<any>}
-     */
-    HttpService.prototype.post = function (url, body, headers, queryString) {
-        // let loader: any;
-        // if (!FeedbackService.isLoaderVisible) {
-        //   loader = this.feedbackService.getLoader();
-        //   loader.present();
-        // }
-        var authUrl = this.addAccesstokenToUrl(url);
-        if (queryString) {
-            authUrl = authUrl + queryString;
-        }
-        // Create a request option
-        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({ headers: headers });
-        return this.intercept(this.http.post(authUrl, body, options));
-    };
-    HttpService.prototype.postFile = function (url, body) {
-        var authUrl = this.addAccesstokenToUrl(url);
-        var opts = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]({
-            responseType: __WEBPACK_IMPORTED_MODULE_1__angular_http__["d" /* ResponseContentType */].ArrayBuffer,
-        });
-        return this.http.post(authUrl, body, opts);
-    };
-    /**
-     * To retrive accesstoken for the logged in user
-     * @returns {String} accessToken
-     */
-    HttpService.prototype.getAccessToken = function () {
-        if (this.session.get("currentUser")) {
-            return this.session.get("currentUser").access_token;
-        }
-        return null;
-    };
-    /**
-     * Converts the JSON object to query
-     */
-    HttpService.prototype.convertJsonToQueryString = function (params) {
-        var reqParams = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["e" /* URLSearchParams */]();
-        for (var _i = 0, _a = Object.keys(params); _i < _a.length; _i++) {
-            var key = _a[_i];
-            reqParams.set(key, params[key]);
-        }
-        return reqParams;
-    };
-    HttpService.prototype.getRequestOptions = function (params, headers) {
-        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["c" /* RequestOptions */]();
-        options.search = this.convertJsonToQueryString(params);
-        options.headers = headers;
-        return options;
-    };
-    HttpService.prototype.onCatch = function (error, caught) {
-        return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error);
-    };
-    HttpService.prototype.onSubscribeSuccess = function (response) {
-        // Todo
-    };
-    HttpService.prototype.onSubscribeError = function (error) {
-        // Todo
-    };
-    HttpService.prototype.onFinally = function () {
-        // Todo
-    };
-    HttpService.prototype.addAccesstokenToUrl = function (serviceURL) {
-        var accessToken = this.getAccessToken();
-        if (serviceURL && accessToken) {
-            serviceURL += "?access_token=" + accessToken;
-        }
-        return serviceURL;
-    };
-    HttpService.prototype.addAccessTokenToParams = function (data) {
-        var computedData = {
-            access_token: null,
-        };
-        if (data) {
-            computedData = JSON.parse(JSON.stringify(data));
-        }
-        if (!computedData.access_token) {
-            var accessToken = this.getAccessToken();
-            if (accessToken) {
-                computedData.access_token = accessToken;
-            }
-        }
-        return computedData;
-    };
-    HttpService.prototype.intercept = function (observable) {
-        var _this = this;
-        return observable.map(function (response) { return response.json(); })
-            .catch(this.onCatch)
-            .do(function (res) {
-            _this.onSubscribeSuccess(res);
-        }, function (error) {
-            _this.onSubscribeError(error);
-        })
-            .finally(function () {
-            // this.checkAndCloseLoader(loader);
-            _this.onFinally();
-        });
-    };
-    HttpService.prototype.checkAndCloseLoader = function (loader) {
-        if (loader) {
-            loader.dismiss();
-        }
-    };
-    HttpService = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_http__["a" /* Http */],
-            __WEBPACK_IMPORTED_MODULE_4__model_session__["a" /* Session */],
-            __WEBPACK_IMPORTED_MODULE_5__providers_feedback_feedback_service__["a" /* FeedbackService */]])
-    ], HttpService);
-    return HttpService;
-}());
-
-var CONTENT_TYPE_FORM = "Content-Type: application/x-www-form-urlencoded";
-//# sourceMappingURL=http.service.js.map
-
-/***/ }),
-
-/***/ 322:
+/***/ 323:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ExceptionService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__ = __webpack_require__(232);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__ = __webpack_require__(222);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_Rx__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__feedback_service__ = __webpack_require__(80);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -3541,7 +3671,7 @@ var ExceptionService = (function () {
 
 /***/ }),
 
-/***/ 323:
+/***/ 324:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3549,8 +3679,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RuleListComponentModule", function() { return RuleListComponentModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rule_list_component__ = __webpack_require__(116);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__ = __webpack_require__(223);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rule_list_component__ = __webpack_require__(134);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__ = __webpack_require__(320);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_ng2_datepicker___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_ng2_datepicker__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3586,13 +3716,13 @@ var RuleListComponentModule = (function () {
 
 /***/ }),
 
-/***/ 367:
+/***/ 368:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(368);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(372);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__ = __webpack_require__(369);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app_module__ = __webpack_require__(373);
 
 
 Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_1__app_module__["a" /* AppModule */]);
@@ -3600,7 +3730,7 @@ Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* pl
 
 /***/ }),
 
-/***/ 372:
+/***/ 373:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3608,28 +3738,28 @@ Object(__WEBPACK_IMPORTED_MODULE_0__angular_platform_browser_dynamic__["a" /* pl
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__ = __webpack_require__(40);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(363);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(366);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_http__ = __webpack_require__(231);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(364);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ionic_native_status_bar__ = __webpack_require__(367);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_http__ = __webpack_require__(221);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__app_component__ = __webpack_require__(695);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_login_login_component__ = __webpack_require__(120);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_home_home_component__ = __webpack_require__(117);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pages_login_login_component__ = __webpack_require__(136);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pages_home_home_component__ = __webpack_require__(135);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pages_rule_list_rule_list_component__ = __webpack_require__(134);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pages_form_form_component__ = __webpack_require__(113);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__pages_login_login_component_module__ = __webpack_require__(227);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_home_home_component_module__ = __webpack_require__(226);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_rule_list_rule_list_component_module__ = __webpack_require__(323);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__pages_form_form_component_module__ = __webpack_require__(217);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__common_model_session__ = __webpack_require__(122);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__common_utils_http_service__ = __webpack_require__(230);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__providers_feedback_exception_service__ = __webpack_require__(322);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__pages_login_login_component_module__ = __webpack_require__(322);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__pages_home_home_component_module__ = __webpack_require__(321);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__pages_rule_list_rule_list_component_module__ = __webpack_require__(324);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__pages_form_form_component_module__ = __webpack_require__(218);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__common_model_session__ = __webpack_require__(133);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__common_utils_http_service__ = __webpack_require__(116);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__providers_feedback_exception_service__ = __webpack_require__(323);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__providers_feedback_feedback_service__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__providers_auth_service__ = __webpack_require__(121);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__providers_fields_service__ = __webpack_require__(219);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__providers_operators_service__ = __webpack_require__(221);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__providers_logical_service__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__providers_auth_service__ = __webpack_require__(137);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__providers_fields_service__ = __webpack_require__(316);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__providers_operators_service__ = __webpack_require__(318);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__providers_logical_service__ = __webpack_require__(317);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__providers_rules_service__ = __webpack_require__(114);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__providers_result_service__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__providers_result_service__ = __webpack_require__(319);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__providers_ruleList_service__ = __webpack_require__(115);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3720,7 +3850,7 @@ var AppModule = (function () {
 
 /***/ }),
 
-/***/ 392:
+/***/ 393:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3991,16 +4121,16 @@ var data = [
 
 /***/ }),
 
-/***/ 393:
+/***/ 673:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return EditorComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_fields_service__ = __webpack_require__(219);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__ = __webpack_require__(220);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__ = __webpack_require__(221);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_result_service__ = __webpack_require__(222);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__providers_fields_service__ = __webpack_require__(316);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__ = __webpack_require__(317);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__providers_operators_service__ = __webpack_require__(318);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__providers_result_service__ = __webpack_require__(319);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_rules_service__ = __webpack_require__(114);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -4118,6 +4248,12 @@ var EditorComponent = (function () {
             this.addRulesToObservable(this.ruleLogic);
         }
     };
+    EditorComponent.prototype.ngOnChanges = function (changes) {
+        if (changes && changes.ruleLogic && changes.ruleLogic.currentValue) {
+            this.ruleLogic = this.addOptionsToRules(this.ruleLogic);
+            this.addRulesToObservable(this.ruleLogic);
+        }
+    };
     EditorComponent.prototype.addOptionsToRules = function (ruleLogic) {
         var fields = this.fields;
         return ruleLogic.map(function (rule) {
@@ -4157,9 +4293,6 @@ var EditorComponent = (function () {
         var element = event.srcElement;
         if (!this.ruleEditMode) {
             this.ruleEditMode = true;
-            // if(this.ruleLogic[this.ruleLogic.length -1].elementType === 'value') {
-            //   this.ruleLogic.pop();
-            // }
             if (this.ruleLogic.length === 0) {
                 this.ruleLogic.push({
                     name: 'IF',
@@ -4167,7 +4300,9 @@ var EditorComponent = (function () {
                     value: 'if',
                 });
             }
-            this.setDropdown({ code: '' });
+            if (!this.customMode) {
+                this.setDropdown({ code: '' });
+            }
         }
         // $event.preventDefault();
         event.stopPropagation();
@@ -4179,6 +4314,11 @@ var EditorComponent = (function () {
     };
     EditorComponent.prototype.exitEditingMode = function (event) {
         this.ruleEditMode = false;
+        var lastLogic = this.ruleLogic[this.ruleLogic.length - 1];
+        this.ruleLogic = this.ruleLogic.filter(function (r) { return r.name.length || r.value.length; });
+        if (!(lastLogic.name.length && lastLogic.value.length)) {
+            this.ruleLogic.push(lastLogic);
+        }
         this.addRulesToObservable(this.ruleLogic);
     };
     EditorComponent.prototype.setNextDropDownType = function (result, exception, input) {
@@ -4285,6 +4425,7 @@ var EditorComponent = (function () {
         var _a;
     };
     EditorComponent.prototype.setDropdown = function (event, empty) {
+        var _this = this;
         if (empty === void 0) { empty = false; }
         var code = event.code;
         var key = event.key;
@@ -4335,7 +4476,9 @@ var EditorComponent = (function () {
         }
         var base = this;
         setTimeout(function () {
-            base.setDropDownPos(base);
+            if (_this.mode != 'dropdown') {
+                base.setDropDownPos(base);
+            }
         }, 20);
     };
     EditorComponent.prototype.setEndOfContenteditable = function (event) {
@@ -4373,7 +4516,9 @@ var EditorComponent = (function () {
         if (this.dropDownIndex > this.ruleLogic.length) {
             this.dropDownIndex = this.ruleLogic.length - 1;
         }
-        this.setCurrentElement();
+        if (this.mode != 'dropdown') {
+            this.setCurrentElement();
+        }
         var logic = this.ruleLogic[this.dropDownIndex]
             ? this.ruleLogic[this.dropDownIndex]
             : this[this.dropDownTypes[this.dropDownType] + 'Logic'];
@@ -4620,6 +4765,14 @@ var EditorComponent = (function () {
             return;
         }
         if (ruleLogic.elementType === 'logicalOperator' && ruleLogic.name === 'then') {
+            if (ruleIndex < this.ruleLogic.length - 1) {
+                this.ruleLogic = this.ruleLogic.slice(0, ruleIndex + 1);
+                // this.results.push({
+                //   name: 'Add Loan Exception',
+                //   value: 'addLoanException',
+                //   elementType: 'result',
+                // });
+            }
             this.addRuleToObservable(this.ruleLogic[ruleIndex]);
             this.moveToResult();
             return;
@@ -4631,9 +4784,10 @@ var EditorComponent = (function () {
         this.moveToNextElement(this.resultMode, move);
     };
     EditorComponent.prototype.setCustomOption = function () {
-        this.setFocusToRuleEditor();
+        if (this.mode != 'dropdown') {
+            this.setFocusToRuleEditor();
+        }
         this.enterCustomMode();
-        // this.ruleLogic[this.ruleLogic.length - 1].value = '';
         this.ruleLogic[this.dropDownIndex].value = '';
     };
     EditorComponent.prototype.setCustomString = function (text) {
@@ -4641,7 +4795,7 @@ var EditorComponent = (function () {
     };
     EditorComponent.prototype.enterCustomMode = function () {
         this.ruleLogic[this.dropDownIndex].customMode = true;
-        // this.ruleLogic[this.ruleLogic.length - 1].customMode = true;
+        this.emptyDropDown();
         this.customMode = true;
     };
     EditorComponent.prototype.exitCustomMode = function () {
@@ -4664,7 +4818,9 @@ var EditorComponent = (function () {
             this.setNextDropDownType(result);
         }
         this.setDropdown({ code: '' }, true);
-        this.setFocusToRuleEditor();
+        if (this.mode != 'dropdown') {
+            this.setFocusToRuleEditor();
+        }
     };
     EditorComponent.prototype.moveToResult = function () {
         this.resultMode = true;
@@ -4729,16 +4885,32 @@ var EditorComponent = (function () {
         var options = this['get' + logic.elementType + 's']();
         return options;
     };
-    EditorComponent.prototype.logicSelectChange = function (logic, index, event) {
+    EditorComponent.prototype.logicSelectChange = function (logic, index, event, options) {
         var _a = event.target.value.split(','), name = _a[0], value = _a[1];
-        if (value === undefined) {
-            logic.value = name;
+        this.dropDownIndex = index;
+        var dropDownEle = this.getDropDownEle(logic.elementType, name, value, options);
+        this.selectOption(dropDownEle);
+    };
+    EditorComponent.prototype.logicCustomChange = function (logic, index, value) {
+        if (value != undefined) {
+            logic.value = value;
             this.ruleLogic[index] = logic;
             return;
         }
-        logic.name = name;
-        logic.value = value;
-        this.ruleLogic[index] = logic;
+    };
+    EditorComponent.prototype.getDropDownEle = function (elementType, name, value, options) {
+        return options.find(function (o) { return o.name === name && o.value === value; });
+    };
+    EditorComponent.prototype.selectDate = function (event, index) {
+        this.exitCustomMode();
+        var date = event.target.value;
+        if (this.dropDownIndex == index) {
+            this.exitCustomMode();
+            this.setCustomValueInRule(date);
+        }
+        else {
+            this.ruleLogic[index].value = date;
+        }
     };
     __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Input"])('helpText'),
@@ -4776,7 +4948,7 @@ var EditorComponent = (function () {
     ], EditorComponent.prototype, "clickedOutside", null);
     EditorComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.esc)        = exitEditingMode()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          {{ logic.customMode ? customString : logic.value }}\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select\n          class="col-2"\n          *ngIf="logic.elementType===\'field\' && logic.name !== \'\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-3"\n          *ngIf="logic.elementType===\'operator\' && logic.name !== \'\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-4"\n          *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'\')"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input\n        class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\') &&\n                logic.name !== \'\'"\n        [value] = "logic.value"\n        (change) = "logicSelectChange(logic, i, $event)">\n\n    <select\n          class="col-6"\n          *ngIf="logic.elementType===\'logicalOperator\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event)">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\' && logic.name !== \'\'"\n        [value] = "logic.name"\n        readonly>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
+            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.esc)        = exitEditingMode()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          <span *ngIf="logic.name ===\'Enter a date\'">\n            <input type="date" [value]="logic.value"  (change) = "selectDate($event, i)">\n          </span>\n          <span *ngIf="logic.name !==\'Enter a date\'">\n            {{ logic.customMode ? customString : logic.value }}\n            <br *ngIf="isNewLineRequired(logic)" >\n            <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n          </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select\n          class="col-2"\n          *ngIf="logic.elementType===\'field\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n        [value]="logic.name + \',\' + logic.value"\n      >\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-3"\n          *ngIf="logic.elementType===\'operator\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-4"\n          *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input\n        class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n        [value] = "logic.value"\n        [type] = "logic.name === \'Enter a date\' ? \'date\' : \'text\'"\n        (change) = "logic.name === \'Enter a date\'\n              ? selectDate($event, i)\n              : logicCustomChange(logic, i, value)">\n\n    <select\n          class="col-6"\n          *ngIf="logic.elementType===\'logicalOperator\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\' && logic.name !== \'\'"\n        [value] = "logic.name"\n        readonly>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__providers_fields_service__["a" /* FieldsService */],
             __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__["a" /* LogicalOperatorsService */],
@@ -4788,24 +4960,6 @@ var EditorComponent = (function () {
 }());
 
 //# sourceMappingURL=editor.component.js.map
-
-/***/ }),
-
-/***/ 673:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Config; });
-/* tslint:disable max-line-length*/
-var Config = (function () {
-    function Config() {
-    }
-    Config.LOGIN_URL = BASE_URL + "crm/api/login";
-    Config.USER_URL = BASE_URL + "crm/v1/api/login/loginInfo";
-    return Config;
-}());
-
-//# sourceMappingURL=service-url.config.js.map
 
 /***/ }),
 
@@ -4836,10 +4990,10 @@ var FeedbackMessage;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyApp; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(366);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(363);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_login_login_component__ = __webpack_require__(120);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_auth_service__ = __webpack_require__(121);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(367);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(364);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_login_login_component__ = __webpack_require__(136);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__providers_auth_service__ = __webpack_require__(137);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4971,5 +5125,5 @@ var FeedbackService = (function () {
 
 /***/ })
 
-},[367]);
+},[368]);
 //# sourceMappingURL=main.js.map
