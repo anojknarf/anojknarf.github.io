@@ -26078,6 +26078,7 @@ element .type-dropdown {
   padding: 9px !important;
   cursor: pointer;
   font-size: 11px;
+  max-height: 40px;
   margin: 0px !important;
   width: 40% !important;
 }
