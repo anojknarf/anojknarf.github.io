@@ -1188,7 +1188,7 @@ var FieldsService = (function () {
             {
                 "name": "Anticipated Settlement Date",
                 "value": "anticipatedSettlementDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1200,13 +1200,13 @@ var FieldsService = (function () {
             {
                 "name": "Application Date",
                 "value": "applicationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Appraisal Date",
                 "value": "appraisalDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1230,13 +1230,13 @@ var FieldsService = (function () {
             {
                 "name": "Appraisal Verification Effective Date",
                 "value": "appraisalVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Appraisal Verification Expiration Date",
                 "value": "appraisalVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1260,13 +1260,13 @@ var FieldsService = (function () {
             {
                 "name": "Asset Verification Effective Date",
                 "value": "assetVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Asset Verification Expiration Date",
                 "value": "assetVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1302,7 +1302,7 @@ var FieldsService = (function () {
             {
                 "name": "Bankruptcy Date",
                 "value": "bankruptcyDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1326,7 +1326,7 @@ var FieldsService = (function () {
             {
                 "name": "Birth Date",
                 "value": "birthDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1474,19 +1474,19 @@ var FieldsService = (function () {
             {
                 "name": "Credit Verification Effective Date",
                 "value": "creditVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Credit Verification Expiration Date",
                 "value": "creditVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Current Date",
                 "value": "currentDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1504,7 +1504,7 @@ var FieldsService = (function () {
             {
                 "name": "Deed In Lieu Date",
                 "value": "deedInLieuDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1546,13 +1546,13 @@ var FieldsService = (function () {
             {
                 "name": "Employment Verification Effective Date",
                 "value": "employmentVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Employment Verification Expiration Date",
                 "value": "employmentVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1594,13 +1594,13 @@ var FieldsService = (function () {
             {
                 "name": "FHA Case Number Assignment Date",
                 "value": "fhaCaseNumberAssignmentDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "FHA Prior Loan Endorsement Date",
                 "value": "fhaPriorLoanEndorsementDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1642,13 +1642,13 @@ var FieldsService = (function () {
             {
                 "name": "Flood Certificate Verification Effective Date",
                 "value": "floodCertificateVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Flood Certificate Verification Expiration Date",
                 "value": "floodCertificateVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1660,7 +1660,7 @@ var FieldsService = (function () {
             {
                 "name": "Foreclosure Date",
                 "value": "foreclosureDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1684,7 +1684,7 @@ var FieldsService = (function () {
             {
                 "name": "Guidelines Version Date",
                 "value": "guidelinesVersionDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -1708,37 +1708,37 @@ var FieldsService = (function () {
             {
                 "name": "Income Verification Effective Date",
                 "value": "incomeVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Income Verification Expiration Date",
                 "value": "incomeVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Initial Closing Disclosure Delivery Date",
                 "value": "initialClosingDisclosureDeliveryDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Initial Closing Disclosure Receipt Date",
                 "value": "initialClosingDisclosureReceiptDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Initial Loan Estimate Delivery Date",
                 "value": "initialLoanEstimateDeliveryDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Initial Loan Estimate Receipt Date",
                 "value": "initialLoanEstimateReceiptDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2218,13 +2218,13 @@ var FieldsService = (function () {
             {
                 "name": "Loan Closed Date",
                 "value": "loanClosedDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Loan Eligibility Date",
                 "value": "loanEligibilityDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2236,13 +2236,13 @@ var FieldsService = (function () {
             {
                 "name": "Loan Funding Date",
                 "value": "loanFundingDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Loan Note Date",
                 "value": "loanNoteDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2290,7 +2290,7 @@ var FieldsService = (function () {
             {
                 "name": "Loan Submitted From Correspondent Portal Date",
                 "value": "loanSubmittedFromCorrespondentPortalDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2350,7 +2350,7 @@ var FieldsService = (function () {
             {
                 "name": "Modification Date",
                 "value": "modificationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2362,13 +2362,13 @@ var FieldsService = (function () {
             {
                 "name": "Mortgage Insurance Certificate Verification Effective Date",
                 "value": "mortgageInsuranceCertificateVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Mortgage Insurance Certificate Verification Expiration Date",
                 "value": "mortgageInsuranceCertificateVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2474,7 +2474,7 @@ var FieldsService = (function () {
                     {
                         "name": "Refinance",
                         "value": "R"
-                    },
+                    }
                 ]
             },
             {
@@ -2552,7 +2552,7 @@ var FieldsService = (function () {
             {
                 "name": "Pricing Date",
                 "value": "pricingDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2582,7 +2582,7 @@ var FieldsService = (function () {
             {
                 "name": "Property Acquisition Date",
                 "value": "propertyAcquisitionDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2660,7 +2660,7 @@ var FieldsService = (function () {
             {
                 "name": "Rate Lock Date",
                 "value": "rateLockDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2672,7 +2672,7 @@ var FieldsService = (function () {
             {
                 "name": "Rate Lock Expiration Date",
                 "value": "rateLockExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2740,7 +2740,7 @@ var FieldsService = (function () {
             {
                 "name": "Relock Date",
                 "value": "relockDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2752,25 +2752,25 @@ var FieldsService = (function () {
             {
                 "name": "Revised Closing Disclosure Delivery Date",
                 "value": "revisedClosingDisclosureDeliveryDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Revised Closing Disclosure Receipt Date",
                 "value": "revisedClosingDisclosureReceiptDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Revised Loan Estimate Delivery Date",
                 "value": "revisedLoanEstimateDeliveryDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Revised Loan Estimate Receipt Date",
                 "value": "revisedLoanEstimateReceiptDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2788,7 +2788,7 @@ var FieldsService = (function () {
             {
                 "name": "Scheduled Closing Date",
                 "value": "scheduledClosingDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2818,7 +2818,7 @@ var FieldsService = (function () {
             {
                 "name": "Short Sale Date",
                 "value": "shortSaleDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2866,13 +2866,13 @@ var FieldsService = (function () {
             {
                 "name": "Title Verification Effective Date",
                 "value": "titleVerificationEffectiveDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Title Verification Expiration Date",
                 "value": "titleVerificationExpirationDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2908,13 +2908,13 @@ var FieldsService = (function () {
             {
                 "name": "Usda Case Number Assignment Date",
                 "value": "usdaCaseNumberAssignmentDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "VA Case Number Assignment Date",
                 "value": "vaCaseNumberAssignmentDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -2926,13 +2926,13 @@ var FieldsService = (function () {
             {
                 "name": "Verification Document Date",
                 "value": "verificationDocumentDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
                 "name": "Verification Document Exp Date",
                 "value": "verificationDocumentExpDate",
-                "type": "string",
+                "type": "date",
                 "elementType": "field"
             },
             {
@@ -3099,6 +3099,40 @@ var OperatorsService = (function () {
                 {
                     name: 'is not',
                     value: 'isNot',
+                },
+            ],
+            'date': [
+                {
+                    name: 'is equal to',
+                    value: 'isEqualTo',
+                },
+                {
+                    name: 'is not equal to',
+                    value: 'isNotEqualTo',
+                },
+                {
+                    name: 'is after',
+                    value: 'isAfter',
+                },
+                {
+                    name: 'is after or equal to',
+                    value: 'isAfterEqualTo',
+                },
+                {
+                    name: 'is before',
+                    value: 'isBefore',
+                },
+                {
+                    name: 'is before or equal to',
+                    value: 'isBeforeEqualTo',
+                },
+                {
+                    name: 'has no value',
+                    value: 'hasNoVal',
+                },
+                {
+                    name: 'has any value',
+                    value: 'hasAnyVal',
                 },
             ],
         });
@@ -4356,6 +4390,11 @@ var EditorComponent = (function () {
             return f.type === 'number';
         });
     };
+    EditorComponent.prototype.getDateFields = function () {
+        return this.fields.filter(function (f) {
+            return f.type === 'date';
+        });
+    };
     EditorComponent.prototype.pushDropDownElements = function (dropDownIndex) {
         this.emptyDropDown();
         var logic = this.ruleLogic[this.dropDownIndex] ? this.ruleLogic[this.dropDownIndex] : this[this.dropDownTypes[this.dropDownType] + 'Logic'];
@@ -4440,6 +4479,10 @@ var EditorComponent = (function () {
                 else {
                     return this.ruleLogic[this.dropDownIndex - 2].options;
                 }
+            case 'date':
+                dropdown = this.getEnterADateObject();
+                dropdown.push.apply(dropdown, this.getDateFields());
+                return dropdown;
         }
     };
     EditorComponent.prototype.getresults = function () {
@@ -4451,6 +4494,13 @@ var EditorComponent = (function () {
     EditorComponent.prototype.getEnterAStringObject = function () {
         return [{
                 name: 'Enter a string',
+                value: 'CUSTOM',
+                custom: true,
+            }];
+    };
+    EditorComponent.prototype.getEnterADateObject = function () {
+        return [{
+                name: 'Enter a date',
                 value: 'CUSTOM',
                 custom: true,
             }];

@@ -25810,7 +25810,7 @@ rule-editor {
 
 rule-editor .rule-editor {
   font-size: 11px;
-  font-family: tahoma;
+  font-family: tahoma !important;
 }
 
 rule-editor .rule-editor-start {
@@ -25839,7 +25839,8 @@ rule-editor .text-box-long {
 
 rule-editor .starter {
   text-transform: uppercase;
-  font-family: 'Lato-Bold';
+  font-family: tahoma !important;
+  font-weight: 900;
   text-shadow: 0 0 0 #000;
 }
 
@@ -25853,7 +25854,8 @@ rule-editor .result::before {
 }
 
 rule-editor .field, rule-editor .result {
-  font-family: 'Lato-Bold';
+  font-family: tahoma !important;
+  font-weight: 900;
   text-shadow: 0 0 0 #000;
 }
 
@@ -25891,7 +25893,8 @@ rule-editor .drop-down {
   box-shadow: 1px 1px 5px 2px #888888;
   padding: 10px;
   font-size: 12px;
-  font-family: 'Lato-Bold';
+  font-family: tahoma !important;
+  font-weight: 900;
   background-color: white;
   z-index: 9;
   max-height: 250px;
@@ -26903,7 +26906,6 @@ page-login input {
   border-radius: 0px !important;
   color: #222222;
   margin: 0px 0px 30px 0px !important;
-  font-family: "Lato-Regular" !important;
   font-size: calc(14px + 0.36vh) !important;
   padding-bottom: 4px !important;
   background-color: transparent;
@@ -26921,7 +26923,6 @@ page-login button {
 }
 
 page-login button .button-inner {
-  font-family: "Lato-Bold" !important;
   font-size: calc(16px + 0.36vh) !important;
 }
 
@@ -26941,7 +26942,6 @@ page-login .space-bottom {
 page-login .build-version {
   margin-top: 10px;
   margin-bottom: 15px;
-  font-family: "Lato-Regular" !important;
   font-size: calc(10px + 0.36vh) !important;
   color: #999999;
   -webkit-box-pack: center;
