@@ -161,6 +161,9 @@ var FormComponent = (function () {
                 else if (operatorElem['value'] && operatorElem['value'] == "hasAnyVal") {
                     commandString += " > 0 ";
                 }
+                else if (operatorElem['value'] && operatorElem['value'] == "notIn") {
+                    commandString = value + ".indexOf(" + commandString + ") ";
+                }
                 if (!_this.checkIfExists(elem, _this.formElems)) {
                     _this.formElems.push(elem);
                 }
@@ -1639,19 +1642,19 @@ var FieldsService = (function () {
             {
                 "name": "Base Combined Loan To Value Ratio",
                 "value": "baseCombinedLoanToValueRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Base High Credit Loan To Value Ratio",
                 "value": "baseHighCreditLoanToValueRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Base Loan To Value Ratio",
                 "value": "baseLoanToValueRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -1717,7 +1720,7 @@ var FieldsService = (function () {
             {
                 "name": "Cash Out Amount",
                 "value": "cashOutAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -1745,13 +1748,13 @@ var FieldsService = (function () {
             {
                 "name": "Combined Loan To Value Ratio",
                 "value": "combinedLoanToValueRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Conforming Loan Limit Amount",
                 "value": "conformingLoanLimitAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -1799,7 +1802,7 @@ var FieldsService = (function () {
             {
                 "name": "Credit Score",
                 "value": "creditScore",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -1823,13 +1826,13 @@ var FieldsService = (function () {
             {
                 "name": "Debt To Income Ratio",
                 "value": "debtToIncomeRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Deed In Lieu Age In Years",
                 "value": "deedInLieuAgeInYears",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -1907,19 +1910,19 @@ var FieldsService = (function () {
             {
                 "name": "Existing Subordinate Financing Amount",
                 "value": "existingSubordinateFinancingAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Existing Subordinate HELOC Amount",
                 "value": "existingSubordinateHELOCAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Existing Subordinate HELOC Max Credit Amount",
                 "value": "existingSubordinateHELOCMaxCreditAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2021,13 +2024,13 @@ var FieldsService = (function () {
             {
                 "name": "High Credit Loan To Value Ratio",
                 "value": "highCreditLoanToValueRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Housing Expense Ratio",
                 "value": "housingExpenseRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2105,385 +2108,385 @@ var FieldsService = (function () {
             {
                 "name": "Is Adverse Modification Applicable",
                 "value": "adverseModificationApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Alimony Child Support Obligated",
                 "value": "alimonyChildSupportObligated",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Asset Depletion Income Used",
                 "value": "assetDepletionIncomeUsed",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Assumable Product",
                 "value": "assumableProduct",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Bankruptcy Applicable",
                 "value": "bankruptcyApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Cash Out Refinance",
                 "value": "cashOutRefinance",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Citizen",
                 "value": "citizen",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Closed End Loan",
                 "value": "closedEndLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Condominium Property",
                 "value": "condominiumProperty",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Coop Property",
                 "value": "coopProperty",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Correspondent Channel",
                 "value": "correspondentChannel",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Declining Balance Renewals",
                 "value": "decliningBalanceRenewals",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Deed In Lieu Applicable",
                 "value": "deedInLieuApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Delegated Underwriting",
                 "value": "delegatedUnderwriting",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is DU Refi Plus Loan",
                 "value": "duRefiPlusLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Escrows Waived",
                 "value": "escrowsWaived",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Fee Buy Out",
                 "value": "feeBuyOut",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is First Time Home Buyer",
                 "value": "firstTimeHomeBuyer",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Foreclosure Applicable",
                 "value": "foreclosureApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Full Eligibility",
                 "value": "fullEligibility",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Hoepa Applicable",
                 "value": "hoepaApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Home Equity Loan",
                 "value": "homeEquityLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Home Ready Loan",
                 "value": "homeReadyLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Home Style Renovation Loan",
                 "value": "homeStyleRenovationLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is In House Loan",
                 "value": "inHouseLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is In House Servicing",
                 "value": "inHouseServicing",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Initialized",
                 "value": "initialized",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Insurance Escrows Waived",
                 "value": "insuranceEscrowsWaived",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Lender Paid Mortgage Insurance",
                 "value": "lenderPaidMortgageInsurance",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Limited Cash Out Refinance",
                 "value": "limitedCashOutRefinance",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Manual Underwriting",
                 "value": "manualUnderwriting",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Manufactured Home Property",
                 "value": "manufacturedHomeProperty",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Modification Applicable",
                 "value": "modificationApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Mortgage Insurance Premium Financed",
                 "value": "mortgageInsurancePremiumFinanced",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is My Community Mortgage Loan",
                 "value": "myCommunityMortgageLoan",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is New Construction Property",
                 "value": "newConstructionProperty",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Non Occupant Borrower",
                 "value": "nonOccupantBorrower",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Non Warrantable Project",
                 "value": "nonWarrantableProject",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Partial Term Buydown",
                 "value": "partialTermBuydown",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Permanent Resident Alien",
                 "value": "permanentResidentAlien",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is PMI Attributes Initialized",
                 "value": "pmiAttributesInitialized",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Prepayment Penalty",
                 "value": "prepaymentPenalty",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Primary Borrower",
                 "value": "primaryBorrower",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Primary Employment Indicated",
                 "value": "primaryEmploymentIndicated",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Property Fully Occupied",
                 "value": "propertyFullyOccupied",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Property Inspection Waiver",
                 "value": "propertyInspectionWaiver",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is PUD",
                 "value": "pud",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Quote Service Call",
                 "value": "quoteServiceCall",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Rate Lock Expired",
                 "value": "rateLockExpired",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Rate Lock Pending",
                 "value": "rateLockPending",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Rate Locked",
                 "value": "rateLocked",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Recent Home Owner",
                 "value": "recentHomeOwner",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Refundable Premium",
                 "value": "refundablePremium",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Retail Channel",
                 "value": "retailChannel",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Self Employed",
                 "value": "selfEmployed",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Self Employed",
                 "value": "selfEmployed",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Short Sale Applicable",
                 "value": "shortSaleApplicable",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Single Premium Mortgage Insurance",
                 "value": "singlePremiumMortgageInsurance",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Streamline Refi Program",
                 "value": "streamlineRefiProgram",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Tax Escrows Waived",
                 "value": "taxEscrowsWaived",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is VA Entitlement Used",
                 "value": "vaEntitlementUsed",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is VA Funding Fee Exempt",
                 "value": "vaFundingFeeExempt",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is VA Prior Use Manufactured Home",
                 "value": "vaPriorUseManufacturedHome",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
                 "name": "Is Wholesale Channel",
                 "value": "wholesaleChannel",
-                "type": "string",
+                "type": "boolean",
                 "elementType": "field"
             },
             {
@@ -2543,7 +2546,7 @@ var FieldsService = (function () {
             {
                 "name": "Loan Amount",
                 "value": "loanAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2591,8 +2594,26 @@ var FieldsService = (function () {
             {
                 "name": "Loan Program Type",
                 "value": "loanProgramType",
-                "type": "string",
-                "elementType": "field"
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "203KS",
+                        "value": "203KS",
+                    },
+                    {
+                        "name": "203KL",
+                        "value": "203KL"
+                    },
+                    {
+                        "name": "201KS",
+                        "value": "201KS",
+                    },
+                    {
+                        "name": "201KL",
+                        "value": "201KL"
+                    },
+                ]
             },
             {
                 "name": "Loan Prospector Key Identifier",
@@ -2603,8 +2624,18 @@ var FieldsService = (function () {
             {
                 "name": "Loan Purpose Type",
                 "value": "loanPurposeType",
-                "type": "string",
-                "elementType": "field"
+                "type": "options",
+                "elementType": "field",
+                "options": [
+                    {
+                        "name": "Refinance",
+                        "value": "R"
+                    },
+                    {
+                        "name": "Purchase",
+                        "value": "P"
+                    },
+                ]
             },
             {
                 "name": "Loan Status Level",
@@ -2645,7 +2676,7 @@ var FieldsService = (function () {
             {
                 "name": "Maximum Credit Line Amount",
                 "value": "maximumCreditLineAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2657,7 +2688,7 @@ var FieldsService = (function () {
             {
                 "name": "Maximum Loan Limit Amount",
                 "value": "maximumLoanLimitAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2705,7 +2736,7 @@ var FieldsService = (function () {
             {
                 "name": "Mortgage Insurance Financed Amount",
                 "value": "mortgageInsuranceFinancedAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2925,7 +2956,7 @@ var FieldsService = (function () {
             {
                 "name": "Property Debt To Income Ratio",
                 "value": "propertyDebtToIncomeRatio",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -2961,13 +2992,13 @@ var FieldsService = (function () {
             {
                 "name": "Property Value Amount",
                 "value": "propertyValueAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Purchase Price Amount",
                 "value": "purchasePriceAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -3053,7 +3084,7 @@ var FieldsService = (function () {
             {
                 "name": "Refinance Amount",
                 "value": "refinanceAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -3173,13 +3204,13 @@ var FieldsService = (function () {
             {
                 "name": "Subordinate Credit Line Amount",
                 "value": "subordinateCreditLineAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
                 "name": "Subordinate Financing Amount",
                 "value": "subordinateFinancingAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -3191,7 +3222,7 @@ var FieldsService = (function () {
             {
                 "name": "Tax Id Number",
                 "value": "taxIdNumber",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -3251,7 +3282,7 @@ var FieldsService = (function () {
             {
                 "name": "VA Guarantee Available Amount",
                 "value": "VAGuaranteeAvailableAmount",
-                "type": "string",
+                "type": "number",
                 "elementType": "field"
             },
             {
@@ -3431,6 +3462,14 @@ var OperatorsService = (function () {
                     name: 'is not',
                     value: 'isNot',
                 },
+                {
+                    name: 'in',
+                    value: 'in',
+                },
+                {
+                    name: 'not in',
+                    value: 'notIn',
+                },
             ],
             'date': [
                 {
@@ -3466,6 +3505,16 @@ var OperatorsService = (function () {
                     value: 'hasAnyVal',
                 },
             ],
+            'boolean': [
+                {
+                    name: 'is',
+                    value: 'is',
+                },
+                {
+                    name: 'is not',
+                    value: 'isNot',
+                },
+            ]
         });
         this.operator = this.operators.asObservable();
     }
@@ -4184,11 +4233,13 @@ var EditorComponent = (function () {
         this.ruleLogic = [];
         this.mode = 'text';
         this.ruleEditMode = false;
+        this.selectionMode = false;
         this.fields = [];
         this.logicalOperators = [];
         this.operators = [];
         this.values = [];
         this.results = [];
+        this.selectedValues = [];
         this.dropDownTypes = [
             'fields',
             'operators',
@@ -4330,6 +4381,11 @@ var EditorComponent = (function () {
             if (!this.customMode) {
                 this.setDropdown({ code: '' });
             }
+        }
+        if (this.ruleEditMode && this.selectionMode) {
+            var selectedDropDown = this.getSelectedDropDown();
+            this.exitSelectionMode();
+            this.selectOption(selectedDropDown);
         }
         // $event.preventDefault();
         event.stopPropagation();
@@ -4567,6 +4623,11 @@ var EditorComponent = (function () {
             return f.type === 'date';
         });
     };
+    EditorComponent.prototype.getBooleanFields = function () {
+        return this.fields.filter(function (f) {
+            return f.type === 'boolean';
+        });
+    };
     EditorComponent.prototype.pushDropDownElements = function (dropDownIndex) {
         this.emptyDropDown();
         var logic = this.ruleLogic[this.dropDownIndex] ? this.ruleLogic[this.dropDownIndex] : this[this.dropDownTypes[this.dropDownType] + 'Logic'];
@@ -4655,6 +4716,17 @@ var EditorComponent = (function () {
                 dropdown = this.getEnterADateObject();
                 dropdown.push.apply(dropdown, this.getDateFields());
                 return dropdown;
+            case 'boolean':
+                dropdown.push({
+                    name: 'True',
+                    value: 'true',
+                });
+                dropdown.push({
+                    name: 'False',
+                    value: 'false',
+                });
+                dropdown.push.apply(dropdown, this.getBooleanFields());
+                return dropdown;
         }
     };
     EditorComponent.prototype.getresults = function () {
@@ -4695,8 +4767,12 @@ var EditorComponent = (function () {
     EditorComponent.prototype.enter = function (event) {
         event && event.preventDefault ? event.preventDefault() : {};
         var selectedDropDown = this.dropDown[this.dropDownSelectedIndex];
-        this.selectOption(selectedDropDown);
         this.dropDownSelectedIndex = -1;
+        if (this.selectionMode) {
+            selectedDropDown = this.getSelectedDropDown();
+            this.exitSelectionMode();
+        }
+        this.selectOption(selectedDropDown);
     };
     EditorComponent.prototype.setDropDownPos = function (base) {
         base = base ? base : this;
@@ -4727,12 +4803,43 @@ var EditorComponent = (function () {
         dropDown.nativeElement.style.top = x + 'px';
         dropDown.nativeElement.style.left = y + 'px';
     };
+    EditorComponent.prototype.checkOption = function (dropDownEle, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.selectedValues.push(dropDownEle);
+        console.log(dropDownEle);
+    };
+    EditorComponent.prototype.enterSelectionMode = function () {
+        this.selectionMode = true;
+        this.selectedValues = [];
+    };
+    EditorComponent.prototype.exitSelectionMode = function () {
+        this.selectionMode = false;
+        this.selectedValues = [];
+    };
+    EditorComponent.prototype.getSelectedDropDown = function () {
+        var dropdown = { name: '', value: '' };
+        var name = this.selectedValues.reduce(function (str, v) { return str += v.name + ", "; }, '');
+        var value = this.selectedValues.reduce(function (str, v) { return str += "'" + v.value + "' , "; }, '');
+        name = '[ ' + name.substring(0, name.length - 1) + ' ]';
+        value = '[ ' + value.substring(0, value.length - 1) + ' ]';
+        dropdown.name = name;
+        dropdown.value = value;
+        return dropdown;
+    };
     EditorComponent.prototype.selectOption = function (dropDownEle) {
         var ruleIndex = this.dropDownIndex;
         this.dropDownSelectedIndex = -1;
         var move = true;
         if (this.dropDownIndex < this.ruleLogic.length - 1) {
             move = false;
+        }
+        if (this.selectionMode) {
+            this.checkOption(dropDownEle);
+        }
+        if (dropDownEle.value === 'in' || dropDownEle.value === 'notIn') {
+            this.enterSelectionMode();
         }
         if (dropDownEle.value === 'OPEN_PARANTHESIS' || dropDownEle.value === 'CLOSE_PARANTHESIS') {
             this.ruleLogic.splice(this.ruleLogic.length - 1, 0, dropDownEle);
@@ -4886,6 +4993,9 @@ var EditorComponent = (function () {
         event.preventDefault();
         event.stopPropagation();
     };
+    EditorComponent.prototype.stopPropagation = function (event) {
+        event.stopPropagation();
+    };
     EditorComponent.prototype.logicClicked = function (event, logic, index) {
         this.dropDownIndex = index;
         if (logic.value === 'then' || logic.elementType === 'result') {
@@ -4975,7 +5085,7 @@ var EditorComponent = (function () {
     ], EditorComponent.prototype, "clickedOutside", null);
     EditorComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
-            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.esc)        = exitEditingMode()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          <span *ngIf="logic.name ===\'Enter a date\'">\n            <input type="date" [value]="logic.value"  (change) = "selectDate($event, i)">\n          </span>\n          <span *ngIf="logic.name !==\'Enter a date\'">\n            {{ logic.customMode ? customString : logic.value }}\n            <br *ngIf="isNewLineRequired(logic)" >\n            <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n          </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n      {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select\n          class="col-2"\n          *ngIf="logic.elementType===\'field\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n        [value]="logic.name + \',\' + logic.value"\n      >\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-3"\n          *ngIf="logic.elementType===\'operator\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-4"\n          *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input\n        class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n        [value] = "logic.value"\n        [type] = "logic.name === \'Enter a date\' ? \'date\' : \'text\'"\n        (change) = "logic.name === \'Enter a date\'\n              ? selectDate($event, i)\n              : logicCustomChange(logic, i, value)">\n\n    <select\n          class="col-6"\n          *ngIf="logic.elementType===\'logicalOperator\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\' && logic.name !== \'\'"\n        [value] = "logic.name"\n        readonly>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
+            selector: 'rule-editor',template:/*ion-inline-start:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/'<span *ngIf="mode === \'text\'">\n  <div class="rule-editor rule-text-box text-box-long"\n        #ruleEditor\n        contenteditable      = "true"\n        spellcheck           = "false"\n        (click)              = enterEditingMode($event)\n        (keypress)           = \'setDropdown($event); setEndOfContenteditable($event)\'\n        (keydown.arrowright) = rightArrow()\n        (keydown.arrowleft)  = leftArrow()\n        (keydown.arrowdown)  = setFocusToDropDown()\n        (keydown.backspace)  = backspace($event)\n        (keydown.control.z)  = undoDelete()\n        (keydown.esc)        = exitEditingMode()\n        [ngClass]            = "(ruleLogic.length > 1) ? \'rule-editor-edit\' : \'rule-editor-start\'">\n\n    <span class="initial-text" *ngIf="!(ruleLogic.length > 0)">\n      - Click anywhere inside the rule area to modify the rule. -\n    </span>\n\n    <span class="rule-edit-mode" *ngIf="ruleLogic.length > 0">\n      <span *ngFor="let logic of ruleLogic; index as i"\n          class="logic"\n          [ngClass]="logic.elementType === \'logicalOperator\' && logic.name === \'then\'\n                    ? \'starter\'\n                    : dropDownIndex === i\n                    ? \'current-logic \' + logic.elementType\n                    : logic.elementType "\n\n          (click) ="logicClicked($event, logic, i)"\n          >\n\n        <br *ngIf="logic.elementType === \'logicalOperator\' && logic.name === \'then\'">\n\n\n        <span *ngIf="!logic.custom">\n\n          <br *ngIf="logic.elementType === \'result\'">\n          <span *ngIf="logic.elementType === \'result\'"> &nbsp; </span>\n\n          <!-- {{ logic.value === \'OPEN_PARANTHESIS\' || logic.value === \'CLOSE_PARANTHESIS\'\n             ? logic.name + \'  \'\n             : logic.value + \'  \'\n           }} -->\n\n           {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\'\n           ? logic.value : logic.name }}\n\n          <br *ngIf="isNewLineRequired(logic)" >\n          <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n\n        </span>\n\n        <span *ngIf="logic.custom">\n          <span *ngIf="logic.name ===\'Enter a date\'">\n            <input type="date"\n              [value]="logic.value"\n              (change) = "selectDate($event, i)"\n              (click)="stopPropagation($event)">\n          </span>\n          <span *ngIf="logic.name !==\'Enter a date\'">\n            {{ logic.customMode ? customString : logic.value }}\n            <br *ngIf="isNewLineRequired(logic)" >\n            <span *ngIf="isNewLineRequired(logic)"> &nbsp; </span>\n          </span>\n        </span>\n\n      </span>\n    </span>\n\n    <span>{{currentText}}</span>\n\n    <span #endElement>\n\n    .</span>\n\n  </div>\n\n  <div class="drop-down"\n      #dropDownElement\n      contenteditable     = "true"\n      spellcheck          = "false"\n      (keypress)          = prevent($event)\n      (click)             = prevent($event)\n      (keydown.arrowup)   = upArrow($event)\n      (keydown.arrowdown) = downArrow($event)\n      (keydown.enter)     = enter($event)\n      (keydown.arrowright)= setFocusToRuleEditor()\n      (keydown.arrowleft) = setFocusToRuleEditor()\n      [ngClass]           = "dropDown.length > 0 && ruleEditMode ? \'show\' : \'hide\'">\n    <div class="dropDownElement drop-down-element"\n          *ngFor="let ele of dropDown; index as i"\n          [ngClass]="i === dropDownSelectedIndex ? \'active-drop-down-element\' : \'\'"\n          (click) ="selectOption(ele)">\n        <input type="checkbox" (click)="checkOption(ele, $event)" *ngIf="selectionMode">\n        {{ ele.name }}\n    </div>\n  </div>\n</span>\n\n<span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses &nbsp;\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n\n    <select\n          class="col-2"\n          *ngIf="logic.elementType===\'field\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n        [value]="logic.name + \',\' + logic.value"\n      >\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-3"\n          *ngIf="logic.elementType===\'operator\'" [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)" [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <select\n          class="col-4"\n          *ngIf="logic.elementType===\'value\' &&\n            !(logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name === \'Enter a string\' || logic.name === \'Enter String\' ? logic.value : logic.name }}\n      </option>\n    </select>\n\n    <input\n        class="col-4"\n        *ngIf="logic.elementType===\'value\' &&\n                (logic.name === \'Enter a string\' || logic.name === \'Enter String\' || logic.name === \'Enter a number\' || logic.name === \'Enter a date\')"\n        [value] = "logic.value"\n        [type] = "logic.name === \'Enter a date\' ? \'date\' : \'text\'"\n        (change) = "logic.name === \'Enter a date\'\n              ? selectDate($event, i)\n              : logicCustomChange(logic, i, value)">\n\n    <select\n          class="col-6"\n          *ngIf="logic.elementType===\'logicalOperator\'"\n          [value] = "logic.name + \',\' + logic.value"\n          (change) = "logicSelectChange(logic, i, $event, getOptions(logic, i))">\n      <option *ngFor="let logic of getOptions(logic, i)"\n              [value]="logic.name + \',\' + logic.value">\n        {{ logic.name }}\n      </option>\n    </select>\n\n    <input class="result"\n        *ngIf="logic.elementType===\'result\' && logic.name !== \'\'"\n        [value] = "logic.name"\n        readonly>\n\n  </div>\n\n</span>\n\n\n<!-- <span *ngIf="mode === \'dropdown\'">\n  <div class="drop-down-header">\n    <span>\n      WHEN\n    </span>\n    <span>\n      Add Parantheses\n      <button> ( </button>\n      <button>  ) </button>\n    </span>\n  </div>\n\n  <div class="drop-down-headers">\n    <div class="drop-down-head col-1">\n      (\n    </div>\n    <div class="drop-down-head col-2">\n      Field\n    </div>\n    <div class="drop-down-head col-3">\n      Operator\n    </div>\n    <div class="drop-down-head col-4">\n      Value\n    </div>\n    <div class="drop-down-head col-5">\n      )\n    </div>\n    <div class="drop-down-head col-6">\n      Join\n    </div>\n  </div>\n\n  <div class="rules-drop-down-elements" *ngFor="let logic of ruleLogic; index as i">\n    <input type="text" class="col-2" *ngIf="logic.elementType===\'field\'" [value] = "logic.value">\n    <input type="text" class="col-3" *ngIf="logic.elementType===\'operator\'" [value] = "logic.value">\n    <input type="text" class="col-4" *ngIf="logic.elementType===\'value\'" [value] = "logic.value">\n    <input type="text" class="col-6" *ngIf="logic.elementType===\'logicalOperator\'" [value] = "logic.value">\n  </div>\n\n</span> -->\n'/*ion-inline-end:"/Office/Rule-Editor/src/components/editor/editor.component.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__providers_fields_service__["a" /* FieldsService */],
             __WEBPACK_IMPORTED_MODULE_2__providers_logical_service__["a" /* LogicalOperatorsService */],
