@@ -162,7 +162,7 @@ var FormComponent = (function () {
                     commandString += " > 0 ";
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "notIn") {
-                    commandString = value + ".indexOf(" + commandString + ") ";
+                    commandString = valueElem['value'] + ".indexOf(" + commandString + ") ";
                 }
                 if (!_this.checkIfExists(elem, _this.formElems)) {
                     _this.formElems.push(elem);

@@ -25882,6 +25882,10 @@ rule-editor input {
   color: black !important;
 }
 
+rule-editor input[type="checkbox"] {
+  padding-right: 10px;
+}
+
 rule-editor .value::before {
   /*content: '"';*/
 }
