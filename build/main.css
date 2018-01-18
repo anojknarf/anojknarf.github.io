@@ -25830,6 +25830,7 @@ rule-editor .rule-text-box {
   background: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+  display: table;
 }
 
 rule-editor .text-box-long {
@@ -25925,6 +25926,7 @@ rule-editor .active-drop-down-element {
 rule-editor .rule-edit-mode {
   line-height: 1.5;
   word-spacing: 4px;
+  display: table;
 }
 
 rule-editor .show {
@@ -26204,7 +26206,7 @@ rule-form .highlight-tab {
 rule-form .rule-form {
   background: #f4f4f4;
   max-width: 1000px;
-  height: 80%;
+  height: 90%;
   position: absolute;
   left: 0;
   right: 0;
@@ -26269,6 +26271,7 @@ rule-form .editor-type-button {
   height: 35px;
   text-transform: capitalize;
   border-radius: 5px;
+  border: 1px solid #c4c4c4;
 }
 
 rule-form .rule-sub-label {
