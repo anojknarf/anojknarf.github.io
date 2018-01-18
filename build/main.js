@@ -4295,6 +4295,7 @@ var EditorComponent = (function () {
         this.openParanthesis = 0;
         this.dropDownIndex = 0;
         this.deletedElements = [];
+        this.boolNum = 0;
     }
     EditorComponent.prototype.clickedOutside = function ($event) {
         this.exitEditingMode($event);
@@ -4683,7 +4684,6 @@ var EditorComponent = (function () {
         return this.operators[fieldType];
     };
     EditorComponent.prototype.getvalues = function () {
-        console.log('get values');
         var dropdown = [];
         if (this.resultMode) {
             dropdown.push.apply(dropdown, this.getEnterAStringObject());
@@ -4726,7 +4726,7 @@ var EditorComponent = (function () {
                     name: 'False',
                     value: 'false',
                 });
-                dropdown.push.apply(dropdown, this.getBooleanFields());
+                // dropdown.push(...this.getBooleanFields());
                 return dropdown;
         }
     };
@@ -4809,7 +4809,6 @@ var EditorComponent = (function () {
             event.stopPropagation();
         }
         this.selectedValues.push(dropDownEle);
-        console.log(dropDownEle);
     };
     EditorComponent.prototype.enterSelectionMode = function () {
         this.selectionMode = true;
