@@ -162,7 +162,7 @@ var FormComponent = (function () {
                     commandString += " > 0 ";
                 }
                 else if (operatorElem['value'] && operatorElem['value'] == "notIn") {
-                    commandString = valueElem['value'] + ".indexOf(" + commandString + ") ";
+                    commandString = valueElem['value'] + ".indexOf(" + commandString + ") < 0 ";
                 }
                 if (!_this.checkIfExists(elem, _this.formElems)) {
                     _this.formElems.push(elem);
@@ -4822,8 +4822,8 @@ var EditorComponent = (function () {
         var dropdown = { name: '', value: '' };
         var name = this.selectedValues.reduce(function (str, v) { return str += v.name + ", "; }, '');
         var value = this.selectedValues.reduce(function (str, v) { return str += "'" + v.value + "' , "; }, '');
-        name = '[ ' + name.substring(0, name.length - 1) + ' ]';
-        value = '[ ' + value.substring(0, value.length - 1) + ' ]';
+        name = '[ ' + name.substring(0, name.length - 2) + ' ]';
+        value = '[ ' + value.substring(0, value.length - 2) + ' ]';
         dropdown.name = name;
         dropdown.value = value;
         return dropdown;

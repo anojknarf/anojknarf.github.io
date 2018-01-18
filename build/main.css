@@ -25883,7 +25883,7 @@ rule-editor input {
 }
 
 rule-editor input[type="checkbox"] {
-  padding-right: 10px;
+  margin-right: 10px;
 }
 
 rule-editor .value::before {
