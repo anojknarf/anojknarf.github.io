@@ -425,6 +425,9 @@ var RuleListService = (function () {
             console.log(res);
         });
     };
+    RuleListService.prototype.deleteRuleSubscribe = function (name) {
+        return this.http.delete(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].DELETE_RULE + "/" + name);
+    };
     RuleListService.prototype.deleteRule = function (name) {
         // this.ruleList = this.ruleList.filter((elem) => {
         // 	if (elem['rule_name'] == name) {
@@ -432,7 +435,7 @@ var RuleListService = (function () {
         // 	}
         // 	return true;
         // });
-        this.http.delete(__WEBPACK_IMPORTED_MODULE_2__config_service_url_config__["a" /* Config */].DELETE_RULE + "/" + name).subscribe(function (res) {
+        this.saveRuleSubscribe(name).subscribe(function (res) {
             console.log(res);
         });
     };
@@ -765,9 +768,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var RuleListComponent = (function () {
-    function RuleListComponent(ruleListService, navCtrl) {
+    function RuleListComponent(ruleListService, navCtrl, alertCtrl) {
         this.ruleListService = ruleListService;
         this.navCtrl = navCtrl;
+        this.alertCtrl = alertCtrl;
         this.options = {
             displayFormat: 'MM/DD/YYYY',
             barTitleFormat: 'MMMM YYYY',
@@ -865,18 +869,36 @@ var RuleListComponent = (function () {
     };
     RuleListComponent.prototype.deleteRules = function () {
         var _this = this;
-        if (window.confirm("Are you sure you want to delete the selected rule(s) ? ")) {
-            this.selectedRules.forEach(function (rule) {
-                _this.ruleListService.deleteRule(rule.rule_name);
-                _this.selectedRules = _this.selectedRules.filter(function (elem) {
-                    if (elem.rule_name == rule.rule_name) {
-                        return false;
+        var confirm = this.alertCtrl.create({
+            title: 'Delete Rule(s)?',
+            message: 'Are you sure you want to delete the selected rule(s) ?',
+            buttons: [
+                {
+                    text: 'Confirm',
+                    handler: function () {
+                        _this.selectedRules.forEach(function (rule) {
+                            _this.ruleListService.deleteRuleSubscribe(rule.rule_name).subscribe(function (resp) {
+                                console.log(resp);
+                                _this.ngOnInit();
+                            });
+                            _this.selectedRules = _this.selectedRules.filter(function (elem) {
+                                if (elem.rule_name == rule.rule_name) {
+                                    return false;
+                                }
+                                return true;
+                            });
+                        });
                     }
-                    return true;
-                });
-            });
-            this.ngOnInit();
-        }
+                },
+                {
+                    text: 'Cancel',
+                    handler: function () {
+                        // console.log('Operation Canceled');
+                    }
+                }
+            ]
+        });
+        confirm.present();
     };
     RuleListComponent.prototype.cloneRules = function () {
         var _this = this;
@@ -931,7 +953,8 @@ var RuleListComponent = (function () {
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
             selector: 'rule-list',template:/*ion-inline-start:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/'<div class="header-2">\n  <div class="header-content">\n    <div class="title-2">\n      <span class="title-a" [navPush]="homePage">Rules Project</span>\n      <span>&nbsp;/&nbsp;</span>\n      <span class="title-b">Loan Exception Rules</span>\n    </div>\n    <span class="buttons">\n      <div class="button-set">\n        <span (click)="cloneRules()" class="duplicate-button"> </span>\n        <span (click)="deleteRules()" class="delete-button"> </span>\n      </div>\n      <button class="download-button">\n        <a [href]="downloadUrl()" >Download Spreadsheet</a>\n      </button>\n      <div class="button-create">\n        <span class="plus"> + </span>\n        <span class="create-rules-project" [navPush]="formPage"> Create New Rule </span>\n      </div>\n    </span>\n  </div>\n</div>\n<div class="body">\n  <div class="table">\n    <div class="table-header-outer">\n      <span class="table-header">\n\n        <div class="col-1" >\n          <input type="checkbox" (click)="tickAll($event)">\n        </div>\n\n        <div class="col-2 sort-down" (click)="sortList(\'rule_name\', $event)">\n          Rule Name\n        </div>\n        <div class="col-3 sort-down" (click)="sortList(\'rule_category\', $event)">\n          Category\n        </div>\n        <div class="col-4 sort-down" (click)="sortList(\'rule_desc\', $event)">\n          Description\n        </div>\n        <div class="col-5 sort-down" (click)="sortList(\'last_modified\', $event)">\n          Last Modified\n        </div>\n        <div class="col-6 sort-down" (click)="sortList(\'last_published\', $event)">\n          Last Published\n        </div>\n        <div class="col-7 sort-down" (click)="sortList(\'rule_author\', $event)">\n          Last Modifier\n        </div>\n        <div class="col-8">\n          <span class="search-button" (click)="showSearch = showSearch ? false : true; localRuleList = cachedRuleList;" [ngClass]="{\'outline\' : showSearch}"></span>\n    </div>\n    </span>\n    <span *ngIf="showSearch" class="table-header">\n        <div class="col-1" >\n        </div>\n        <div class="col-2">\n          <input (keyup)="searchList(\'rule_name\',$event)" value="" type="text">\n        </div>\n        <div class="col-3">\n          <input (keyup)="searchList(\'rule_category\',$event)" value="" type="text">\n        </div>\n        <div class="col-4">\n          <input (keyup)="searchList(\'rule_desc\',$event)" value="" type="text">\n        </div>\n        <div class="col-5">\n          <ng-datepicker [(ngModel)]="searchLastModDate" (ngModelChange)="searchDate(\'last_modified\',searchLastModDate)" [options]="options" position="bottom-right"></ng-datepicker>\n        </div>\n        <div class="col-6">\n          <ng-datepicker [(ngModel)]="searchLastPubDate" [options]="options" (ngModelChange)="searchDate(\'last_published\',searchLastPubDate)" position="bottom-left"></ng-datepicker>\n        </div>\n        <div class="col-7">\n          <input (keyup)="searchList(\'rule_author\',$event)" value="" type="text">\n        </div>\n        <div class="col-8">\n        </div>\n      </span>\n  </div>\n  <div class="table-rows" #ruleListRows>\n    <div *ngFor="let rule of localRuleList" class="table-row" >\n      <div class="col-1">\n        <input type="checkbox" (change)="toggleCheckBox($event, rule)">\n      </div>\n      <div class="col-2" (click)="openRule(rule)">\n        DU Refi Rule [{{rule.rule_name}}]\n      </div>\n      <div class="col-3" (click)="openRule(rule)">\n        {{rule.rule_category.name}}\n      </div>\n      <div class="col-4" title="{{rule.rule_desc}}" (click)="openRule(rule)">\n        {{rule.rule_desc}}\n      </div>\n      <div class="col-5" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_modified)}}\n      </div>\n      <div class="col-6" [navPush]="formPage" (click)="openRule(rule)">\n        {{formatDate(rule.last_published)}}\n      </div>\n      <div class="col-7" [navPush]="formPage" (click)="openRule(rule)">\n        {{rule.rule_author}}\n      </div>\n      <div class="col-8" [navPush]="formPage" (click)="openRule(rule)">\n      </div>\n    </div>\n  </div>\n</div>\n</div>'/*ion-inline-end:"/Office/Rule-Editor/src/pages/rule-list/rule-list.component.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */]])
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_2__providers_ruleList_service__["a" /* RuleListService */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["j" /* NavController */],
+            __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["a" /* AlertController */]])
     ], RuleListComponent);
     return RuleListComponent;
 }());
